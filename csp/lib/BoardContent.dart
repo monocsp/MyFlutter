@@ -126,7 +126,7 @@ class Board extends StatelessWidget {
                                 ),
                                 Container(
                                     child: CommentList(context)
-                                        .commentListBuilder())
+                                        .setCommentContainer())
                               ],
                             ),
                           ))

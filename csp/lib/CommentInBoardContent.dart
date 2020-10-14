@@ -11,6 +11,12 @@ final List<tempBoardCommentData> testingData = [
 final bool FIRSTCOMMENT = true;
 final double COMMENTCONTAINERHEIGHT = 50;
 final double COMMENTBOARDERLINEWiDTH = 3.0;
+final Color COMMENT_CONTAINER_COLOR = Colors.grey[100];
+final EdgeInsets COMMENT_CONTENT_PADDING_SIZE =
+    EdgeInsets.only(top: 2.0, left: 10.0);
+final EdgeInsets COMMENT_NAME_PADDING_SIZE =
+    EdgeInsets.only(top: 2.0, left: 5.0);
+final EdgeInsets DATE_PADDING_SIZE = EdgeInsets.only(top: 2.0, right: 3.0);
 
 class tempBoardCommentData {
   var commentDate;
@@ -25,10 +31,23 @@ class tempBoardCommentData {
 class CommentList {
   final BuildContext context;
   CommentList(this.context);
-  Widget setCommentContainer() {
+
+  Widget tempCommentContainer() {
+    return Container(
+        child: Column(
+      children: tempSetComment(commentCount: 3),
+    ));
+  }
+
+  List<Widget> tempSetComment({@required int commentCount}) {
+    return new List<Widget>.generate(
+        commentCount, (index) => commentContainer());
+  }
+
+  Widget commentContainer() {
     return Container(
         child: Column(children: <Widget>[
-      _setCommentContainer(firstComment: FIRSTCOMMENT),
+      Container(child: _setCommentContainer(firstComment: FIRSTCOMMENT)),
       Container(
         child: Column(
           children: _setUnderComment(underCommentCount: 2),
@@ -48,7 +67,7 @@ class CommentList {
     BoxDecoration initDecoration;
     if (!firstComment) {
       initDecoration = BoxDecoration(
-        color: Colors.grey,
+        color: COMMENT_CONTAINER_COLOR,
       );
     } else {
       initDecoration = BoxDecoration(
@@ -73,18 +92,12 @@ class CommentList {
     );
     if (!firstComment) {
       return Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
+          _setCommentIcon(),
           Expanded(
-              child: Transform(
-            alignment: Alignment.topLeft,
-            transform: Matrix4.rotationY(math.pi),
-            child: Icon(
-              Icons.keyboard_return,
-              size: 20,
-            ),
-          )),
-          containerColumnValue,
+            child: containerColumnValue,
+          )
         ],
       );
     } else {
@@ -99,13 +112,13 @@ class CommentList {
     // }
     var nameTextColor = Colors.black;
     var dateTextColor = Colors.grey;
-    var writter = '익친 1';
+    var writter = 'A 1';
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         ////Setting Text For Distinguish Name
         Container(
-          padding: EdgeInsets.only(top: 3.0, left: 3.0),
+          padding: COMMENT_NAME_PADDING_SIZE,
           child: Text(
             writter,
             style: TextStyle(color: nameTextColor, fontWeight: FontWeight.bold),
@@ -113,7 +126,7 @@ class CommentList {
         ),
         //Setting Text For Date
         Container(
-            padding: EdgeInsets.only(top: 3.0, right: 2.0),
+            padding: DATE_PADDING_SIZE,
             child: Text(
               '2020.09.24',
               style: TextStyle(color: dateTextColor),
@@ -127,27 +140,26 @@ class CommentList {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         Container(
-            //     child: Transform(
-            //   alignment: Alignment.center,
-            //   transform: Matrix4.rotationY(math.pi),
-            //   child: Icon(Icons.keyboard_return),
-            // )
-            child: Text('hsihdifhi'))
+            padding: COMMENT_CONTENT_PADDING_SIZE, child: Text('hsihdifhi'))
       ],
     );
   }
 
   Widget _setCommentIcon() {
     return Container(
-        color: Colors.white,
-        width: 100,
-        child: Transform(
-          alignment: Alignment.topLeft,
-          transform: Matrix4.rotationY(math.pi),
-          child: Icon(
-            Icons.keyboard_return,
-            size: 5,
-          ),
-        ));
+        child: Column(
+      children: <Widget>[
+        Container(
+            width: 30,
+            child: Transform(
+              alignment: Alignment.topCenter,
+              transform: Matrix4.rotationY(math.pi),
+              child: Icon(
+                Icons.keyboard_return,
+                size: 20,
+              ),
+            ))
+      ],
+    ));
   }
 }

@@ -10,6 +10,12 @@ final List<tempTitleData> tempData = [
   tempTitleData('리스트', '깔끔하지 않은가', 50, 20, '2019.10.4'),
   tempTitleData('라는', '촤밍하지 않는가', 99, 2000, '2019.4.4'),
   tempTitleData('것이다', '페이보릿카운트가 555555이다', 30, 55555555, '2019.2.4'),
+  tempTitleData('이게', '멋진 서브타이틀', 5000, 5, '2019.2.4'),
+  tempTitleData('바로', '영롱 하지 않은가', 10, 100, '2019.7.4'),
+  tempTitleData('멋진', '아름답지 않은가', 90, 1500, '2019.9.4'),
+  tempTitleData('리스트', '깔끔하지 않은가', 50, 20, '2019.10.4'),
+  tempTitleData('라는', '촤밍하지 않는가', 99, 2000, '2019.4.4'),
+  tempTitleData('것이다', '페이보릿카운트가 555555이다', 30, 55555555, '2019.2.4'),
 ];
 
 class GeneralBoard {
@@ -17,12 +23,14 @@ class GeneralBoard {
   // GeneralBoard(BuildContext context);
   // GeneralBoard({@required this.context}) : assert(context != null);
   int _indexCheck;
-  ListView buildListView(
-      // BuildContext context
-      ) {
+  ListView buildListView({var controller}) {
     // var commentCount =
     //     BoxDecoration(color: Colors.lightGreen, shape: BoxShape.circle);
     return ListView.builder(
+        //Bottom Padding
+        controller: controller,
+        padding:
+            const EdgeInsets.only(bottom: kFloatingActionButtonMargin + 60),
         itemCount: tempData.length,
         itemBuilder: (context, index) => _buildListCard(context, index));
   }
@@ -45,7 +53,7 @@ class GeneralBoard {
                     context,
                     CupertinoPageRoute(
                       fullscreenDialog: false,
-                      builder: (context) => Board(
+                      builder: (context) => BoardStateful(
                         index: index,
                         boardName: 'Current Test Board',
                       ),
@@ -59,7 +67,7 @@ class GeneralBoard {
                     children: <Widget>[
                       //Title Container
                       titleContainerMethod(index),
-                      commentCountMethod(index)
+                      _commentCountMethod(index)
                     ],
                   )),
                   Container(
@@ -129,7 +137,7 @@ class GeneralBoard {
         ));
   }
 
-  Widget commentCountMethod(int index) {
+  Widget _commentCountMethod(int index) {
     int _commentCount = tempData[index].commentCount;
     Widget _commentCountText;
     BoxDecoration _commentBoxDecoration;

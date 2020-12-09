@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "690244953999",
+    "firebase_url": "https://cakeorder-c764a.firebaseio.com",
+    "project_id": "cakeorder-c764a",
+    "storage_bucket": "cakeorder-c764a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:690244953999:android:9ec2b6dd5fd626c913cdfa",
+        "android_client_info": {
+          "package_name": "com.example.cakeorder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "690244953999-4gm3pa0hbtmu8de231331iqt88jo06hv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVYy5wQPFUormy9pfRvWHR9HNPleuqnaU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "690244953999-4gm3pa0hbtmu8de231331iqt88jo06hv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

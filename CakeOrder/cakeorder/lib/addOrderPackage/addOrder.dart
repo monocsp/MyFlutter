@@ -1,3 +1,4 @@
+import 'package:cakeorder/ProviderPackage/cakeList.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -23,10 +24,9 @@ class _AddOrderState extends State<AddOrder> {
   CustomDate customDate;
   CustomDropDown customDropDown;
 
-  String _selectedCakeName;
-  String _selectedCakeSize;
+  CakeCategory _selectedCakeName;
   String _partTimer;
-  Map<dynamic, dynamic> _cakePriceList;
+  CakeSizePrice _selectedCakeSize;
   TextEditingController _textEditingControllerOrderDate;
   TextEditingController _textEditingControllerPickUpDate;
   TextEditingController _textEditingControllerOrderTime;
@@ -40,6 +40,9 @@ class _AddOrderState extends State<AddOrder> {
 
   @override
   void initState() {
+    _selectedCakeName = null;
+    _partTimer = null;
+    _selectedCakeSize = null;
     initNdisposeTextEditController(init: true);
     super.initState();
   }
@@ -67,18 +70,13 @@ class _AddOrderState extends State<AddOrder> {
     super.dispose();
   }
 
-  dropDownCallback(var value) {
-    setState(() {
-      _partTimer = value;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     customDate = CustomDate(context: context, setStateCallback: dateCallback);
     customDropDown =
         CustomDropDown(context: context, setStateCallback: dropDownCallback);
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text('예약하기'),
       ),
@@ -104,7 +102,23 @@ class _AddOrderState extends State<AddOrder> {
                   isOrderRow: false,
                   controllerCalendar: _textEditingControllerPickUpDate,
                   controllerTimer: _textEditingControllerPickUpTime),
-              _selectCakeNsizeDropDown(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Flexible(
+                    flex: 1,
+                    child: customDropDown.selectCakeCategory(_selectedCakeName),
+                  ),
+                  Flexible(
+                      flex: 1,
+                      child: Container(
+                        margin: EdgeInsets.only(left: 30),
+                        child: customDropDown.selectCakePrice(
+                            currentCakeCategory: _selectedCakeName,
+                            cakePrice: _selectedCakeSize),
+                      ))
+                ],
+              ),
               _orderNamePhoneTextField(),
               customDropDown.selectPartTimerDropDown(_partTimer),
             ],
@@ -135,133 +149,18 @@ class _AddOrderState extends State<AddOrder> {
     });
   }
 
-  _selectCakeNsizeDropDown() {
-    return Container(
-        child: Column(children: <Widget>[
-      Container(
-        alignment: Alignment.centerLeft,
-        margin: EdgeInsets.only(top: _text_MARGIN, left: _text_MARGIN),
-        child: _customTitle(title: '주문 케이크 종류 및 호수', important: true),
-      ),
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Flexible(child: _dropDownCakeList(isCakeList: true)),
-          Flexible(child: _dropDownCakeList(isCakeList: false)),
-        ],
-      ),
-    ]));
-  }
-
-  _dropDownCakeList({@required bool isCakeList}) {
-    bool _isCakeSelected;
-    if (_selectedCakeName == null)
-      _isCakeSelected = false;
-    else
-      _isCakeSelected = true;
-    return Container(
-        margin: EdgeInsets.only(left: 30),
-        child: isCakeList
-            //CakeList DropDown
-            ? StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection("CakeList")
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return Container(child: Text('Loding'));
-                  } else {
-                    List<DropdownMenuItem> cakeitems = [];
-                    for (int i = 0; i < snapshot.data.docs.length; i++) {
-                      DocumentSnapshot docSnapshot = snapshot.data.docs[i];
-                      cakeitems.add(DropdownMenuItem(
-                        child: Text(docSnapshot.id.toString()),
-                        value: "${docSnapshot.id}",
-                      ));
-                    }
-                    return Row(children: <Widget>[
-                      DropdownButton(
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500),
-                          items: cakeitems,
-                          value: _selectedCakeName,
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedCakeName = value;
-                            });
-                          }),
-                    ]);
-                  }
-                },
-              )
-            //CakeSize DropDown
-            : _isCakeSelected
-                ? _testCakeSizeString()
-                : Container(
-                    margin: EdgeInsets.only(top: 10),
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      '케이크 선택',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: Colors.redAccent),
-                    )));
-  }
-
-  _testCakeSizeString() {
-    var _section;
-    List<DropdownMenuItem> _cakeSizeList = [];
-    return StreamBuilder<DocumentSnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection("CakeList")
-          .doc(_selectedCakeName)
-          .snapshots(),
-      builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-        if (!snapshot.hasData) {
-          Center(child: CupertinoActivityIndicator());
-        } else {
-          _cakePriceList = null;
-          _section = snapshot.data.data();
-
-          _cakePriceList = _section;
-          for (int i = 0; i < _section.length; i++) {
-            var _dropDownMenuItem = DropdownMenuItem(
-              child: Text(
-                  "${_section.keys.toList()[i]} : ${_section.values.toList()[i]}"),
-              value: _section.keys.toList()[i],
-            );
-
-            _cakeSizeList.add(_dropDownMenuItem);
-          }
-        }
-        // print(_selectedCakeSize);
-
-        return DropdownButton(
-          value: _selectedCakeSize,
-          items: _cakeSizeList,
-          onChanged: (value) {
-            setState(() {
-              _selectedCakeSize = value;
-              print(_cakePriceList);
-
-              // print(_selectedCakeSize.runtimeType);
-            });
-          },
-        );
-        // print(snapshot);
-      },
-    );
-  }
-
-  _customTextBox({@required bool isOrder}) {
-    return Container(
-        padding: EdgeInsets.only(left: _text_MARGIN, top: _text_MARGIN),
-        child: _customTitle(
-            title: isOrder ? '주문 날짜' : '픽업 날짜',
-            important: isOrder ? false : true));
+  dropDownCallback(var parameter,
+      {CakeCategory cakeCategory, CakeSizePrice cakePrice}) {
+    Map<String, String> arguments = Uri.parse(parameter).queryParameters;
+    setState(() {
+      if (arguments["parm1"] == "partTimer") {
+        _partTimer = arguments["parm2"];
+      } else if (arguments["parm1"] == "cakeCategory") {
+        _selectedCakeName = cakeCategory;
+      } else if (arguments["parm1"] == "cakePrice") {
+        _selectedCakeSize = cakePrice;
+      }
+    });
   }
 
   void showAlertDialog(BuildContext context,
@@ -291,12 +190,6 @@ class _AddOrderState extends State<AddOrder> {
         );
       },
     );
-  }
-
-  onChangeDropDown(String selectName) {
-    setState(() {
-      _selectedCakeName = selectName;
-    });
   }
 
   _orderNamePhoneTextField() {
@@ -338,5 +231,13 @@ class _AddOrderState extends State<AddOrder> {
           fontWeight: FontWeight.bold,
           color: important ? Colors.redAccent : Colors.black),
     );
+  }
+
+  _customTextBox({@required bool isOrder}) {
+    return Container(
+        padding: EdgeInsets.only(left: _text_MARGIN, top: _text_MARGIN),
+        child: _customTitle(
+            title: isOrder ? '주문 날짜' : '픽업 날짜',
+            important: isOrder ? false : true));
   }
 }

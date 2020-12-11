@@ -80,9 +80,6 @@ class CustomDate {
 
   void showAlertDialog(BuildContext context,
       {@required bool isOrderTime}) async {
-    String a = DateTime.now().toString().split(' ')[0];
-    print(DateTime.parse(a + " 00:00:00.000").runtimeType);
-    // print(DateTime.monthsPerYear);
     String result = await showDialog(
       context: context,
       barrierDismissible: true, // user must tap button!

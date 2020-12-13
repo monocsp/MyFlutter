@@ -11,10 +11,12 @@ import 'package:provider/provider.dart';
 import 'package:path/path.dart' as p;
 import 'addDropDown.dart';
 import 'addDate.dart';
+import 'cakeDataClass.dart';
 
 class AddOrder extends StatefulWidget {
   @override
   _AddOrderState createState() => _AddOrderState();
+  // State createState() => new MyAppState();
 }
 
 class _AddOrderState extends State<AddOrder> {
@@ -23,10 +25,12 @@ class _AddOrderState extends State<AddOrder> {
   // static final double _text_TOP_MARGIN = 5;
   CustomDate customDate;
   CustomDropDown customDropDown;
-
+  List<CakeSizePrice> cakeSizeList = <CakeSizePrice>[];
   CakeCategory _selectedCakeName;
+  CakeCategory _beforeCakeName;
   String _partTimer;
   CakeSizePrice _selectedCakeSize;
+  TextEditingController _textEditingControllerRemark;
   TextEditingController _textEditingControllerOrderDate;
   TextEditingController _textEditingControllerPickUpDate;
   TextEditingController _textEditingControllerOrderTime;
@@ -42,7 +46,6 @@ class _AddOrderState extends State<AddOrder> {
   void initState() {
     _selectedCakeName = null;
     _partTimer = null;
-    _selectedCakeSize = null;
     initNdisposeTextEditController(init: true);
     super.initState();
   }
@@ -55,6 +58,7 @@ class _AddOrderState extends State<AddOrder> {
         ..text = _todayTime;
       _textEditingControllerPickUpDate = TextEditingController();
       _textEditingControllerPickUpTime = TextEditingController();
+      _textEditingControllerRemark = TextEditingController();
     } else {
       _textEditingControllerOrderDate.dispose();
       _textEditingControllerOrderTime.dispose();
@@ -76,7 +80,7 @@ class _AddOrderState extends State<AddOrder> {
     customDropDown =
         CustomDropDown(context: context, setStateCallback: dropDownCallback);
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomPadding: true,
       appBar: AppBar(
         title: Text('예약하기'),
       ),
@@ -89,41 +93,89 @@ class _AddOrderState extends State<AddOrder> {
           height: double.infinity,
           width: double.infinity,
           color: Colors.transparent,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              _customTextBox(isOrder: true),
-              customDate.dateNtimeRow(
-                  isOrderRow: true,
-                  controllerCalendar: _textEditingControllerOrderDate,
-                  controllerTimer: _textEditingControllerOrderTime),
-              _customTextBox(isOrder: false),
-              customDate.dateNtimeRow(
-                  isOrderRow: false,
-                  controllerCalendar: _textEditingControllerPickUpDate,
-                  controllerTimer: _textEditingControllerPickUpTime),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Flexible(
-                    flex: 1,
-                    child: customDropDown.selectCakeCategory(_selectedCakeName),
-                  ),
-                  Flexible(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                _customTextBox(isOrder: true),
+                customDate.dateNtimeRow(
+                    isOrderRow: true,
+                    controllerCalendar: _textEditingControllerOrderDate,
+                    controllerTimer: _textEditingControllerOrderTime),
+                _customTextBox(isOrder: false),
+                customDate.dateNtimeRow(
+                    isOrderRow: false,
+                    controllerCalendar: _textEditingControllerPickUpDate,
+                    controllerTimer: _textEditingControllerPickUpTime),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Flexible(
                       flex: 1,
-                      child: Container(
-                        margin: EdgeInsets.only(left: 30),
-                        child: customDropDown.selectCakePrice(
-                            currentCakeCategory: _selectedCakeName,
-                            cakePrice: _selectedCakeSize),
-                      ))
-                ],
-              ),
-              _orderNamePhoneTextField(),
-              customDropDown.selectPartTimerDropDown(_partTimer),
-            ],
+                      child:
+                          customDropDown.selectCakeCategory(_selectedCakeName),
+                    ),
+                    Flexible(
+                        flex: 1,
+                        child: Container(
+                          margin: EdgeInsets.only(left: 30),
+                          child: customDropDown.selectCakePrice(
+                              currentCakeCategory: _selectedCakeName,
+                              cakeList: cakeSizeList,
+                              selectedCakeSize: _selectedCakeSize),
+                        ))
+                  ],
+                ),
+                _orderNamePhoneTextField(),
+                customDropDown.selectPartTimerDropDown(_partTimer),
+                _remarkTextField(context),
+                addButton()
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  addButton() {
+    return Container(
+      margin: EdgeInsets.only(top: 15),
+      child: Center(
+        child: RaisedButton(
+            child: Text(
+              "저장",
+              style: TextStyle(
+                  color: Colors.blueAccent,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14),
+            ),
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0),
+                side: BorderSide(color: Colors.blueAccent)),
+            onPressed: () {
+              var _id;
+              Map<dynamic, dynamic> temp = {
+                "time": Timestamp.fromDate(DateTime.now())
+              };
+              FirebaseFirestore.instance
+                  .collection("Cake")
+                  .add(temp.cast())
+                  .then((value) {
+                _id = value.id;
+                FirebaseFirestore.instance
+                    .collection("Cake")
+                    .doc(_id)
+                    .get()
+                    .then((value) => print(
+                        value.data()["time"].toDate().add(Duration(hours: 9))));
+              });
+              var a = DateFormat(_textEditingControllerOrderDate.text);
+              DateFormat format = DateFormat("yyyy-MM-dd");
+              print(format.parse(_textEditingControllerOrderDate.text));
+              print(_textEditingControllerOrderTime.text);
+            }),
       ),
     );
   }
@@ -149,6 +201,16 @@ class _AddOrderState extends State<AddOrder> {
     });
   }
 
+  _resetCakePriceList(CakeCategory cakeCategory) {
+    cakeSizeList.clear();
+    if (cakeCategory != null) {
+      for (int i = 0; i < cakeCategory.cakePrice.length; i++) {
+        cakeSizeList.add(
+            CakeSizePrice(cakeCategory.cakeSize[i], cakeCategory.cakePrice[i]));
+      }
+    }
+  }
+
   dropDownCallback(var parameter,
       {CakeCategory cakeCategory, CakeSizePrice cakePrice}) {
     Map<String, String> arguments = Uri.parse(parameter).queryParameters;
@@ -156,8 +218,13 @@ class _AddOrderState extends State<AddOrder> {
       if (arguments["parm1"] == "partTimer") {
         _partTimer = arguments["parm2"];
       } else if (arguments["parm1"] == "cakeCategory") {
+        if (_selectedCakeName != cakeCategory) {
+          _selectedCakeSize = null;
+          _resetCakePriceList(cakeCategory);
+        }
         _selectedCakeName = cakeCategory;
       } else if (arguments["parm1"] == "cakePrice") {
+        print(cakePrice);
         _selectedCakeSize = cakePrice;
       }
     });
@@ -219,6 +286,30 @@ class _AddOrderState extends State<AddOrder> {
             )
           ]),
         ],
+      ),
+    );
+  }
+
+  _remarkTextField(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          right: 10,
+          left: 10),
+      decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent)),
+      child: TextField(
+        decoration: InputDecoration(
+          // counterText:
+          //     '${this._textEditingControllerRemark.text.split(' ').length} words',
+          labelText: '비고',
+          hintText: '만나서 카드결제 등',
+        ),
+        controller: _textEditingControllerRemark,
+        keyboardType: TextInputType.multiline,
+        maxLines: null,
+        style: TextStyle(
+          fontSize: 15,
+        ),
       ),
     );
   }

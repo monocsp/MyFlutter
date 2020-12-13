@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'addOrder.dart';
-import 'orderStore.dart';
+import 'cakeDataClass.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:cakeorder/ProviderPackage/cakeList.dart';
+import 'cakeDataClass.dart';
 
 class CustomDropDown {
   final BuildContext context;
   static final double _text_Font_Size = 15;
   Function
       setStateCallback; //Callback Parameter Format : "?parm1='STRING'&parm2='DATA'"
-
+  List<CakeSizePrice> cakeSizeList = <CakeSizePrice>[];
   List<dynamic> partTimerProvider;
   List<CakeCategory> cakeCategoryProvider;
-  List<CakeSizePrice> cakeSizeList = [];
   CustomDropDown({this.context, this.setStateCallback}) {
     partTimerProvider = Provider.of<List<dynamic>>(context);
     cakeCategoryProvider = Provider.of<List<CakeCategory>>(context);
@@ -83,59 +83,40 @@ class CustomDropDown {
               value: cakeCategory,
               items: _cakeCategories,
               onChanged: (value) {
+                print('$value');
                 setStateCallback("?parm1=cakeCategory", cakeCategory: value);
               }),
         ]));
   }
 
   selectCakePrice(
-      {@required CakeCategory currentCakeCategory, CakeSizePrice cakePrice}) {
-    currentCakeCategory != null ? _dropDownItems(currentCakeCategory) : null;
-    print(cakeSizeList);
+      {@required CakeCategory currentCakeCategory,
+      List<CakeSizePrice> cakeList,
+      CakeSizePrice selectedCakeSize}) {
     return currentCakeCategory != null
         ? Container(
             margin: EdgeInsets.only(left: 10, top: 15),
             child: Column(children: [
               _customTitle(title: "케이크 호수", important: true),
-              DropdownButton<CakeSizePrice>(
-                value: cakePrice,
-                onChanged: (CakeSizePrice value) {
-                  setStateCallback("?parm1=cakePrice", cakePrice: value);
-                  // print(cakeSizeList.contains(value));
-                },
-                items: cakeSizeList.map((CakeSizePrice cake) {
-                  return new DropdownMenuItem<CakeSizePrice>(
-                    value: cake,
-                    child: Text(cake.cakeSize),
-                  );
-                }).toList(),
-              ),
-            ]))
+              cakeSizeList != null
+                  ? DropdownButton<CakeSizePrice>(
+                      hint: Text("선택하세요"),
+                      value: selectedCakeSize,
+                      onChanged: (CakeSizePrice value) => setStateCallback(
+                          "?parm1=cakePrice",
+                          cakePrice: value),
+                      items: cakeList.map((CakeSizePrice cake) {
+                        return DropdownMenuItem<CakeSizePrice>(
+                          value: cake,
+                          child: Text("${cake.cakeSize} : ${cake.cakePrice}"),
+                        );
+                      }).toList(),
+                    )
+                  : Container(
+                      child: CupertinoActivityIndicator(),
+                    ),
+            ]),
+          )
         : Container(child: _customTitle(title: '케이크를 선택해주세요', important: true));
   }
-
-  _dropDownItems(CakeCategory cakeCategory) {
-    for (int i = 0; i < cakeCategory.cakePrice.length; i++) {
-      cakeSizeList.add(new CakeSizePrice(
-          cakeSize: cakeCategory.cakeSize[i],
-          cakePrice: cakeCategory.cakePrice[0]));
-    }
-    // List<DropdownMenuItem<CakeSizePrice>> _cakePriceItems = [];
-    // for (int i = 0; i < cakeCategory.cakeSize.length; i++) {
-
-    //   _cakePriceItems.add(new DropdownMenuItem<CakeSizePrice>(
-    //     child: Text("${cakeCategory.cakeSize[i]}"),
-    //     value: new CakeSizePrice(
-    //         cakeSize: cakeCategory.cakeSize[i].toString(),
-    //         cakePrice: cakeCategory.cakePrice[i].toString()),
-    //   ));
-    // }
-    // return _cakePriceItems;
-  }
-}
-
-class CakeSizePrice {
-  final String cakeSize;
-  final String cakePrice;
-  CakeSizePrice({this.cakeSize, this.cakePrice});
 }

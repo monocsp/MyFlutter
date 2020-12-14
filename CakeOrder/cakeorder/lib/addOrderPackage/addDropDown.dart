@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'addOrder.dart';
-import 'cakeDataClass.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:cakeorder/ProviderPackage/cakeList.dart';
-import 'cakeDataClass.dart';
 
 class CustomDropDown {
   final BuildContext context;
@@ -63,6 +61,7 @@ class CustomDropDown {
 
   selectCakeCategory(CakeCategory cakeCategory) {
     List<DropdownMenuItem<CakeCategory>> _cakeCategories = [];
+
     if (cakeCategoryProvider == null) {
       Container(
         child: CupertinoActivityIndicator(),

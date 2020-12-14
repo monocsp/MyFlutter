@@ -11,7 +11,6 @@ import 'package:provider/provider.dart';
 import 'package:path/path.dart' as p;
 import 'addDropDown.dart';
 import 'addDate.dart';
-import 'cakeDataClass.dart';
 
 class AddOrder extends StatefulWidget {
   @override
@@ -22,6 +21,7 @@ class AddOrder extends StatefulWidget {
 class _AddOrderState extends State<AddOrder> {
   static final double _text_MARGIN = 10;
   static final double _text_Font_Size = 15;
+  bool addProgressStatus;
   // static final double _text_TOP_MARGIN = 5;
   CustomDate customDate;
   CustomDropDown customDropDown;
@@ -35,15 +35,18 @@ class _AddOrderState extends State<AddOrder> {
   TextEditingController _textEditingControllerPickUpDate;
   TextEditingController _textEditingControllerOrderTime;
   TextEditingController _textEditingControllerPickUpTime;
+  TextEditingController _textEditingControllerCustomerName;
+  TextEditingController _textEditingControllerCustomerPhone;
   var _todayDate =
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
           .toString()
           .split(' ')[0];
   String _todayTime =
-      DateFormat('kk:mm:a').format(DateTime.now().add(Duration(hours: 9)));
+      DateFormat('kk:mm').format(DateTime.now().add(Duration(hours: 9)));
 
   @override
   void initState() {
+    addProgressStatus = null;
     _selectedCakeName = null;
     _partTimer = null;
     initNdisposeTextEditController(init: true);
@@ -59,11 +62,15 @@ class _AddOrderState extends State<AddOrder> {
       _textEditingControllerPickUpDate = TextEditingController();
       _textEditingControllerPickUpTime = TextEditingController();
       _textEditingControllerRemark = TextEditingController();
+      _textEditingControllerCustomerName = TextEditingController();
+      _textEditingControllerCustomerPhone = TextEditingController();
     } else {
       _textEditingControllerOrderDate.dispose();
       _textEditingControllerOrderTime.dispose();
       _textEditingControllerPickUpDate.dispose();
       _textEditingControllerPickUpTime.dispose();
+      _textEditingControllerCustomerName.dispose();
+      _textEditingControllerCustomerPhone.dispose();
     }
   }
 
@@ -155,29 +162,111 @@ class _AddOrderState extends State<AddOrder> {
                 borderRadius: BorderRadius.circular(5.0),
                 side: BorderSide(color: Colors.blueAccent)),
             onPressed: () {
-              var _id;
-              Map<dynamic, dynamic> temp = {
-                "time": Timestamp.fromDate(DateTime.now())
-              };
-              FirebaseFirestore.instance
-                  .collection("Cake")
-                  .add(temp.cast())
-                  .then((value) {
-                _id = value.id;
-                FirebaseFirestore.instance
-                    .collection("Cake")
-                    .doc(_id)
-                    .get()
-                    .then((value) => print(
-                        value.data()["time"].toDate().add(Duration(hours: 9))));
-              });
-              var a = DateFormat(_textEditingControllerOrderDate.text);
-              DateFormat format = DateFormat("yyyy-MM-dd");
-              print(format.parse(_textEditingControllerOrderDate.text));
-              print(_textEditingControllerOrderTime.text);
+              dialogProgressIndicator(addProgressStatus);
+              CakeData data = CakeData(
+                  orderDate: _textEditingControllerOrderDate.text +
+                      " " +
+                      _textEditingControllerOrderTime.text,
+                  pickUpDate: _textEditingControllerPickUpDate.text +
+                      " " +
+                      _textEditingControllerPickUpTime.text,
+                  cakeCategory: _selectedCakeName.name,
+                  cakeSize: _selectedCakeSize.cakeSize,
+                  cakePrice: _selectedCakeSize.cakePrice,
+                  customerName: _textEditingControllerCustomerName.text,
+                  customerPhone: _textEditingControllerCustomerPhone.text);
+              data.toFireStore(loadDialogCallback);
+              print(data.documentId);
+              print(data.pickUpDate.toDate());
+              print(data.orderDate.toDate());
+              // c.toFireStore(loadDialogCallback);
+              // var _id;
+              // Map<dynamic, dynamic> temp = {
+              //   "time": Timestamp.fromDate(f.parse(
+              //       _textEditingControllerOrderDate.text +
+              //           " " +
+              //           _textEditingControllerOrderTime.text))
+              // };
+              // FirebaseFirestore.instance
+              //     .collection("Cake")
+              //     .add(temp.cast())
+              //     .then((value) {
+              //   _id = value.id;
+              //   FirebaseFirestore.instance
+              //       .collection("Cake")
+              //       .doc(_id)
+              //       .get()
+              //       .then((value) => print(value.data()["time"].toDate()));
+              // });
+              // var a = DateFormat(_textEditingControllerOrderDate.text);
             }),
       ),
     );
+  }
+
+  dialogProgressIndicator(bool status) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return WillPopScope(
+            onWillPop: () async => false,
+            child: AlertDialog(
+              backgroundColor: Colors.black87,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8.0))),
+              content: Container(
+                  padding: EdgeInsets.all(16),
+                  color: Colors.black.withOpacity(0.8),
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(
+                            child: Container(
+                                child: status == null
+                                    ? CircularProgressIndicator(
+                                        strokeWidth: 3,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.white),
+                                      )
+                                    : status
+                                        ? Icon(
+                                            Icons.check,
+                                            size: 20,
+                                          )
+                                        : Icon(
+                                            Icons.error_outline,
+                                            size: 20,
+                                          ),
+                                width: 32,
+                                height: 32),
+                            padding: EdgeInsets.only(bottom: 16)),
+                        Padding(
+                            child: Text(
+                              'Please wait …',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 16),
+                              textAlign: TextAlign.center,
+                            ),
+                            padding: EdgeInsets.only(bottom: 4)),
+                        Text(
+                          "displayedText",
+                          style: TextStyle(color: Colors.white, fontSize: 14),
+                          textAlign: TextAlign.center,
+                        )
+                      ])),
+            ));
+      },
+    );
+  }
+
+  loadDialogCallback() {
+    Navigator.of(context).popUntil(ModalRoute.withName('/'));
+    // Navigator.of(context).pushNamed(ModalRoute.withName('/AddOrder'));
+    // Navigator.of(context).pop();
+    // Navigator.of(context).pop();
   }
 
   dateCallback(String param) {
@@ -247,7 +336,7 @@ class _AddOrderState extends State<AddOrder> {
             isForce2Digits: true,
             onTimeChange: (time) {
               setState(() {
-                String _selectTime = DateFormat('kk:mm:a').format(time);
+                String _selectTime = DateFormat('kk:mm').format(time);
                 isOrderTime
                     ? _textEditingControllerOrderTime.text = '$_selectTime'
                     : _textEditingControllerPickUpTime.text = '$_selectTime';
@@ -272,12 +361,14 @@ class _AddOrderState extends State<AddOrder> {
           Row(children: <Widget>[
             Flexible(
                 child: TextField(
+                    controller: _textEditingControllerCustomerName,
                     decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: '성함',
-            ))),
+                      border: OutlineInputBorder(),
+                      labelText: '성함',
+                    ))),
             Flexible(
               child: TextField(
+                  controller: _textEditingControllerCustomerPhone,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),

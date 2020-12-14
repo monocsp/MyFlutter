@@ -43,7 +43,8 @@ class CustomDate {
           child: Container(
             padding: EdgeInsets.only(right: 5),
             child: GestureDetector(
-              onTap: () => showAlertDialog(context, isOrderTime: isOrderRow),
+              onTap: () => showAlertDialog(context,
+                  isOrderTime: isOrderRow, pickUpTime: controllerTimer),
               child: _customTextField(controllerTimer,
                   isOrderDate: isOrderRow, isCalendar: false),
             ),
@@ -79,7 +80,7 @@ class CustomDate {
   }
 
   void showAlertDialog(BuildContext context,
-      {@required bool isOrderTime}) async {
+      {@required bool isOrderTime, var pickUpTime}) async {
     String result = await showDialog(
       context: context,
       barrierDismissible: true, // user must tap button!
@@ -91,14 +92,20 @@ class CustomDate {
             time: isOrderTime
                 ? DateTime.now().add(Duration(hours: 9))
                 //Set 00:00
-                : DateTime.parse(
-                    DateTime.now().toString().split(' ')[0] + " 00:00:00.000"),
+                : pickUpTime == null
+                    ? DateTime.parse(DateTime.now().toString().split(' ')[0] +
+                        " 00:00:00.000")
+                    : _test(pickUpTime
+                        // DateTime.parse(DateTime.now().toString().split(' ')[0] +
+                        //     " " +
+                        //     pickUpTime
+                        ),
             minutesInterval: isOrderTime ? 1 : 5,
             spacing: 50,
             itemHeight: 80,
             isForce2Digits: true,
             onTimeChange: (time) {
-              String _selectTime = DateFormat('kk:mm:a').format(time);
+              String _selectTime = DateFormat('kk:mm').format(time);
               if (isOrderTime)
                 this.setStateCallback(
                     "?isOrder=true&isCalendar=false&data=$_selectTime");

@@ -65,6 +65,7 @@ class _CakeOrderAppState extends State<CakeOrderApp> {
             ? MaterialApp(
                 home: _materialAppScaffold(context),
                 theme: ThemeData(primaryColor: Colors.white),
+                initialRoute: '/',
                 onGenerateRoute: CakeOrderRouteGenerator.generateRoute,
               )
             : CupertinoApp());

@@ -17,4 +17,10 @@ class DatabaseProvider {
     return _db.collection("CakeList").snapshots().map((list) =>
         list.docs.map((doc) => CakeCategory.fromFireStore(doc)).toList());
   }
+  Stream<List<CakeData>> getTodayOrderCakeData(){
+    return _db.collection(collectionPath)
+  }
+  // Stream<List<CakeData>> getTodayPickUpCakeData(){
+  //   return _db.collection(collectionPath)
+  // }
 }

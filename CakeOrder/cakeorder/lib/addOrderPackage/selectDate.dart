@@ -89,17 +89,7 @@ class CustomDate {
           title: isOrderTime ? Text('주문시간 설정') : Text('픽업시간 설정'),
           content: TimePickerSpinner(
             is24HourMode: true,
-            time: isOrderTime
-                ? DateTime.now().add(Duration(hours: 9))
-                //Set 00:00
-                : pickUpTime == null
-                    ? DateTime.parse(DateTime.now().toString().split(' ')[0] +
-                        " 00:00:00.000")
-                    : _test(pickUpTime
-                        // DateTime.parse(DateTime.now().toString().split(' ')[0] +
-                        //     " " +
-                        //     pickUpTime
-                        ),
+            time: setDateTime(isOrderTime, pickUpTime),
             minutesInterval: isOrderTime ? 1 : 5,
             spacing: 50,
             itemHeight: 80,
@@ -117,5 +107,17 @@ class CustomDate {
         );
       },
     );
+  }
+
+  setDateTime(bool isOrder, var pickUpTime) {
+    return pickUpTime.text == ''
+        ? isOrder
+            ? DateTime.now().add(Duration(hours: 9)) //set Current Time
+            : DateTime.parse(DateTime.now().toString().split(' ')[0] +
+                " 00:00:00.000") //set 00
+        : DateTime.parse(DateTime.now().toString().split(' ')[0] +
+            " " +
+            pickUpTime.text +
+            ":00.000"); //set previous time
   }
 }

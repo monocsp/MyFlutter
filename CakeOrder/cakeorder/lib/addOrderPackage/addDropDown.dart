@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'addOrder.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:cakeorder/ProviderPackage/cakeList.dart';
 
@@ -18,11 +16,11 @@ class CustomDropDown {
     cakeCategoryProvider = Provider.of<List<CakeCategory>>(context);
   }
 
-  _customTitle({@required String title, bool important}) {
+  _customTitle({@required String title, bool important, double fontSize}) {
     return Text(
       title ?? "Empty",
       style: TextStyle(
-          fontSize: _text_Font_Size,
+          fontSize: fontSize ?? _text_Font_Size,
           fontWeight: FontWeight.bold,
           color: important ? Colors.redAccent : Colors.black),
     );
@@ -94,7 +92,7 @@ class CustomDropDown {
       CakeSizePrice selectedCakeSize}) {
     return currentCakeCategory != null
         ? Container(
-            margin: EdgeInsets.only(left: 10, top: 15),
+            margin: EdgeInsets.only(left: 10, top: 20),
             child: Column(children: [
               _customTitle(title: "케이크 호수", important: true),
               cakeSizeList != null
@@ -116,6 +114,9 @@ class CustomDropDown {
                     ),
             ]),
           )
-        : Container(child: _customTitle(title: '케이크를 선택해주세요', important: true));
+        : Container(
+            margin: EdgeInsets.only(top: 20),
+            child: _customTitle(
+                title: '케이크를 선택해주세요', important: true, fontSize: 13));
   }
 }

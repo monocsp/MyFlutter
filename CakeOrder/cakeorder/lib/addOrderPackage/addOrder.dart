@@ -1,16 +1,12 @@
 import 'package:cakeorder/ProviderPackage/cakeList.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
-import 'package:path/path.dart' as p;
 import 'addDropDown.dart';
-import 'addDate.dart';
+import 'selectDate.dart';
+import 'cakeCount.dart';
 
 class AddOrder extends StatefulWidget {
   @override
@@ -19,16 +15,19 @@ class AddOrder extends StatefulWidget {
 }
 
 class _AddOrderState extends State<AddOrder> {
+  final scaffoldKey = GlobalKey<ScaffoldState>();
   static final double _text_MARGIN = 10;
   static final double _text_Font_Size = 15;
-  bool addProgressStatus;
+  bool payStatus;
   // static final double _text_TOP_MARGIN = 5;
   CustomDate customDate;
   CustomDropDown customDropDown;
+  CakeCountWidget cakeCountWidget;
   List<CakeSizePrice> cakeSizeList = <CakeSizePrice>[];
   CakeCategory _selectedCakeName;
   CakeCategory _beforeCakeName;
   String _partTimer;
+  int _cakeCount;
   CakeSizePrice _selectedCakeSize;
   TextEditingController _textEditingControllerRemark;
   TextEditingController _textEditingControllerOrderDate;
@@ -46,7 +45,8 @@ class _AddOrderState extends State<AddOrder> {
 
   @override
   void initState() {
-    addProgressStatus = null;
+    _cakeCount = 1;
+    payStatus = null;
     _selectedCakeName = null;
     _partTimer = null;
     initNdisposeTextEditController(init: true);
@@ -86,7 +86,10 @@ class _AddOrderState extends State<AddOrder> {
     customDate = CustomDate(context: context, setStateCallback: dateCallback);
     customDropDown =
         CustomDropDown(context: context, setStateCallback: dropDownCallback);
+    cakeCountWidget =
+        CakeCountWidget(cakeCount: _cakeCount, callback: cakeCountCallback);
     return Scaffold(
+      key: scaffoldKey,
       resizeToAvoidBottomPadding: true,
       appBar: AppBar(
         title: Text('예약하기'),
@@ -123,20 +126,26 @@ class _AddOrderState extends State<AddOrder> {
                           customDropDown.selectCakeCategory(_selectedCakeName),
                     ),
                     Flexible(
+                      flex: 1,
+                      child: customDropDown.selectCakePrice(
+                          currentCakeCategory: _selectedCakeName,
+                          cakeList: cakeSizeList,
+                          selectedCakeSize: _selectedCakeSize),
+                    ),
+                    Flexible(
                         flex: 1,
-                        child: Container(
-                          margin: EdgeInsets.only(left: 30),
-                          child: customDropDown.selectCakePrice(
-                              currentCakeCategory: _selectedCakeName,
-                              cakeList: cakeSizeList,
-                              selectedCakeSize: _selectedCakeSize),
-                        ))
+                        child: cakeCountWidget.countWidget(
+                            isvisible: _selectedCakeName != null)),
                   ],
                 ),
                 _orderNamePhoneTextField(),
-                customDropDown.selectPartTimerDropDown(_partTimer),
+                Row(children: [
+                  customDropDown.selectPartTimerDropDown(_partTimer),
+                  _payStatusCheckBox(),
+                ]),
+                _customTextBox(title: "비고란", import: false),
                 _remarkTextField(context),
-                addButton()
+                addButton(),
               ],
             ),
           ),
@@ -162,111 +171,138 @@ class _AddOrderState extends State<AddOrder> {
                 borderRadius: BorderRadius.circular(5.0),
                 side: BorderSide(color: Colors.blueAccent)),
             onPressed: () {
-              dialogProgressIndicator(addProgressStatus);
-              CakeData data = CakeData(
-                  orderDate: _textEditingControllerOrderDate.text +
-                      " " +
-                      _textEditingControllerOrderTime.text,
-                  pickUpDate: _textEditingControllerPickUpDate.text +
-                      " " +
-                      _textEditingControllerPickUpTime.text,
-                  cakeCategory: _selectedCakeName.name,
-                  cakeSize: _selectedCakeSize.cakeSize,
-                  cakePrice: _selectedCakeSize.cakePrice,
-                  customerName: _textEditingControllerCustomerName.text,
-                  customerPhone: _textEditingControllerCustomerPhone.text);
-              data.toFireStore(loadDialogCallback);
-              print(data.documentId);
-              print(data.pickUpDate.toDate());
-              print(data.orderDate.toDate());
-              // c.toFireStore(loadDialogCallback);
-              // var _id;
-              // Map<dynamic, dynamic> temp = {
-              //   "time": Timestamp.fromDate(f.parse(
-              //       _textEditingControllerOrderDate.text +
-              //           " " +
-              //           _textEditingControllerOrderTime.text))
-              // };
-              // FirebaseFirestore.instance
-              //     .collection("Cake")
-              //     .add(temp.cast())
-              //     .then((value) {
-              //   _id = value.id;
-              //   FirebaseFirestore.instance
-              //       .collection("Cake")
-              //       .doc(_id)
-              //       .get()
-              //       .then((value) => print(value.data()["time"].toDate()));
-              // });
-              // var a = DateFormat(_textEditingControllerOrderDate.text);
+              // dialogProgressIndicator();
+              if (!_catchNull()) {
+                _addData();
+                dialogProgressIndicator();
+              }
+              // print(_checkError == null ? true : false);
+              // _errorSnackBar(_checkError);
+              // _checkError != null ? _errorSnackBar(_checkError) : _addData();
             }),
       ),
     );
   }
 
-  dialogProgressIndicator(bool status) {
+  _addData() async {
+    CakeData data = CakeData(
+        orderDate: _textEditingControllerOrderDate.text +
+            " " +
+            _textEditingControllerOrderTime.text,
+        pickUpDate: _textEditingControllerPickUpDate.text +
+            " " +
+            _textEditingControllerPickUpTime.text,
+        cakeCategory: _selectedCakeName.name,
+        cakeSize: _selectedCakeSize.cakeSize,
+        cakePrice: _selectedCakeSize.cakePrice,
+        customerName: _textEditingControllerCustomerName.text,
+        customerPhone: _textEditingControllerCustomerPhone.text,
+        partTimer: _partTimer,
+        remark: _textEditingControllerRemark.text,
+        paystatus: payStatus,
+        cakeCount: _cakeCount);
+    await data.toFireStore(loadDialogCallback);
+  }
+
+  _catchNull() {
+    CakeDataError error;
+    if (_textEditingControllerOrderDate.text == '' ||
+        _textEditingControllerOrderTime.text == '') {
+      error = CakeDataError(
+          errorName: "orderDate", errorComment: "예약시간 및 날짜를 선택해주세요");
+    } else if (_textEditingControllerPickUpDate.text == '' ||
+        _textEditingControllerPickUpTime.text == '') {
+      error = CakeDataError(
+          errorName: "pickUpDate", errorComment: "픽업시간 및 날짜를 선택해주세요");
+    } else if (_selectedCakeName == null) {
+      error = CakeDataError(
+          errorName: "cakeCategory", errorComment: "케이크 종류를 선택해주세요");
+    } else if (_selectedCakeSize == null) {
+      error =
+          CakeDataError(errorName: "cakeSize", errorComment: "케이크 사이즈를 선택해주세요");
+    } else if (_textEditingControllerCustomerName.text == '') {
+      error = CakeDataError(
+          errorName: "customerName", errorComment: "주문한 사람의 이름을 입력해주세요");
+    } else if (_textEditingControllerCustomerPhone.text == '') {
+      error = CakeDataError(
+          errorName: "customerPhone", errorComment: "주문한 사람의 전화번호를 입력해주세요");
+    } else if (_partTimer == null) {
+      error = CakeDataError(
+          errorName: "partTimer", errorComment: "주문받은 사람의 이름을 선택해주세요");
+    }
+    if (error != null) {
+      var snackBar = SnackBar(
+          content: Text(
+            "${error.errorComment}",
+          ),
+          duration: Duration(seconds: 1));
+      scaffoldKey.currentState.showSnackBar(snackBar);
+      return true;
+    }
+    return false;
+  }
+
+  _errorSnackBar(CakeDataError dataError) {
+    // final snackBar = SnackBar(content: Text('Are you talkin\' to me?'));
+    var snackBar = SnackBar(content: Text("${dataError.errorComment}"));
+  }
+
+  dialogProgressIndicator() {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
         return WillPopScope(
-            onWillPop: () async => false,
+            // onWillPop: () async => false,
             child: AlertDialog(
-              backgroundColor: Colors.black87,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(8.0))),
-              content: Container(
-                  padding: EdgeInsets.all(16),
-                  color: Colors.black.withOpacity(0.8),
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Padding(
-                            child: Container(
-                                child: status == null
-                                    ? CircularProgressIndicator(
-                                        strokeWidth: 3,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                                Colors.white),
-                                      )
-                                    : status
-                                        ? Icon(
-                                            Icons.check,
-                                            size: 20,
-                                          )
-                                        : Icon(
-                                            Icons.error_outline,
-                                            size: 20,
-                                          ),
-                                width: 32,
-                                height: 32),
-                            padding: EdgeInsets.only(bottom: 16)),
-                        Padding(
-                            child: Text(
-                              'Please wait …',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 16),
-                              textAlign: TextAlign.center,
+          backgroundColor: Colors.black87,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8.0))),
+          content: Container(
+              padding: EdgeInsets.all(16),
+              color: Colors.black.withOpacity(0.8),
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                        child: Container(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 3,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
-                            padding: EdgeInsets.only(bottom: 4)),
-                        Text(
-                          "displayedText",
-                          style: TextStyle(color: Colors.white, fontSize: 14),
+                            width: 32,
+                            height: 32),
+                        padding: EdgeInsets.only(bottom: 16)),
+                    Padding(
+                        child: Text(
+                          'Please wait …',
+                          style: TextStyle(color: Colors.white, fontSize: 16),
                           textAlign: TextAlign.center,
-                        )
-                      ])),
-            ));
+                        ),
+                        padding: EdgeInsets.only(bottom: 4)),
+                    Text(
+                      "displayedText",
+                      style: TextStyle(color: Colors.white, fontSize: 14),
+                      textAlign: TextAlign.center,
+                    )
+                  ])),
+        ));
       },
     );
   }
 
-  loadDialogCallback() {
-    Navigator.of(context).popUntil(ModalRoute.withName('/'));
-    // Navigator.of(context).pushNamed(ModalRoute.withName('/AddOrder'));
-    // Navigator.of(context).pop();
-    // Navigator.of(context).pop();
+  cakeCountCallback(int count) {
+    setState(() {
+      _cakeCount = count;
+    });
+  }
+
+  loadDialogCallback({bool isCompleted}) {
+    isCompleted == null
+        ? Navigator.of(context).popUntil(ModalRoute.withName('/'))
+        : Navigator.of(context).pop();
   }
 
   dateCallback(String param) {
@@ -382,25 +418,46 @@ class _AddOrderState extends State<AddOrder> {
   }
 
   _remarkTextField(BuildContext context) {
+    return Center(
+      child: Container(
+        width: 350,
+        padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            right: 10,
+            left: 10),
+        decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+        child: TextField(
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            labelText: '비고',
+            hintText: '만나서 카드결제 등',
+          ),
+          controller: _textEditingControllerRemark,
+          keyboardType: TextInputType.multiline,
+          maxLines: null,
+          style: TextStyle(
+            fontSize: 15,
+          ),
+        ),
+      ),
+    );
+  }
+
+  _payStatusCheckBox() {
     return Container(
-      padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          right: 10,
-          left: 10),
-      decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent)),
-      child: TextField(
-        decoration: InputDecoration(
-          // counterText:
-          //     '${this._textEditingControllerRemark.text.split(' ').length} words',
-          labelText: '비고',
-          hintText: '만나서 카드결제 등',
-        ),
-        controller: _textEditingControllerRemark,
-        keyboardType: TextInputType.multiline,
-        maxLines: null,
-        style: TextStyle(
-          fontSize: 15,
-        ),
+      margin: EdgeInsets.only(left: 50, top: 5, right: 5),
+      child: Column(
+        children: [
+          _customTextBox(title: "결제 여부", import: true),
+          Checkbox(
+            value: payStatus ?? false,
+            onChanged: (value) {
+              setState(() {
+                payStatus = payStatus == null ? true : !payStatus;
+              });
+            },
+          )
+        ],
       ),
     );
   }
@@ -415,11 +472,19 @@ class _AddOrderState extends State<AddOrder> {
     );
   }
 
-  _customTextBox({@required bool isOrder}) {
+  _customTextBox({bool isOrder, String title, bool import}) {
     return Container(
         padding: EdgeInsets.only(left: _text_MARGIN, top: _text_MARGIN),
         child: _customTitle(
-            title: isOrder ? '주문 날짜' : '픽업 날짜',
-            important: isOrder ? false : true));
+            title: isOrder != null
+                ? isOrder
+                    ? '주문 날짜'
+                    : '픽업 날짜'
+                : title,
+            important: isOrder != null
+                ? isOrder
+                    ? false
+                    : true
+                : import ?? false));
   }
 }

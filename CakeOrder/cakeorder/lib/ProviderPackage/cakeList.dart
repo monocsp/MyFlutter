@@ -17,9 +17,15 @@ import 'package:cakeorder/addOrderPackage/AddOrder.dart';
 //     return CakeData(cakeSize: map.keys ?? [], cakePrice: map.values ?? []);
 //   }
 // }
+class CakeDataError {
+  final String errorName;
+  final String errorComment;
+  CakeDataError({this.errorName, this.errorComment});
+}
+
 class CakeSizePrice {
   final String cakeSize;
-  final String cakePrice;
+  final int cakePrice;
   const CakeSizePrice(this.cakeSize, this.cakePrice);
 }
 
@@ -29,15 +35,17 @@ class CakeData {
   var pickUpDate;
   final String cakeCategory;
   final String cakeSize;
-  final String cakePrice;
+  final int cakePrice;
   final String customerName;
   final String customerPhone;
   final String partTimer;
   final String remark;
   final bool paystatus;
   final bool pickUpStatus;
+  final int cakeCount;
 
   String documentId;
+
   CakeData(
       {this.orderDate,
       this.pickUpDate,
@@ -50,46 +58,53 @@ class CakeData {
       this.remark,
       this.paystatus,
       this.pickUpStatus,
-      this.documentId});
+      this.documentId,
+      this.cakeCount});
+
   Future toFireStore(callback) async {
     this.orderDate = Timestamp.fromDate(f.parse(orderDate));
     this.pickUpDate = Timestamp.fromDate(f.parse(pickUpDate));
-    await _storeFireStore();
-
-    callback();
-  }
-
-//  c.toFireStore(loadDialogCallback);
-  // var _id;
-  // Map<dynamic, dynamic> temp = {
-  //   "time": Timestamp.fromDate(f.parse(
-  //       _textEditingControllerOrderDate.text +
-  //           " " +
-  //           _textEditingControllerOrderTime.text))
-  // };
-  // FirebaseFirestore.instance
-  //     .collection("Cake")
-  //     .add(temp.cast())
-  //     .then((value) {
-  //   _id = value.id;
-  //   FirebaseFirestore.instance
-  //       .collection("Cake")
-  //       .doc(_id)
-  //       .get()
-  //       .then((value) => print(value.data()["time"].toDate()));
-  // });
-  // var a = DateFormat(_textEditingControllerOrderDate.text);
-  _storeFireStore() {
-    FirebaseFirestore.instance
-        .collection("Cake")
-        .add({"OrderDate": orderDate, "PickUpDate": pickUpDate}).then((value) {
+    await FirebaseFirestore.instance.collection("Cake").add({
+      "orderDate": orderDate,
+      "pickUpDate": pickUpDate,
+      "cakeCategory": cakeCategory,
+      "cakeSize": cakeSize,
+      "cakePrice": cakePrice,
+      "customerName": customerName,
+      "customerPhone": customerPhone,
+      "partTimer": partTimer,
+      "remark": remark,
+      "payStatus": paystatus ?? false,
+      "pickUpStatus": pickUpStatus ?? false,
+      "cakeCount": cakeCount
+    }).then((value) {
       this.documentId = value.id;
+      callback();
     });
   }
 
   forRead() {
     this.orderDate = orderDate.toDate();
     this.pickUpDate = pickUpDate.toDate();
+  }
+
+  factory CakeData.fromFireStore(DocumentSnapshot snapshot) {
+    var _cakeData = snapshot.data();
+    return CakeData(
+      cakeCategory: ,
+      cakeCount: ,
+      cakePrice: ,
+      cakeSize: ,
+      customerName: ,
+      customerPhone: ,
+      documentId: ,
+      orderDate: ,
+      partTimer: ,
+      paystatus: ,
+      pickUpDate: ,
+      pickUpStatus: ,
+      remark: ,
+    );
   }
 }
 
@@ -99,10 +114,10 @@ class CakeCategory {
   final List<dynamic> cakePrice;
   CakeCategory({this.name, this.cakePrice, this.cakeSize});
   factory CakeCategory.fromFireStore(DocumentSnapshot snapshot) {
-    var _cakePrice = snapshot.data()["CakePrice"];
+    var _data = snapshot.data()["CakePrice"];
     return CakeCategory(
         name: snapshot.id ?? '',
-        cakeSize: _cakePrice.keys.toList() ?? [],
-        cakePrice: _cakePrice.values.toList() ?? []);
+        cakeSize: _data.keys.toList() ?? [],
+        cakePrice: _data.values.toList() ?? []);
   }
 }

@@ -89,21 +89,22 @@ class CakeData {
   }
 
   factory CakeData.fromFireStore(DocumentSnapshot snapshot) {
+    print(snapshot.id);
     var _cakeData = snapshot.data();
     return CakeData(
-      cakeCategory: ,
-      cakeCount: ,
-      cakePrice: ,
-      cakeSize: ,
-      customerName: ,
-      customerPhone: ,
-      documentId: ,
-      orderDate: ,
-      partTimer: ,
-      paystatus: ,
-      pickUpDate: ,
-      pickUpStatus: ,
-      remark: ,
+      cakeCategory: _cakeData["cakeCategory"],
+      cakeCount: _cakeData["cakeCount"],
+      cakePrice: _cakeData["cakePrice"],
+      cakeSize: _cakeData["cakeSize"],
+      customerName: _cakeData["customerName"],
+      customerPhone: _cakeData["customerPhone"],
+      documentId: snapshot.id,
+      orderDate: _cakeData["orderDate"],
+      partTimer: _cakeData["partTimer"],
+      paystatus: _cakeData["paystatus"],
+      pickUpDate: _cakeData["pickUpDate"],
+      pickUpStatus: _cakeData["pickUpStatus"],
+      remark: _cakeData["remark"],
     );
   }
 }

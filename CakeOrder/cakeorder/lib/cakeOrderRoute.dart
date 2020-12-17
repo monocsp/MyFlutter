@@ -1,3 +1,4 @@
+import 'package:cakeorder/OrderListPackage/todayOrderPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'addOrderPackage/addOrder.dart';
@@ -15,6 +16,8 @@ class CakeOrderRouteGenerator {
       case 'AddOrder':
         _pageWidget = AddOrder();
         break;
+      case 'temp':
+        _pageWidget = OrderPage();
     }
     return CurrentOSCheck.instance['Android']
         ? MaterialPageRoute(

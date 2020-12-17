@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'addDropDown.dart';
 import 'selectDate.dart';
 import 'cakeCount.dart';
@@ -16,16 +17,14 @@ class AddOrder extends StatefulWidget {
 
 class _AddOrderState extends State<AddOrder> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  static final double _text_MARGIN = 10;
-  static final double _text_Font_Size = 15;
+  double _text_MARGIN = 10;
+  double _text_Font_Size = 15;
   bool payStatus;
-  // static final double _text_TOP_MARGIN = 5;
   CustomDate customDate;
   CustomDropDown customDropDown;
   CakeCountWidget cakeCountWidget;
   List<CakeSizePrice> cakeSizeList = <CakeSizePrice>[];
   CakeCategory _selectedCakeName;
-  CakeCategory _beforeCakeName;
   String _partTimer;
   int _cakeCount;
   CakeSizePrice _selectedCakeSize;
@@ -83,11 +82,14 @@ class _AddOrderState extends State<AddOrder> {
 
   @override
   Widget build(BuildContext context) {
+    List<CakeData> temp = Provider.of<List<CakeData>>(context);
+    // print(temp);
     customDate = CustomDate(context: context, setStateCallback: dateCallback);
     customDropDown =
         CustomDropDown(context: context, setStateCallback: dropDownCallback);
     cakeCountWidget =
         CakeCountWidget(cakeCount: _cakeCount, callback: cakeCountCallback);
+
     return Scaffold(
       key: scaffoldKey,
       resizeToAvoidBottomPadding: true,
@@ -171,14 +173,10 @@ class _AddOrderState extends State<AddOrder> {
                 borderRadius: BorderRadius.circular(5.0),
                 side: BorderSide(color: Colors.blueAccent)),
             onPressed: () {
-              // dialogProgressIndicator();
               if (!_catchNull()) {
                 _addData();
                 dialogProgressIndicator();
               }
-              // print(_checkError == null ? true : false);
-              // _errorSnackBar(_checkError);
-              // _checkError != null ? _errorSnackBar(_checkError) : _addData();
             }),
       ),
     );
@@ -249,46 +247,47 @@ class _AddOrderState extends State<AddOrder> {
 
   dialogProgressIndicator() {
     showDialog(
-      context: context,
+      context: scaffoldKey.currentContext,
       barrierDismissible: false,
       builder: (context) {
         return WillPopScope(
-            // onWillPop: () async => false,
+            onWillPop: () async => true,
             child: AlertDialog(
-          backgroundColor: Colors.black87,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8.0))),
-          content: Container(
-              padding: EdgeInsets.all(16),
-              color: Colors.black.withOpacity(0.8),
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                        child: Container(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 3,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
+              backgroundColor: Colors.black87,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8.0))),
+              content: Container(
+                  padding: EdgeInsets.all(16),
+                  color: Colors.black.withOpacity(0.8),
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(
+                            child: Container(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 3,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                ),
+                                width: 32,
+                                height: 32),
+                            padding: EdgeInsets.only(bottom: 16)),
+                        Padding(
+                            child: Text(
+                              'Please wait …',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 16),
+                              textAlign: TextAlign.center,
                             ),
-                            width: 32,
-                            height: 32),
-                        padding: EdgeInsets.only(bottom: 16)),
-                    Padding(
-                        child: Text(
-                          'Please wait …',
-                          style: TextStyle(color: Colors.white, fontSize: 16),
+                            padding: EdgeInsets.only(bottom: 4)),
+                        Text(
+                          "displayedText",
+                          style: TextStyle(color: Colors.white, fontSize: 14),
                           textAlign: TextAlign.center,
-                        ),
-                        padding: EdgeInsets.only(bottom: 4)),
-                    Text(
-                      "displayedText",
-                      style: TextStyle(color: Colors.white, fontSize: 14),
-                      textAlign: TextAlign.center,
-                    )
-                  ])),
-        ));
+                        )
+                      ])),
+            ));
       },
     );
   }
@@ -358,7 +357,7 @@ class _AddOrderState extends State<AddOrder> {
   void showAlertDialog(BuildContext context,
       {@required bool isOrderTime}) async {
     String result = await showDialog(
-      context: context,
+      context: scaffoldKey.currentContext,
       barrierDismissible: true, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(

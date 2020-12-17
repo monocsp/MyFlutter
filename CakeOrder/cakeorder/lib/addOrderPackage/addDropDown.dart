@@ -12,8 +12,12 @@ class CustomDropDown {
   List<dynamic> partTimerProvider;
   List<CakeCategory> cakeCategoryProvider;
   CustomDropDown({this.context, this.setStateCallback}) {
-    partTimerProvider = Provider.of<List<dynamic>>(context);
-    cakeCategoryProvider = Provider.of<List<CakeCategory>>(context);
+    getData(context);
+  }
+  Future getData(BuildContext context) async {
+    partTimerProvider = Provider.of<List<dynamic>>(context, listen: false);
+    cakeCategoryProvider =
+        Provider.of<List<CakeCategory>>(context, listen: false);
   }
 
   _customTitle({@required String title, bool important, double fontSize}) {

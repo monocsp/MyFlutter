@@ -35,6 +35,8 @@ dependencies:
   provider: ^4.3.2+3
   flutter_time_picker_spinner: ^1.0.6+1
   firebase_auth: ^0.18.4
+  flutter_slidable:
+  table_calendar: ^2.3.3
   
   
 

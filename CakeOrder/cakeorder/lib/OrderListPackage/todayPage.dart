@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'todayOrderPage.dart';
 import 'todayPickUpPage.dart';
-import 'package:cakeorder/ProviderPackage/CakeList.dart';
+import 'package:cakeorder/ProviderPackage/cakeDataClass.dart';
 import 'package:provider/provider.dart';
 
 class TodayList extends StatefulWidget {
@@ -36,7 +36,7 @@ class _TodayListState extends State<TodayList>
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(100),
         child: AppBar(
-          title: Center(child: Text('hihi')),
+          title: Center(child: Text("Today.")),
           bottom: TabBar(
             controller: _tabController,
             indicator: UnderlineTabIndicator(
@@ -59,19 +59,20 @@ class _TodayListState extends State<TodayList>
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).pushNamed('/AddOrder');
-          // Navigator.of(context).pushNamed('/temp');
         },
-        child: Icon(Icons.add),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        child: Icon(Icons.cake),
+        // label: Text("추가"),
       ),
-      body: TabBarView(controller: _tabController, children: [
-        OrderPage(),
-        // OrderPage(),
-        Center(
-            child: Text(
-          "1",
-          style: TextStyle(fontSize: 40),
-        ))
-      ]),
+      body: TabBarView(
+          physics: NeverScrollableScrollPhysics(),
+          controller: _tabController,
+          children: [
+            OrderPage(),
+            // OrderPage(),
+            PickUpPage()
+          ]),
     );
   }
 

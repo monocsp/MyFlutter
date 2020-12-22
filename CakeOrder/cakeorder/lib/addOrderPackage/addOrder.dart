@@ -1,10 +1,9 @@
-import 'package:cakeorder/ProviderPackage/cakeList.dart';
+import 'package:cakeorder/ProviderPackage/cakeDataClass.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'addDropDown.dart';
 import 'selectDate.dart';
 import 'cakeCount.dart';
@@ -20,21 +19,22 @@ class _AddOrderState extends State<AddOrder> {
   double _text_MARGIN = 10;
   double _text_Font_Size = 15;
   bool payStatus;
+  bool pickUpStatus;
   CustomDate customDate;
   CustomDropDown customDropDown;
   CakeCountWidget cakeCountWidget;
   List<CakeSizePrice> cakeSizeList = <CakeSizePrice>[];
-  CakeCategory _selectedCakeName;
-  String _partTimer;
-  int _cakeCount;
-  CakeSizePrice _selectedCakeSize;
-  TextEditingController _textEditingControllerRemark;
-  TextEditingController _textEditingControllerOrderDate;
-  TextEditingController _textEditingControllerPickUpDate;
-  TextEditingController _textEditingControllerOrderTime;
-  TextEditingController _textEditingControllerPickUpTime;
-  TextEditingController _textEditingControllerCustomerName;
-  TextEditingController _textEditingControllerCustomerPhone;
+  CakeCategory selectedCakeName;
+  String partTimer;
+  int cakeCount;
+  CakeSizePrice selectedCakeSize;
+  TextEditingController textEditingControllerRemark;
+  TextEditingController textEditingControllerOrderDate;
+  TextEditingController textEditingControllerPickUpDate;
+  TextEditingController textEditingControllerOrderTime;
+  TextEditingController textEditingControllerPickUpTime;
+  TextEditingController textEditingControllerCustomerName;
+  TextEditingController textEditingControllerCustomerPhone;
   var _todayDate =
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
           .toString()
@@ -42,34 +42,39 @@ class _AddOrderState extends State<AddOrder> {
   String _todayTime =
       DateFormat('kk:mm').format(DateTime.now().add(Duration(hours: 9)));
 
+  customInitData() {
+    cakeCount = 1;
+    payStatus = null;
+    pickUpStatus = null;
+    selectedCakeName = null;
+    partTimer = null;
+  }
+
   @override
   void initState() {
-    _cakeCount = 1;
-    payStatus = null;
-    _selectedCakeName = null;
-    _partTimer = null;
+    customInitData();
     initNdisposeTextEditController(init: true);
     super.initState();
   }
 
   initNdisposeTextEditController({@required bool init}) {
     if (init) {
-      _textEditingControllerOrderDate = TextEditingController()
+      textEditingControllerOrderDate = TextEditingController()
         ..text = _todayDate;
-      _textEditingControllerOrderTime = TextEditingController()
+      textEditingControllerOrderTime = TextEditingController()
         ..text = _todayTime;
-      _textEditingControllerPickUpDate = TextEditingController();
-      _textEditingControllerPickUpTime = TextEditingController();
-      _textEditingControllerRemark = TextEditingController();
-      _textEditingControllerCustomerName = TextEditingController();
-      _textEditingControllerCustomerPhone = TextEditingController();
+      textEditingControllerPickUpDate = TextEditingController();
+      textEditingControllerPickUpTime = TextEditingController();
+      textEditingControllerRemark = TextEditingController();
+      textEditingControllerCustomerName = TextEditingController();
+      textEditingControllerCustomerPhone = TextEditingController();
     } else {
-      _textEditingControllerOrderDate.dispose();
-      _textEditingControllerOrderTime.dispose();
-      _textEditingControllerPickUpDate.dispose();
-      _textEditingControllerPickUpTime.dispose();
-      _textEditingControllerCustomerName.dispose();
-      _textEditingControllerCustomerPhone.dispose();
+      textEditingControllerOrderDate.dispose();
+      textEditingControllerOrderTime.dispose();
+      textEditingControllerPickUpDate.dispose();
+      textEditingControllerPickUpTime.dispose();
+      textEditingControllerCustomerName.dispose();
+      textEditingControllerCustomerPhone.dispose();
     }
   }
 
@@ -82,13 +87,12 @@ class _AddOrderState extends State<AddOrder> {
 
   @override
   Widget build(BuildContext context) {
-    List<CakeData> temp = Provider.of<List<CakeData>>(context);
     // print(temp);
     customDate = CustomDate(context: context, setStateCallback: dateCallback);
     customDropDown =
         CustomDropDown(context: context, setStateCallback: dropDownCallback);
     cakeCountWidget =
-        CakeCountWidget(cakeCount: _cakeCount, callback: cakeCountCallback);
+        CakeCountWidget(cakeCount: cakeCount, callback: cakeCountCallback);
 
     return Scaffold(
       key: scaffoldKey,
@@ -112,38 +116,39 @@ class _AddOrderState extends State<AddOrder> {
                 _customTextBox(isOrder: true),
                 customDate.dateNtimeRow(
                     isOrderRow: true,
-                    controllerCalendar: _textEditingControllerOrderDate,
-                    controllerTimer: _textEditingControllerOrderTime),
+                    controllerCalendar: textEditingControllerOrderDate,
+                    controllerTimer: textEditingControllerOrderTime),
                 _customTextBox(isOrder: false),
                 customDate.dateNtimeRow(
                     isOrderRow: false,
-                    controllerCalendar: _textEditingControllerPickUpDate,
-                    controllerTimer: _textEditingControllerPickUpTime),
+                    controllerCalendar: textEditingControllerPickUpDate,
+                    controllerTimer: textEditingControllerPickUpTime),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Flexible(
                       flex: 1,
                       child:
-                          customDropDown.selectCakeCategory(_selectedCakeName),
+                          customDropDown.selectCakeCategory(selectedCakeName),
                     ),
                     Flexible(
                       flex: 1,
                       child: customDropDown.selectCakePrice(
-                          currentCakeCategory: _selectedCakeName,
+                          currentCakeCategory: selectedCakeName,
                           cakeList: cakeSizeList,
-                          selectedCakeSize: _selectedCakeSize),
+                          selectedCakeSize: selectedCakeSize),
                     ),
                     Flexible(
                         flex: 1,
                         child: cakeCountWidget.countWidget(
-                            isvisible: _selectedCakeName != null)),
+                            isvisible: selectedCakeName != null)),
                   ],
                 ),
                 _orderNamePhoneTextField(),
                 Row(children: [
-                  customDropDown.selectPartTimerDropDown(_partTimer),
-                  _payStatusCheckBox(),
+                  customDropDown.selectPartTimerDropDown(partTimer),
+                  _payAndPickUpStatusCheckBox(isPayStatus: true),
+                  _payAndPickUpStatusCheckBox(isPayStatus: false)
                 ]),
                 _customTextBox(title: "비고란", import: false),
                 _remarkTextField(context),
@@ -184,47 +189,48 @@ class _AddOrderState extends State<AddOrder> {
 
   _addData() async {
     CakeData data = CakeData(
-        orderDate: _textEditingControllerOrderDate.text +
+        orderDate: textEditingControllerOrderDate.text +
             " " +
-            _textEditingControllerOrderTime.text,
-        pickUpDate: _textEditingControllerPickUpDate.text +
+            textEditingControllerOrderTime.text,
+        pickUpDate: textEditingControllerPickUpDate.text +
             " " +
-            _textEditingControllerPickUpTime.text,
-        cakeCategory: _selectedCakeName.name,
-        cakeSize: _selectedCakeSize.cakeSize,
-        cakePrice: _selectedCakeSize.cakePrice,
-        customerName: _textEditingControllerCustomerName.text,
-        customerPhone: _textEditingControllerCustomerPhone.text,
-        partTimer: _partTimer,
-        remark: _textEditingControllerRemark.text,
-        paystatus: payStatus,
-        cakeCount: _cakeCount);
+            textEditingControllerPickUpTime.text,
+        cakeCategory: selectedCakeName.name,
+        cakeSize: selectedCakeSize.cakeSize,
+        cakePrice: selectedCakeSize.cakePrice,
+        customerName: textEditingControllerCustomerName.text,
+        customerPhone: textEditingControllerCustomerPhone.text,
+        partTimer: partTimer,
+        remark: textEditingControllerRemark.text,
+        payStatus: payStatus,
+        pickUpStatus: pickUpStatus,
+        cakeCount: cakeCount);
     await data.toFireStore(loadDialogCallback);
   }
 
   _catchNull() {
     CakeDataError error;
-    if (_textEditingControllerOrderDate.text == '' ||
-        _textEditingControllerOrderTime.text == '') {
+    if (textEditingControllerOrderDate.text == '' ||
+        textEditingControllerOrderTime.text == '') {
       error = CakeDataError(
           errorName: "orderDate", errorComment: "예약시간 및 날짜를 선택해주세요");
-    } else if (_textEditingControllerPickUpDate.text == '' ||
-        _textEditingControllerPickUpTime.text == '') {
+    } else if (textEditingControllerPickUpDate.text == '' ||
+        textEditingControllerPickUpTime.text == '') {
       error = CakeDataError(
           errorName: "pickUpDate", errorComment: "픽업시간 및 날짜를 선택해주세요");
-    } else if (_selectedCakeName == null) {
+    } else if (selectedCakeName == null) {
       error = CakeDataError(
           errorName: "cakeCategory", errorComment: "케이크 종류를 선택해주세요");
-    } else if (_selectedCakeSize == null) {
+    } else if (selectedCakeSize == null) {
       error =
           CakeDataError(errorName: "cakeSize", errorComment: "케이크 사이즈를 선택해주세요");
-    } else if (_textEditingControllerCustomerName.text == '') {
+    } else if (textEditingControllerCustomerName.text == '') {
       error = CakeDataError(
           errorName: "customerName", errorComment: "주문한 사람의 이름을 입력해주세요");
-    } else if (_textEditingControllerCustomerPhone.text == '') {
+    } else if (textEditingControllerCustomerPhone.text == '') {
       error = CakeDataError(
           errorName: "customerPhone", errorComment: "주문한 사람의 전화번호를 입력해주세요");
-    } else if (_partTimer == null) {
+    } else if (partTimer == null) {
       error = CakeDataError(
           errorName: "partTimer", errorComment: "주문받은 사람의 이름을 선택해주세요");
     }
@@ -294,7 +300,7 @@ class _AddOrderState extends State<AddOrder> {
 
   cakeCountCallback(int count) {
     setState(() {
-      _cakeCount = count;
+      cakeCount = count;
     });
   }
 
@@ -311,15 +317,15 @@ class _AddOrderState extends State<AddOrder> {
     setState(() {
       if (arguments["isOrder"] == "true") {
         if (arguments["isCalendar"] == "true") {
-          _textEditingControllerOrderDate..text = arguments["data"];
+          textEditingControllerOrderDate..text = arguments["data"];
         } else {
-          _textEditingControllerOrderTime..text = arguments["data"];
+          textEditingControllerOrderTime..text = arguments["data"];
         }
       } else {
         if (arguments["isCalendar"] == "true") {
-          _textEditingControllerPickUpDate..text = arguments["data"];
+          textEditingControllerPickUpDate..text = arguments["data"];
         } else {
-          _textEditingControllerPickUpTime..text = arguments["data"];
+          textEditingControllerPickUpTime..text = arguments["data"];
         }
       }
     });
@@ -340,16 +346,16 @@ class _AddOrderState extends State<AddOrder> {
     Map<String, String> arguments = Uri.parse(parameter).queryParameters;
     setState(() {
       if (arguments["parm1"] == "partTimer") {
-        _partTimer = arguments["parm2"];
+        partTimer = arguments["parm2"];
       } else if (arguments["parm1"] == "cakeCategory") {
-        if (_selectedCakeName != cakeCategory) {
-          _selectedCakeSize = null;
+        if (selectedCakeName != cakeCategory) {
+          selectedCakeSize = null;
           _resetCakePriceList(cakeCategory);
         }
-        _selectedCakeName = cakeCategory;
+        selectedCakeName = cakeCategory;
       } else if (arguments["parm1"] == "cakePrice") {
         print(cakePrice);
-        _selectedCakeSize = cakePrice;
+        selectedCakeSize = cakePrice;
       }
     });
   }
@@ -373,8 +379,8 @@ class _AddOrderState extends State<AddOrder> {
               setState(() {
                 String _selectTime = DateFormat('kk:mm').format(time);
                 isOrderTime
-                    ? _textEditingControllerOrderTime.text = '$_selectTime'
-                    : _textEditingControllerPickUpTime.text = '$_selectTime';
+                    ? textEditingControllerOrderTime.text = '$_selectTime'
+                    : textEditingControllerPickUpTime.text = '$_selectTime';
               });
             },
           ),
@@ -396,14 +402,14 @@ class _AddOrderState extends State<AddOrder> {
           Row(children: <Widget>[
             Flexible(
                 child: TextField(
-                    controller: _textEditingControllerCustomerName,
+                    controller: textEditingControllerCustomerName,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: '성함',
                     ))),
             Flexible(
               child: TextField(
-                  controller: _textEditingControllerCustomerPhone,
+                  controller: textEditingControllerCustomerPhone,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
@@ -431,7 +437,7 @@ class _AddOrderState extends State<AddOrder> {
             labelText: '비고',
             hintText: '만나서 카드결제 등',
           ),
-          controller: _textEditingControllerRemark,
+          controller: textEditingControllerRemark,
           keyboardType: TextInputType.multiline,
           maxLines: null,
           style: TextStyle(
@@ -442,17 +448,22 @@ class _AddOrderState extends State<AddOrder> {
     );
   }
 
-  _payStatusCheckBox() {
+  _payAndPickUpStatusCheckBox({@required isPayStatus}) {
     return Container(
       margin: EdgeInsets.only(left: 50, top: 5, right: 5),
       child: Column(
         children: [
-          _customTextBox(title: "결제 여부", import: true),
+          isPayStatus
+              ? _customTextBox(title: "결제 여부", import: true)
+              : _customTextBox(title: "픽업 여부", import: true),
           Checkbox(
-            value: payStatus ?? false,
+            value: isPayStatus ? payStatus ?? false : pickUpStatus ?? false,
             onChanged: (value) {
               setState(() {
-                payStatus = payStatus == null ? true : !payStatus;
+                if (isPayStatus)
+                  payStatus = payStatus == null ? true : !payStatus;
+                else
+                  pickUpStatus = pickUpStatus == null ? true : !pickUpStatus;
               });
             },
           )

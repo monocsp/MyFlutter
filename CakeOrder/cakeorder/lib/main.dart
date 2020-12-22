@@ -1,4 +1,4 @@
-import 'package:cakeorder/ProviderPackage/cakeList.dart';
+import 'package:cakeorder/ProviderPackage/cakeDataClass.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:cakeorder/calendarPage.dart';
@@ -48,8 +48,15 @@ class _CakeOrderAppState extends State<CakeOrderApp> {
   Widget build(BuildContext context) {
     return MultiProvider(
         providers: [
-          StreamProvider<List<CakeData>>.value(
+          StreamProvider<List<CakeDataOrder>>.value(
             value: db.getTodayOrderCakeData(),
+            catchError: (context, error) {
+              print(error);
+              return null;
+            },
+          ),
+          StreamProvider<List<CakeDataPickUp>>.value(
+            value: db.getTodayPickCupCakeData(),
             catchError: (context, error) {
               print(error);
               return null;
@@ -66,6 +73,13 @@ class _CakeOrderAppState extends State<CakeOrderApp> {
               return null;
             },
           ),
+          StreamProvider<List<CakeDataCalendar>>.value(
+            value: db.getThisMonthCakeData(),
+            catchError: (context, error) {
+              print(error);
+              return null;
+            },
+          )
         ],
         child: _os['Android']
             ? MaterialApp(

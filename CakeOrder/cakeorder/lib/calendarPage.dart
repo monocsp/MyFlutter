@@ -23,74 +23,74 @@ class _CalendarPageState extends State<CalendarPage>
     with TickerProviderStateMixin {
   List<CakeDataCalendar> thisMonthCakeDataList;
   Map<DateTime, List> _events;
-  List _selectedEvents;
+  List<dynamic> _selectedEvents;
   AnimationController _animationController;
   CalendarController _calendarController;
 
   @override
   void initState() {
     super.initState();
-
+    // initEventData();
     final _selectedDay = DateTime.now();
-
-    _events = {
-      _selectedDay.subtract(Duration(days: 30)): [
-        'Event A0',
-        'Event B0',
-        'Event C0'
-      ],
-      _selectedDay.subtract(Duration(days: 27)): ['Event A1'],
-      _selectedDay.subtract(Duration(days: 20)): [
-        'Event A2',
-        'Event B2',
-        'Event C2',
-        'Event D2'
-      ],
-      _selectedDay.subtract(Duration(days: 16)): ['Event A3', 'Event B3'],
-      _selectedDay.subtract(Duration(days: 10)): [
-        'Event A4',
-        'Event B4',
-        'Event C4'
-      ],
-      _selectedDay.subtract(Duration(days: 4)): [
-        'Event A5',
-        'Event B5',
-        'Event C5'
-      ],
-      _selectedDay.subtract(Duration(days: 2)): ['Event A6', 'Event B6'],
-      _selectedDay: ['Event A7', 'Event B7', 'Event C7', 'Event D7'],
-      _selectedDay.add(Duration(days: 1)): [
-        'Event A8',
-        'Event A8',
-        'Event A8',
-        'Event A8',
-        'Event A8',
-        'Event A8',
-        'Event B8',
-        'Event C8',
-        'Event D8'
-      ],
-      _selectedDay.add(Duration(days: 3)):
-          Set.from(['Event A9', 'Event A9', 'Event B9']).toList(),
-      _selectedDay.add(Duration(days: 7)): [
-        'Event A10',
-        'Event B10',
-        'Event C10'
-      ],
-      _selectedDay.add(Duration(days: 11)): ['Event A11', 'Event B11'],
-      _selectedDay.add(Duration(days: 17)): [
-        'Event A12',
-        'Event B12',
-        'Event C12',
-        'Event D12'
-      ],
-      _selectedDay.add(Duration(days: 22)): ['Event A13', 'Event B13'],
-      _selectedDay.add(Duration(days: 26)): [
-        'Event A14',
-        'Event B14',
-        'Event C14'
-      ],
-    };
+    _events = {};
+    // _events = {
+    //   _selectedDay.subtract(Duration(days: 30)): [
+    //     'Event A0',
+    //     'Event B0',
+    //     'Event C0'
+    //   ],
+    //   _selectedDay.subtract(Duration(days: 27)): ['Event A1'],
+    //   _selectedDay.subtract(Duration(days: 20)): [
+    //     'Event A2',
+    //     'Event B2',
+    //     'Event C2',
+    //     'Event D2'
+    //   ],
+    //   _selectedDay.subtract(Duration(days: 16)): ['Event A3', 'Event B3'],
+    //   _selectedDay.subtract(Duration(days: 10)): [
+    //     'Event A4',
+    //     'Event B4',
+    //     'Event C4'
+    //   ],
+    //   _selectedDay.subtract(Duration(days: 4)): [
+    //     'Event A5',
+    //     'Event B5',
+    //     'Event C5'
+    //   ],
+    //   _selectedDay.subtract(Duration(days: 2)): ['Event A6', 'Event B6'],
+    //   _selectedDay: ['Event A7', 'Event B7', 'Event C7', 'Event D7'],
+    //   _selectedDay.add(Duration(days: 1)): [
+    //     'Event A8',
+    //     'Event A8',
+    //     'Event A8',
+    //     'Event A8',
+    //     'Event A8',
+    //     'Event A8',
+    //     'Event B8',
+    //     'Event C8',
+    //     'Event D8'
+    //   ],
+    //   _selectedDay.add(Duration(days: 3)):
+    //       Set.from(['Event A9', 'Event A9', 'Event B9']).toList(),
+    //   _selectedDay.add(Duration(days: 7)): [
+    //     'Event A10',
+    //     'Event B10',
+    //     'Event C10'
+    //   ],
+    //   _selectedDay.add(Duration(days: 11)): ['Event A11', 'Event B11'],
+    //   _selectedDay.add(Duration(days: 17)): [
+    //     'Event A12',
+    //     'Event B12',
+    //     'Event C12',
+    //     'Event D12'
+    //   ],
+    //   _selectedDay.add(Duration(days: 22)): ['Event A13', 'Event B13'],
+    //   _selectedDay.add(Duration(days: 26)): [
+    //     'Event A14',
+    //     'Event B14',
+    //     'Event C14'
+    //   ],
+    // };
 
     _selectedEvents = _events[_selectedDay] ?? [];
     _calendarController = CalendarController();
@@ -104,11 +104,29 @@ class _CalendarPageState extends State<CalendarPage>
   }
 
   initEventData() {
-    thisMonthCakeDataList.forEach((element) {
-      DateTime _pickUpdate = element.pickUpDate;
-      DateTime _day =
-          DateTime(_pickUpdate.year, _pickUpdate.month, _pickUpdate.day);
-      _events.containsKey(_day)?_events.update(_day, (value) => null):_events.addEntries({_day:[]});
+    var a;
+    if (thisMonthCakeDataList.isNotEmpty)
+      thisMonthCakeDataList.forEach((element) {
+        DateTime _pickUpdate = element.pickUpDate;
+        DateTime _day =
+            DateTime(_pickUpdate.year, _pickUpdate.month, _pickUpdate.day);
+
+        if (a == _day) {
+          _events.update(_day, (value) {
+            List<dynamic> _temp = [];
+            _temp.addAll(value);
+            _temp.add(element);
+
+            return _temp;
+          });
+        } else {
+          print("hi");
+          _events.addAll({
+            _day: [element]
+          });
+        }
+        a = _day;
+      });
   }
 
   @override
@@ -139,19 +157,15 @@ class _CalendarPageState extends State<CalendarPage>
   Widget build(BuildContext context) {
     thisMonthCakeDataList =
         Provider.of<List<CakeDataCalendar>>(context, listen: true);
-    // thisMonthCakeDataList != null ? initEventData() : print('no');
     return Scaffold(
         appBar: AppBar(
           title: Text('hi'),
         ),
-        body: _events != null
-            ? _builder()
-            : Center(
-                child: CupertinoActivityIndicator(),
-              ));
+        body: _builder());
   }
 
   _builder() {
+    initEventData();
     return Column(
       mainAxisSize: MainAxisSize.max,
       children: <Widget>[
@@ -196,20 +210,30 @@ class _CalendarPageState extends State<CalendarPage>
   Widget _buildEventList() {
     return _events != null
         ? ListView(
-            children: _selectedEvents
-                .map((event) => Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(width: 0.8),
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 4.0),
-                      child: ListTile(
-                        title: Text(event.toString()),
-                        onTap: () => print('$event tapped!'),
-                      ),
-                    ))
-                .toList(),
+            children: _selectedEvents.map((event) {
+              var _pickupdate = event.pickUpDate.toString().split('');
+              _pickupdate.removeRange(
+                  _pickupdate.length - 7, _pickupdate.length);
+
+              return Container(
+                decoration: BoxDecoration(
+                  border: Border.all(width: 0.8),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                margin:
+                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                child: ListTile(
+                  leading: Icon(Icons.cake),
+                  title: Text(event.cakeCategory +
+                      event.cakeSize +
+                      " X" +
+                      event.cakeCount.toString() +
+                      "개 "),
+                  subtitle: Text(_pickupdate.join()),
+                  onTap: () => print('${event.cakeCategory} tapped!'),
+                ),
+              );
+            }).toList(),
           )
         : Center(
             child: Text("hello"),

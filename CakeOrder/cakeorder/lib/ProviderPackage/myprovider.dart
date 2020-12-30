@@ -53,12 +53,10 @@ class SetProvider {
     var today = new DateTime.now();
     DateTime _monthStart = new DateTime(today.year, today.month);
     DateTime _monthEnd = new DateTime(today.year, today.month + 1, 0);
-    // DateTime _monthEnd =
-    //     new DateTime(today.year, today.month);
     return _db
         .collection("Cake")
-        .where("pickUpDate", isGreaterThanOrEqualTo: _monthStart)
-        .where("pickUpDate", isLessThanOrEqualTo: _monthEnd)
+        // .where("pickUpDate", isGreaterThanOrEqualTo: _monthStart)
+        // .where("pickUpDate", isLessThanOrEqualTo: _monthEnd)
         .orderBy("pickUpDate")
         .snapshots()
         .map((list) => list.docs

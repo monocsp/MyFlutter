@@ -1,6 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
@@ -10,14 +10,6 @@ class CalendarPage extends StatefulWidget {
   @override
   _CalendarPageState createState() => _CalendarPageState();
 }
-
-final Map<DateTime, List> _holidays = {
-  DateTime(2020, 1, 1): ['New Year\'s Day'],
-  DateTime(2020, 1, 6): ['Epiphany'],
-  DateTime(2020, 2, 14): ['Valentine\'s Day'],
-  DateTime(2020, 4, 21): ['Easter Sunday'],
-  DateTime(2020, 4, 22): ['Easter Monday'],
-};
 
 class _CalendarPageState extends State<CalendarPage>
     with TickerProviderStateMixin {
@@ -33,68 +25,9 @@ class _CalendarPageState extends State<CalendarPage>
     // initEventData();
     final _selectedDay = DateTime.now();
     _events = {};
-    // _events = {
-    //   _selectedDay.subtract(Duration(days: 30)): [
-    //     'Event A0',
-    //     'Event B0',
-    //     'Event C0'
-    //   ],
-    //   _selectedDay.subtract(Duration(days: 27)): ['Event A1'],
-    //   _selectedDay.subtract(Duration(days: 20)): [
-    //     'Event A2',
-    //     'Event B2',
-    //     'Event C2',
-    //     'Event D2'
-    //   ],
-    //   _selectedDay.subtract(Duration(days: 16)): ['Event A3', 'Event B3'],
-    //   _selectedDay.subtract(Duration(days: 10)): [
-    //     'Event A4',
-    //     'Event B4',
-    //     'Event C4'
-    //   ],
-    //   _selectedDay.subtract(Duration(days: 4)): [
-    //     'Event A5',
-    //     'Event B5',
-    //     'Event C5'
-    //   ],
-    //   _selectedDay.subtract(Duration(days: 2)): ['Event A6', 'Event B6'],
-    //   _selectedDay: ['Event A7', 'Event B7', 'Event C7', 'Event D7'],
-    //   _selectedDay.add(Duration(days: 1)): [
-    //     'Event A8',
-    //     'Event A8',
-    //     'Event A8',
-    //     'Event A8',
-    //     'Event A8',
-    //     'Event A8',
-    //     'Event B8',
-    //     'Event C8',
-    //     'Event D8'
-    //   ],
-    //   _selectedDay.add(Duration(days: 3)):
-    //       Set.from(['Event A9', 'Event A9', 'Event B9']).toList(),
-    //   _selectedDay.add(Duration(days: 7)): [
-    //     'Event A10',
-    //     'Event B10',
-    //     'Event C10'
-    //   ],
-    //   _selectedDay.add(Duration(days: 11)): ['Event A11', 'Event B11'],
-    //   _selectedDay.add(Duration(days: 17)): [
-    //     'Event A12',
-    //     'Event B12',
-    //     'Event C12',
-    //     'Event D12'
-    //   ],
-    //   _selectedDay.add(Duration(days: 22)): ['Event A13', 'Event B13'],
-    //   _selectedDay.add(Duration(days: 26)): [
-    //     'Event A14',
-    //     'Event B14',
-    //     'Event C14'
-    //   ],
-    // };
 
     _selectedEvents = _events[_selectedDay] ?? [];
     _calendarController = CalendarController();
-
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 400),
@@ -103,9 +36,9 @@ class _CalendarPageState extends State<CalendarPage>
     _animationController.forward();
   }
 
-  initEventData() {
+  Future initEventData() async {
     var a;
-    if (thisMonthCakeDataList.isNotEmpty)
+    if (thisMonthCakeDataList != null) {
       thisMonthCakeDataList.forEach((element) {
         DateTime _pickUpdate = element.pickUpDate;
         DateTime _day =
@@ -116,7 +49,6 @@ class _CalendarPageState extends State<CalendarPage>
             List<dynamic> _temp = [];
             _temp.addAll(value);
             _temp.add(element);
-
             return _temp;
           });
         } else {
@@ -127,6 +59,7 @@ class _CalendarPageState extends State<CalendarPage>
         }
         a = _day;
       });
+    } else {}
   }
 
   @override
@@ -143,9 +76,56 @@ class _CalendarPageState extends State<CalendarPage>
     });
   }
 
+  // _getThisMonthCakeData(DateTime _monthStart, DateTime _monthEnd) async {
+  //   return FirebaseFirestore.instance
+  //       .collection("Cake")
+  //       .where("pickUpDate", isGreaterThanOrEqualTo: _monthStart)
+  //       .where("pickUpDate", isLessThanOrEqualTo: _monthEnd)
+  //       .orderBy("pickUpDate")
+  //       .snapshots();
+
+  //   // return FirebaseFirestore.instance
+  //   //     .collection("Cake")
+  //   //     .where("pickUpDate", isGreaterThanOrEqualTo: _monthStart)
+  //   //     .where("pickUpDate", isLessThanOrEqualTo: _monthEnd)
+  //   //     .orderBy("pickUpDate")
+  //   //     .snapshots()
+  //   // .map((list) => list.docs
+  //   //     .map((doc) => CakeDataCalendar.fromFireStore(doc))
+  //   //     .toList());
+  // }
+
   void _onVisibleDaysChanged(
       DateTime first, DateTime last, CalendarFormat format) {
-    print('CALLBACK: _onVisibleDaysChanged');
+    // List<CakeDataCalendar> _d = [];
+
+    // await _getThisMonthCakeData(first, last).map((list) => list.docs
+    //     .map((doc) => _d.add(CakeDataCalendar.fromFireStore(doc)))
+    //     .toList());
+
+    // print(_d);
+    // print(_d.);
+    // print("hi");
+    // print(first.toString());
+    // print(last.toString());
+    // print('CALLBACK: _onVisibleDaysChanged');
+
+    //     Stream<List<CakeDataCalendar>> getThisMonthCakeData() {
+    //   var today = new DateTime.now();
+    //   DateTime _monthStart = new DateTime(today.year, today.month);
+    //   DateTime _monthEnd = new DateTime(today.year, today.month + 1, 0);
+    //   // DateTime _monthEnd =
+    //   //     new DateTime(today.year, today.month);
+    //   return _db
+    //       .collection("Cake")
+    //       .where("pickUpDate", isGreaterThanOrEqualTo: _monthStart)
+    //       .where("pickUpDate", isLessThanOrEqualTo: _monthEnd)
+    //       .orderBy("pickUpDate")
+    //       .snapshots()
+    // .map((list) => list.docs
+    //     .map((doc) => CakeDataCalendar.fromFireStore(doc))
+    //     .toList());
+    // }
   }
 
   void _onCalendarCreated(
@@ -155,8 +135,6 @@ class _CalendarPageState extends State<CalendarPage>
 
   @override
   Widget build(BuildContext context) {
-    thisMonthCakeDataList =
-        Provider.of<List<CakeDataCalendar>>(context, listen: true);
     return Scaffold(
         appBar: AppBar(
           title: Text('hi'),
@@ -165,6 +143,7 @@ class _CalendarPageState extends State<CalendarPage>
   }
 
   _builder() {
+    thisMonthCakeDataList = Provider.of<List<CakeDataCalendar>>(context);
     initEventData();
     return Column(
       mainAxisSize: MainAxisSize.max,
@@ -182,7 +161,6 @@ class _CalendarPageState extends State<CalendarPage>
         ? TableCalendar(
             calendarController: _calendarController,
             events: _events,
-            holidays: _holidays,
             startingDayOfWeek: StartingDayOfWeek.monday,
             calendarStyle: CalendarStyle(
               selectedColor: Colors.deepOrange[400],
@@ -203,7 +181,7 @@ class _CalendarPageState extends State<CalendarPage>
             onCalendarCreated: _onCalendarCreated,
           )
         : Center(
-            child: Text('hi'),
+            child: CupertinoActivityIndicator(),
           );
   }
 

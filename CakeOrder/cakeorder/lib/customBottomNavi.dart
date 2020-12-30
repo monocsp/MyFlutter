@@ -31,7 +31,7 @@ class CustomBottomNavi {
                 ),
                 GButton(
                   icon: Icons.calendar_today_rounded,
-                  text: 'Order Status',
+                  text: 'Calendar',
                 ),
                 GButton(
                   icon: Icons.person,

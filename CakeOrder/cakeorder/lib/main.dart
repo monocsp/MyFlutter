@@ -13,7 +13,7 @@ import 'calendarPage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp().timeout(Duration(seconds: 10));
 
   runApp(CakeOrderApp());
 }

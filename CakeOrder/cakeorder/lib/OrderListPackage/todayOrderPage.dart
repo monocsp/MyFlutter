@@ -160,7 +160,10 @@ class _AddOrderState extends State<OrderPage> {
   }
 
   _listViewThirdRow(int index) {
-    var _orderDateData = _todayOrderList[index].orderDate.toString().split('');
+    var _orderDateData = _todayOrderList[index]
+        .orderDate(Duration(hours: 9))
+        .toString()
+        .split('');
     var _pickUpDateData =
         _todayOrderList[index].pickUpDate.toString().split('');
     int _dateLength =

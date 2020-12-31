@@ -79,7 +79,6 @@ class CakeData {
   }
 
   factory CakeData.fromFireStore(DocumentSnapshot snapshot) {
-    print(snapshot.id);
     var _cakeData = snapshot.data();
     return CakeData(
         cakeCategory: _cakeData["cakeCategory"] ?? '',
@@ -132,7 +131,6 @@ class CakeDataOrder extends CakeData {
             remark: remark);
 
   factory CakeDataOrder.fromFireStore(DocumentSnapshot snapshot) {
-    print(snapshot.id);
     var _cakeData = snapshot.data();
     return CakeDataOrder(
         cakeCategory: _cakeData["cakeCategory"] ?? '',

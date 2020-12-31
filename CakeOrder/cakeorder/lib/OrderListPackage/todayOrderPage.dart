@@ -161,9 +161,11 @@ class _AddOrderState extends State<OrderPage> {
 
   _listViewThirdRow(int index) {
     var _orderDateData = _todayOrderList[index]
-        .orderDate(Duration(hours: 9))
+        .orderDate
+        .add(Duration(hours: 9))
         .toString()
         .split('');
+
     var _pickUpDateData =
         _todayOrderList[index].pickUpDate.toString().split('');
     int _dateLength =
@@ -171,7 +173,7 @@ class _AddOrderState extends State<OrderPage> {
 
     _orderDateData.removeRange(_dateLength - 7, _dateLength);
     _pickUpDateData.removeRange(_dateLength - 7, _dateLength);
-    // print(a.runtimeType);
+
     return Container(
         margin: EdgeInsets.only(top: 3, left: 3),
         child: Row(children: [

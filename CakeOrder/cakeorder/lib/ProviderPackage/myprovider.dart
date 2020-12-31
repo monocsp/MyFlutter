@@ -29,6 +29,7 @@ class SetProvider {
         .collection("Cake")
         .where("orderDate", isGreaterThanOrEqualTo: _todayStart)
         .where("orderDate", isLessThanOrEqualTo: _todayEnd)
+        .orderBy("orderDate")
         .snapshots()
         .map((list) =>
             list.docs.map((doc) => CakeDataOrder.fromFireStore(doc)).toList());
@@ -44,6 +45,7 @@ class SetProvider {
         .collection("Cake")
         .where("pickUpDate", isGreaterThanOrEqualTo: _todayStart)
         .where("pickUpDate", isLessThanOrEqualTo: _todayEnd)
+        .orderBy("pickUpDate")
         .snapshots()
         .map((list) =>
             list.docs.map((doc) => CakeDataPickUp.fromFireStore(doc)).toList());

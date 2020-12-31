@@ -76,57 +76,8 @@ class _CalendarPageState extends State<CalendarPage>
     });
   }
 
-  // _getThisMonthCakeData(DateTime _monthStart, DateTime _monthEnd) async {
-  //   return FirebaseFirestore.instance
-  //       .collection("Cake")
-  //       .where("pickUpDate", isGreaterThanOrEqualTo: _monthStart)
-  //       .where("pickUpDate", isLessThanOrEqualTo: _monthEnd)
-  //       .orderBy("pickUpDate")
-  //       .snapshots();
-
-  //   // return FirebaseFirestore.instance
-  //   //     .collection("Cake")
-  //   //     .where("pickUpDate", isGreaterThanOrEqualTo: _monthStart)
-  //   //     .where("pickUpDate", isLessThanOrEqualTo: _monthEnd)
-  //   //     .orderBy("pickUpDate")
-  //   //     .snapshots()
-  //   // .map((list) => list.docs
-  //   //     .map((doc) => CakeDataCalendar.fromFireStore(doc))
-  //   //     .toList());
-  // }
-
   void _onVisibleDaysChanged(
-      DateTime first, DateTime last, CalendarFormat format) {
-    // List<CakeDataCalendar> _d = [];
-
-    // await _getThisMonthCakeData(first, last).map((list) => list.docs
-    //     .map((doc) => _d.add(CakeDataCalendar.fromFireStore(doc)))
-    //     .toList());
-
-    // print(_d);
-    // print(_d.);
-    // print("hi");
-    // print(first.toString());
-    // print(last.toString());
-    // print('CALLBACK: _onVisibleDaysChanged');
-
-    //     Stream<List<CakeDataCalendar>> getThisMonthCakeData() {
-    //   var today = new DateTime.now();
-    //   DateTime _monthStart = new DateTime(today.year, today.month);
-    //   DateTime _monthEnd = new DateTime(today.year, today.month + 1, 0);
-    //   // DateTime _monthEnd =
-    //   //     new DateTime(today.year, today.month);
-    //   return _db
-    //       .collection("Cake")
-    //       .where("pickUpDate", isGreaterThanOrEqualTo: _monthStart)
-    //       .where("pickUpDate", isLessThanOrEqualTo: _monthEnd)
-    //       .orderBy("pickUpDate")
-    //       .snapshots()
-    // .map((list) => list.docs
-    //     .map((doc) => CakeDataCalendar.fromFireStore(doc))
-    //     .toList());
-    // }
-  }
+      DateTime first, DateTime last, CalendarFormat format) {}
 
   void _onCalendarCreated(
       DateTime first, DateTime last, CalendarFormat format) {

@@ -47,9 +47,7 @@ class _TodayListState extends State<TodayList>
               Tab(
                 icon: Icon(Icons.book),
               ),
-              Tab(
-                icon: Icon(Icons.wheelchair_pickup),
-              )
+              Tab(icon: Icon(Icons.takeout_dining))
             ],
           ),
 

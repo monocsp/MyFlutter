@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cakeorder/ProviderPackage/cakeDataClass.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +15,7 @@ import 'calendarPage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp().timeout(Duration(seconds: 10));
+  await Firebase.initializeApp().timeout(Duration(seconds: 3));
 
   runApp(CakeOrderApp());
 }

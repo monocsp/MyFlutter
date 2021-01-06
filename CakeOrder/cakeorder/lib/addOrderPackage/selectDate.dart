@@ -7,12 +7,14 @@ import 'package:flutter/foundation.dart';
 class CustomDate {
   final BuildContext context;
   Function setStateCallback;
-  CustomDate({this.context, this.setStateCallback});
+  final bool isClickable;
+  CustomDate({this.context, this.setStateCallback, this.isClickable});
 
   Widget dateNtimeRow(
       {@required bool isOrderRow,
-      TextEditingController controllerCalendar,
-      TextEditingController controllerTimer}) {
+      @required TextEditingController controllerCalendar,
+      @required TextEditingController controllerTimer,
+      bool isDetailPage}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -21,18 +23,20 @@ class CustomDate {
           child: Container(
             padding: EdgeInsets.only(left: 5),
             child: GestureDetector(
-              onTap: () => showDialog(
-                context: context,
-                barrierColor: Colors.white,
-                builder: (context) => Container(
-                  child: SfDateRangePicker(
-                    todayHighlightColor: Colors.red,
-                    enablePastDates: isOrderRow ? true : false,
-                    onSelectionChanged: (arg) =>
-                        _onSelectionChanged(arg, isOrderRow),
-                  ),
-                ),
-              ),
+              onTap: () => !isDetailPage
+                  ? showDialog(
+                      context: context,
+                      barrierColor: Colors.white,
+                      builder: (context) => Container(
+                        child: SfDateRangePicker(
+                          todayHighlightColor: Colors.red,
+                          enablePastDates: isOrderRow ? true : false,
+                          onSelectionChanged: (arg) =>
+                              _onSelectionChanged(arg, isOrderRow),
+                        ),
+                      ),
+                    )
+                  : null,
               child: _customTextField(controllerCalendar,
                   isOrderDate: isOrderRow, isCalendar: true),
             ),
@@ -43,8 +47,10 @@ class CustomDate {
           child: Container(
             padding: EdgeInsets.only(right: 5),
             child: GestureDetector(
-              onTap: () => showAlertDialog(context,
-                  isOrderTime: isOrderRow, pickUpTime: controllerTimer),
+              onTap: () => !isDetailPage
+                  ? showAlertDialog(context,
+                      isOrderTime: isOrderRow, pickUpTime: controllerTimer)
+                  : null,
               child: _customTextField(controllerTimer,
                   isOrderDate: isOrderRow, isCalendar: false),
             ),

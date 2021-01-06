@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:cakeorder/ProviderPackage/cakeDataClass.dart';
@@ -10,8 +11,77 @@ class OrderPage extends StatefulWidget {
   // State createState() => new MyAppState();
 }
 
-class _AddOrderState extends State<OrderPage> {
-  List<CakeDataOrder> _todayOrderList;
+class _AddOrderState extends _TodayParent<OrderPage> {
+  @override
+  setListData() => Provider.of<List<CakeDataOrder>>(context);
+}
+
+class PickUpPage extends StatefulWidget {
+  @override
+  _PickUpPageState createState() => _PickUpPageState();
+  // State createState() => new MyAppState();
+
+}
+
+class _PickUpPageState extends _TodayParent<PickUpPage> {
+  @override
+  setListData() => Provider.of<List<CakeDataPickUp>>(context);
+
+  @override
+  listViewSecondRow(int index) {
+    return Container(
+        margin: EdgeInsets.all(3),
+        child: Row(children: [
+          Icon(
+            Icons.shopping_bag_outlined,
+            size: 20,
+          ),
+          Icon(
+            _listData[index].pickUpStatus ? Icons.check : Icons.close,
+            color: Colors.redAccent,
+            size: 18,
+          )
+        ]));
+  }
+
+  @override
+  setSlidableDrawerActionPane(int index) {
+    SnackBar snackbar = SnackBar(
+      content: Text('픽업 완료!'),
+      action: SnackBarAction(
+        label: '취소',
+        onPressed: () {
+          _firestoreDataUpdate(_listData[index], isUndo: true);
+        },
+      ),
+    );
+    return SlidableDismissal(
+      child: SlidableDrawerDismissal(
+        key: UniqueKey(),
+      ),
+      onDismissed: (actionType) {
+        setState(() {
+          _firestoreDataUpdate(_listData[index], isUndo: false);
+          _listData.remove(_listData[index]);
+        });
+
+        Scaffold.of(context).showSnackBar(snackbar);
+      },
+    );
+    // return super.setSlidableDrawerActionPane();
+  }
+
+  Future _firestoreDataUpdate(CakeData cakeData,
+      {@required bool isUndo}) async {
+    FirebaseFirestore.instance
+        .collection("Cake")
+        .doc(cakeData.documentId)
+        .update({"pickUpStatus": !isUndo ? true : false});
+  }
+}
+
+abstract class _TodayParent<T extends StatefulWidget> extends State<T> {
+  List<CakeData> _listData;
   SlidableController slidableController;
   Animation<double> _rotationAnimation;
   Color _fabColor = Colors.blue;
@@ -35,43 +105,29 @@ class _AddOrderState extends State<OrderPage> {
     });
   }
 
+  setSlidableDrawerActionPane(int index) {
+    return SlidableDismissal(
+      child: SlidableDrawerDismissal(),
+    );
+  }
+
+  setListData();
   @override
   Widget build(BuildContext context) {
-    _todayOrderList = Provider.of<List<CakeDataOrder>>(context);
+    _listData = setListData();
 
-    return _todayOrderList != null
-        ? _todayOrderList.length != 0
+    return _listData != null
+        ? _listData.length != 0
             ? Container(
                 margin: EdgeInsets.only(top: 5),
                 child: ListView.builder(
-                  itemCount: _todayOrderList.length,
+                  itemCount: _listData.length,
                   itemBuilder: (context, index) {
                     return Slidable(
                       key: ValueKey(index),
                       actionPane: SlidableDrawerActionPane(),
-                      secondaryActions: <Widget>[
-                        IconSlideAction(
-                          caption: 'Update',
-                          color: Colors.grey,
-                          icon: Icons.edit,
-                          closeOnTap: false,
-                          onTap: () {
-                            print('1');
-                          },
-                        ),
-                        IconSlideAction(
-                          caption: 'Delete',
-                          color: Colors.redAccent,
-                          icon: Icons.close,
-                          closeOnTap: false,
-                          onTap: () {
-                            print('2');
-                          },
-                        )
-                      ],
-                      dismissal: SlidableDismissal(
-                        child: SlidableDrawerDismissal(),
-                      ),
+                      secondaryActions: customSwipeIconWidget(),
+                      dismissal: setSlidableDrawerActionPane(index),
                       child: GestureDetector(
                         onTap: () {
                           print('hi + $index');
@@ -85,9 +141,9 @@ class _AddOrderState extends State<OrderPage> {
                             height: 85,
                             child: Column(
                               children: [
-                                _listViewFirstRow(index),
-                                _listViewSecondRow(index),
-                                _listViewThirdRow(index)
+                                listViewFirstRow(index),
+                                listViewSecondRow(index),
+                                listViewThirdRow(index)
                               ],
                             )),
                       ),
@@ -105,9 +161,31 @@ class _AddOrderState extends State<OrderPage> {
           );
   }
 
-  _listViewFirstRow(int index) {
-    int _totalPrice =
-        _todayOrderList[index].cakePrice * _todayOrderList[index].cakeCount;
+  List<Widget> customSwipeIconWidget() {
+    return [
+      IconSlideAction(
+        caption: 'Update',
+        color: Colors.grey,
+        icon: Icons.edit,
+        closeOnTap: false,
+        onTap: () {
+          print('1');
+        },
+      ),
+      IconSlideAction(
+        caption: 'Delete',
+        color: Colors.redAccent,
+        icon: Icons.close,
+        closeOnTap: false,
+        onTap: () {
+          print('2');
+        },
+      )
+    ];
+  }
+
+  listViewFirstRow(int index) {
+    int _totalPrice = _listData[index].cakePrice * _listData[index].cakeCount;
     List _addColon = _totalPrice.toString().split('');
     if (_addColon.length - 3 > 0 && _addColon.length != null) {
       int count = _addColon.length ~/ 3;
@@ -128,10 +206,10 @@ class _AddOrderState extends State<OrderPage> {
             size: 20,
           ),
           Text(
-            _todayOrderList[index].cakeCategory +
-                _todayOrderList[index].cakeSize +
+            _listData[index].cakeCategory +
+                _listData[index].cakeSize +
                 " X" +
-                _todayOrderList[index].cakeCount.toString(),
+                _listData[index].cakeCount.toString(),
             style: TextStyle(
                 color: Colors.redAccent,
                 fontWeight: FontWeight.bold,
@@ -143,7 +221,7 @@ class _AddOrderState extends State<OrderPage> {
         ]));
   }
 
-  _listViewSecondRow(int index) {
+  listViewSecondRow(int index) {
     return Container(
         margin: EdgeInsets.all(3),
         child: Row(children: [
@@ -152,24 +230,23 @@ class _AddOrderState extends State<OrderPage> {
             size: 20,
           ),
           Icon(
-            _todayOrderList[index].payStatus ? Icons.check : Icons.close,
+            _listData[index].payStatus ? Icons.check : Icons.close,
             color: Colors.redAccent,
             size: 18,
           )
         ]));
   }
 
-  _listViewThirdRow(int index) {
-    var _orderDateData = _todayOrderList[index]
-        .orderDate
+  listViewThirdRow(int index) {
+    var _orderDateData =
+        _listData[index].orderDate.add(Duration(hours: 9)).toString().split('');
+    var _pickUpDateData = _listData[index]
+        .pickUpDate
         .add(Duration(hours: 9))
         .toString()
         .split('');
 
-    var _pickUpDateData =
-        _todayOrderList[index].pickUpDate.toString().split('');
-    int _dateLength =
-        _todayOrderList[index].orderDate.toString().split('').length;
+    int _dateLength = _listData[index].orderDate.toString().split('').length;
 
     _orderDateData.removeRange(_dateLength - 7, _dateLength);
     _pickUpDateData.removeRange(_dateLength - 7, _dateLength);
@@ -194,7 +271,7 @@ class _AddOrderState extends State<OrderPage> {
             size: 15,
           ),
           Text(
-            _todayOrderList[index].partTimer + "  " + _orderDateData.join(),
+            _listData[index].partTimer + "  " + _orderDateData.join(),
             style: TextStyle(color: Colors.grey, fontSize: 10),
           ),
         ]));

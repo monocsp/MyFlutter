@@ -9,17 +9,24 @@ import 'selectDate.dart';
 import 'cakeCount.dart';
 
 class AddOrder extends StatefulWidget {
+  final CakeData cakeData;
+  final bool isDetailPage;
+  const AddOrder({Key key, this.cakeData, this.isDetailPage}) : super(key: key);
   @override
   _AddOrderState createState() => _AddOrderState();
   // State createState() => new MyAppState();
 }
 
 class _AddOrderState extends State<AddOrder> {
+  @override
+  // TODO: implement widget
+
   final scaffoldKey = GlobalKey<ScaffoldState>();
   double _text_MARGIN = 10;
   double _text_Font_Size = 15;
   bool payStatus;
   bool pickUpStatus;
+  bool isDetailPage;
   CustomDate customDate;
   CustomDropDown customDropDown;
   CakeCountWidget cakeCountWidget;
@@ -87,8 +94,12 @@ class _AddOrderState extends State<AddOrder> {
 
   @override
   Widget build(BuildContext context) {
+    isDetailPage = widget.isDetailPage ?? false;
     // print(temp);
-    customDate = CustomDate(context: context, setStateCallback: dateCallback);
+    customDate = CustomDate(
+        context: context,
+        setStateCallback: dateCallback,
+        isClickable: isDetailPage);
     customDropDown =
         CustomDropDown(context: context, setStateCallback: dropDownCallback);
     cakeCountWidget =
@@ -113,51 +124,120 @@ class _AddOrderState extends State<AddOrder> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                _customTextBox(isOrder: true),
-                customDate.dateNtimeRow(
-                    isOrderRow: true,
-                    controllerCalendar: textEditingControllerOrderDate,
-                    controllerTimer: textEditingControllerOrderTime),
-                _customTextBox(isOrder: false),
-                customDate.dateNtimeRow(
-                    isOrderRow: false,
-                    controllerCalendar: textEditingControllerPickUpDate,
-                    controllerTimer: textEditingControllerPickUpTime),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Flexible(
-                      flex: 1,
-                      child:
-                          customDropDown.selectCakeCategory(selectedCakeName),
-                    ),
-                    Flexible(
-                      flex: 1,
-                      child: customDropDown.selectCakePrice(
-                          currentCakeCategory: selectedCakeName,
-                          cakeList: cakeSizeList,
-                          selectedCakeSize: selectedCakeSize),
-                    ),
-                    Flexible(
-                        flex: 1,
-                        child: cakeCountWidget.countWidget(
-                            isvisible: selectedCakeName != null)),
-                  ],
-                ),
-                _orderNamePhoneTextField(),
-                Row(children: [
-                  customDropDown.selectPartTimerDropDown(partTimer),
-                  _payAndPickUpStatusCheckBox(isPayStatus: true),
-                  _payAndPickUpStatusCheckBox(isPayStatus: false)
-                ]),
-                _customTextBox(title: "비고란", import: false),
-                _remarkTextField(context),
+                firstLineBuild(),
+                secondLineBuild(),
+                thirdLineBuild(),
+                fourthLineBuild(),
+                fifthLineBuild(),
+                sixthLineBuild(),
                 addButton(),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  firstLineBuild() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _customTextBox(isOrder: true),
+        customDate.dateNtimeRow(
+            isOrderRow: true,
+            controllerCalendar: textEditingControllerOrderDate,
+            controllerTimer: textEditingControllerOrderTime,
+            isDetailPage: isDetailPage),
+      ],
+    );
+  }
+
+  secondLineBuild() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _customTextBox(isOrder: false),
+        customDate.dateNtimeRow(
+            isOrderRow: false,
+            controllerCalendar: textEditingControllerPickUpDate,
+            controllerTimer: textEditingControllerPickUpTime,
+            isDetailPage: isDetailPage),
+      ],
+    );
+  }
+
+  thirdLineBuild() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Flexible(
+          flex: 1,
+          child: customDropDown.selectCakeCategory(selectedCakeName),
+        ),
+        Flexible(
+          flex: 1,
+          child: customDropDown.selectCakePrice(
+              currentCakeCategory: selectedCakeName,
+              cakeList: cakeSizeList,
+              selectedCakeSize: selectedCakeSize),
+        ),
+        Flexible(
+            flex: 1,
+            child: cakeCountWidget.countWidget(
+                isvisible: selectedCakeName != null)),
+      ],
+    );
+  }
+
+  fourthLineBuild() {
+    return Container(
+      margin: EdgeInsets.only(left: 10, top: 10, right: 5),
+      child: Column(
+        children: [
+          Container(
+            margin: EdgeInsets.only(bottom: 10),
+            alignment: Alignment.centerLeft,
+            child: _customTitle(title: '주문자 정보', important: true),
+          ),
+          Row(children: <Widget>[
+            Flexible(
+                child: TextField(
+                    controller: textEditingControllerCustomerName,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: '성함',
+                    ))),
+            Flexible(
+              child: TextField(
+                  controller: textEditingControllerCustomerPhone,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: '전화번호',
+                  )),
+            )
+          ]),
+        ],
+      ),
+    );
+  }
+
+  fifthLineBuild() {
+    return Row(children: [
+      customDropDown.selectPartTimerDropDown(partTimer),
+      _payAndPickUpStatusCheckBox(isPayStatus: true),
+      _payAndPickUpStatusCheckBox(isPayStatus: false)
+    ]);
+  }
+
+  sixthLineBuild() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _customTextBox(title: "비고란", import: false),
+        _remarkTextField(context),
+      ],
     );
   }
 
@@ -386,39 +466,6 @@ class _AddOrderState extends State<AddOrder> {
           ),
         );
       },
-    );
-  }
-
-  _orderNamePhoneTextField() {
-    return Container(
-      margin: EdgeInsets.only(left: 10, top: 10, right: 5),
-      child: Column(
-        children: [
-          Container(
-            margin: EdgeInsets.only(bottom: 10),
-            alignment: Alignment.centerLeft,
-            child: _customTitle(title: '주문자 정보', important: true),
-          ),
-          Row(children: <Widget>[
-            Flexible(
-                child: TextField(
-                    controller: textEditingControllerCustomerName,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: '성함',
-                    ))),
-            Flexible(
-              child: TextField(
-                  controller: textEditingControllerCustomerPhone,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: '전화번호',
-                  )),
-            )
-          ]),
-        ],
-      ),
     );
   }
 

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'todayOrderPage.dart';
-import 'todayPickUpPage.dart';
 import 'package:cakeorder/ProviderPackage/cakeDataClass.dart';
 import 'package:provider/provider.dart';
+import 'todayList.dart';
 
 class TodayList extends StatefulWidget {
   @override

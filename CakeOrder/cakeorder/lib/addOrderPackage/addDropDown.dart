@@ -15,9 +15,8 @@ class CustomDropDown {
     getData(context);
   }
   Future getData(BuildContext context) async {
-    partTimerProvider = Provider.of<List<dynamic>>(context, listen: false);
-    cakeCategoryProvider =
-        Provider.of<List<CakeCategory>>(context, listen: false);
+    partTimerProvider = Provider.of<List<dynamic>>(context);
+    cakeCategoryProvider = Provider.of<List<CakeCategory>>(context);
   }
 
   _customTitle({@required String title, bool important, double fontSize}) {
@@ -30,7 +29,7 @@ class CustomDropDown {
     );
   }
 
-  selectPartTimerDropDown(String partTimer) {
+  selectPartTimerDropDown(String partTimer, {bool isDetailPage}) {
     List<DropdownMenuItem> _partTimerList = [];
     if (partTimerProvider != null) {
       partTimerProvider.forEach((element) {
@@ -61,7 +60,7 @@ class CustomDropDown {
     );
   }
 
-  selectCakeCategory(CakeCategory cakeCategory) {
+  selectCakeCategory(CakeCategory cakeCategory, {bool isDetailPage}) {
     List<DropdownMenuItem<CakeCategory>> _cakeCategories = [];
 
     if (cakeCategoryProvider == null) {
@@ -93,7 +92,8 @@ class CustomDropDown {
   selectCakePrice(
       {@required CakeCategory currentCakeCategory,
       List<CakeSizePrice> cakeList,
-      CakeSizePrice selectedCakeSize}) {
+      CakeSizePrice selectedCakeSize,
+      bool isDetailPage}) {
     return currentCakeCategory != null
         ? Container(
             margin: EdgeInsets.only(left: 10, top: 20),

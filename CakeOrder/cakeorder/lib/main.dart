@@ -35,10 +35,10 @@ class _CakeOrderAppState extends State<CakeOrderApp> {
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   List<Widget> _widgetOptions = <Widget>[
     TodayList(),
-    Text(
-      'Index 1: Likes',
-      style: optionStyle,
-    ),
+    // Text(
+    //   'Index 1: Likes',
+    //   style: optionStyle,
+    // ),
     CalendarPage(),
     Text(
       'Index 3: Profile',

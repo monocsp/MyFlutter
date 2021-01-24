@@ -49,10 +49,10 @@ class CakeData {
       this.decoStatus});
 
   Future toFireStore(callback) async {
-    this.orderDate =
-        Timestamp.fromDate(f.parse(orderDate).subtract(Duration(hours: 9)));
-    this.pickUpDate =
-        Timestamp.fromDate(f.parse(pickUpDate).subtract(Duration(hours: 9)));
+    print(pickUpDate.toString());
+    this.orderDate = Timestamp.fromDate(f.parse(orderDate));
+    this.pickUpDate = Timestamp.fromDate(f.parse(pickUpDate));
+
     await FirebaseFirestore.instance.collection("Cake").add({
       "orderDate": orderDate,
       "pickUpDate": pickUpDate,
@@ -236,13 +236,15 @@ class CakeDataCalendar extends CakeData {
   factory CakeDataCalendar.fromFireStore(DocumentSnapshot snapshot) {
     var _cakeData = snapshot.data();
     return CakeDataCalendar(
-        cakeCategory: _cakeData["cakeCategory"] ?? '',
-        cakeCount: _cakeData["cakeCount"] ?? 1,
-        cakePrice: _cakeData["cakePrice"] ?? 1,
-        cakeSize: _cakeData["cakeSize"] ?? '',
-        documentId: snapshot.id,
-        pickUpDate: _cakeData["pickUpDate"].toDate(),
-        pickUpStatus: _cakeData["pickUpStatus"] ?? false);
+      cakeCategory: _cakeData["cakeCategory"] ?? '',
+      cakeCount: _cakeData["cakeCount"] ?? 1,
+      cakePrice: _cakeData["cakePrice"] ?? 1,
+      cakeSize: _cakeData["cakeSize"] ?? '',
+      documentId: snapshot.id,
+      pickUpDate: _cakeData["pickUpDate"].toDate(),
+      pickUpStatus: _cakeData["pickUpStatus"] ?? false,
+      payStatus: _cakeData["payStatus"],
+    );
   }
 }
 

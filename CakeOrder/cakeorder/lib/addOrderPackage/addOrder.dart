@@ -11,13 +11,26 @@ import 'cakeCount.dart';
 class AddOrder extends StatefulWidget {
   final CakeData cakeData;
   final bool isDetailPage;
-  const AddOrder({Key key, this.cakeData, this.isDetailPage}) : super(key: key);
+  // final bool canAlter;
+  const AddOrder({
+    Key key,
+    this.cakeData,
+    this.isDetailPage,
+  }) : super(key: key);
   @override
   _AddOrderState createState() => _AddOrderState();
   // State createState() => new MyAppState();
 }
 
-class _AddOrderState extends State<AddOrder> {
+class _AddOrderState extends AddOrderParent<AddOrder> {
+  @override
+  setInitData() {
+    isDetailPage = widget.isDetailPage ?? false;
+    cakeData = widget.cakeData ?? null;
+  }
+}
+
+abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
   @override
   // TODO: implement widget
 
@@ -46,9 +59,9 @@ class _AddOrderState extends State<AddOrder> {
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
           .toString()
           .split(' ')[0];
-  String _todayTime =
-      DateFormat('kk:mm').format(DateTime.now().add(Duration(hours: 9)));
-
+  String _todayTime = DateFormat('kk:mm').format(DateTime.now());
+  setInitData();
+  CakeData cakeData;
   customInitData() {
     cakeCount = 1;
     payStatus = null;
@@ -60,6 +73,7 @@ class _AddOrderState extends State<AddOrder> {
   @override
   void initState() {
     customInitData();
+    setInitData();
     initNdisposeTextEditController(init: true);
     super.initState();
   }
@@ -94,7 +108,6 @@ class _AddOrderState extends State<AddOrder> {
 
   @override
   Widget build(BuildContext context) {
-    isDetailPage = widget.isDetailPage ?? false;
     // print(temp);
     customDate = CustomDate(
         context: context,
@@ -258,6 +271,7 @@ class _AddOrderState extends State<AddOrder> {
                 borderRadius: BorderRadius.circular(5.0),
                 side: BorderSide(color: Colors.blueAccent)),
             onPressed: () {
+              // _addData();
               if (!_catchNull()) {
                 _addData();
                 dialogProgressIndicator();
@@ -268,6 +282,7 @@ class _AddOrderState extends State<AddOrder> {
   }
 
   _addData() async {
+    // print(textEditingControllerPickUpDate.text);
     CakeData data = CakeData(
         orderDate: textEditingControllerOrderDate.text +
             " " +
@@ -450,7 +465,7 @@ class _AddOrderState extends State<AddOrder> {
           title: isOrderTime ? Text('주문시간 설정') : Text('픽업시간 설정'),
           content: TimePickerSpinner(
             is24HourMode: true,
-            time: DateTime.now().add(Duration(hours: 9)),
+            time: DateTime.now(),
             minutesInterval: isOrderTime ? 1 : 5,
             spacing: 50,
             itemHeight: 80,

@@ -88,7 +88,7 @@ class _CalendarPageState extends State<CalendarPage>
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('hi'),
+          title: Center(child: Text('Calendar.')),
         ),
         body: _builder());
   }

@@ -130,7 +130,11 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T> {
                       dismissal: setSlidableDrawerActionPane(index),
                       child: GestureDetector(
                         onTap: () {
-                          print('hi + $index');
+                          // print('hi + ${_listData[index].documentId}');
+                          Navigator.pushNamed(context, '/DetailPage',
+                              arguments: {
+                                "CAKEID": _listData[index].documentId
+                              });
                         },
                         child: Container(
                             margin: EdgeInsets.all(5),
@@ -169,7 +173,7 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T> {
         icon: Icons.edit,
         closeOnTap: false,
         onTap: () {
-          print('1');
+          // Navigator.pushNamed(context, '/AddOrder',arguments: );
         },
       ),
       IconSlideAction(
@@ -238,11 +242,16 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T> {
   }
 
   listViewThirdRow(int index) {
-    var _orderDateData =
-        _listData[index].orderDate.add(Duration(hours: 9)).toString().split('');
+    var _orderDateData = _listData[index]
+        .orderDate
+        // .add(
+        // Duration(hours: 9)
+        // )
+        .toString()
+        .split('');
     var _pickUpDateData = _listData[index]
         .pickUpDate
-        .add(Duration(hours: 9))
+        // .add(Duration(hours: 9))
         .toString()
         .split('');
 

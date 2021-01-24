@@ -116,9 +116,10 @@ class CustomDate {
   }
 
   setInitDateTime(bool isOrder, var pickUpTime) {
+    DateTime _now = DateTime.now();
     return pickUpTime.text == ''
         ? isOrder
-            ? DateTime.now().add(Duration(hours: 9)) //set Current Time
+            ? _now //set Current Time
             : DateTime.parse(DateTime.now().toString().split(' ')[0] +
                 " 00:00:00.000") //set 00
         : DateTime.parse(DateTime.now().toString().split(' ')[0] +

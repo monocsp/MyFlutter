@@ -32,7 +32,7 @@ class CakeOrderRouteGenerator {
         _pageWidget = CakeOrderApp();
         break;
       case 'AddOrder':
-        _pageWidget = AddOrder();
+        _pageWidget = AddOrder(cakeData: arguments["CAKEID"],);
         break;
       case 'DetailPage':
         _pageWidget = DetailPage();

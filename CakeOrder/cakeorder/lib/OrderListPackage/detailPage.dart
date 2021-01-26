@@ -13,6 +13,10 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
   setInitData() {
     isDetailPage = true;
   }
+  @override
+  thirdLineBuild() {
+    
+  }
 
   @override
   Widget build(BuildContext context) {

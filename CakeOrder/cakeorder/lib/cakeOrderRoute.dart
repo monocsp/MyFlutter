@@ -1,3 +1,4 @@
+import 'package:cakeorder/AlterPage/settingPartTimer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'addOrderPackage/addOrder.dart';
@@ -32,10 +33,16 @@ class CakeOrderRouteGenerator {
         _pageWidget = CakeOrderApp();
         break;
       case 'AddOrder':
-        _pageWidget = AddOrder(cakeData: arguments["CAKEID"],);
+        _pageWidget = AddOrder();
         break;
       case 'DetailPage':
-        _pageWidget = DetailPage();
+        _pageWidget = DetailPage(
+          cakeData: arguments["DATA"],
+        );
+        break;
+      case 'SettingPartTimer':
+        _pageWidget = SettingPartTimer();
+        break;
     }
     return CurrentOSCheck.instance['Android']
         ? MaterialPageRoute(

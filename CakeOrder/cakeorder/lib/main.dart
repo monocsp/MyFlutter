@@ -12,6 +12,7 @@ import 'customBottomNavi.dart';
 import 'checkingOS.dart';
 import 'cakeOrderRoute.dart';
 import 'calendarPage.dart';
+import 'AlterPage/alterPage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,10 +41,7 @@ class _CakeOrderAppState extends State<CakeOrderApp> {
     //   style: optionStyle,
     // ),
     CalendarPage(),
-    Text(
-      'Index 3: Profile',
-      style: optionStyle,
-    ),
+    AlterPage(),
   ];
 
   @override
@@ -81,7 +79,7 @@ class _CakeOrderAppState extends State<CakeOrderApp> {
               print(error);
               return null;
             },
-          )
+          ),
         ],
         child: _os['Android']
             ? MaterialApp(

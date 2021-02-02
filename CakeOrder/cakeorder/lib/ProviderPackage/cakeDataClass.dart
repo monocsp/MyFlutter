@@ -49,7 +49,6 @@ class CakeData {
       this.decoStatus});
 
   Future toFireStore(callback) async {
-    print(pickUpDate.toString());
     this.orderDate = Timestamp.fromDate(f.parse(orderDate));
     this.pickUpDate = Timestamp.fromDate(f.parse(pickUpDate));
 
@@ -68,9 +67,30 @@ class CakeData {
       "cakeCount": cakeCount,
       "decoStatus": decoStatus ?? false,
     }).then((value) {
-      this.documentId = value.id;
       callback();
     });
+  }
+
+  Future unDoFireStore() async {
+    print(orderDate.runtimeType);
+    this.orderDate = Timestamp.fromDate(orderDate);
+    this.pickUpDate = Timestamp.fromDate(pickUpDate);
+
+    await FirebaseFirestore.instance.collection("Cake").doc(documentId).set({
+      "orderDate": orderDate,
+      "pickUpDate": pickUpDate,
+      "cakeCategory": cakeCategory,
+      "cakeSize": cakeSize,
+      "cakePrice": cakePrice,
+      "customerName": customerName,
+      "customerPhone": customerPhone,
+      "partTimer": partTimer,
+      "remark": remark,
+      "payStatus": payStatus ?? false,
+      "pickUpStatus": pickUpStatus ?? false,
+      "cakeCount": cakeCount,
+      "decoStatus": decoStatus ?? false,
+    }).then((value) {});
   }
 
   forRead() {
@@ -236,15 +256,20 @@ class CakeDataCalendar extends CakeData {
   factory CakeDataCalendar.fromFireStore(DocumentSnapshot snapshot) {
     var _cakeData = snapshot.data();
     return CakeDataCalendar(
-      cakeCategory: _cakeData["cakeCategory"] ?? '',
-      cakeCount: _cakeData["cakeCount"] ?? 1,
-      cakePrice: _cakeData["cakePrice"] ?? 1,
-      cakeSize: _cakeData["cakeSize"] ?? '',
-      documentId: snapshot.id,
-      pickUpDate: _cakeData["pickUpDate"].toDate(),
-      pickUpStatus: _cakeData["pickUpStatus"] ?? false,
-      payStatus: _cakeData["payStatus"],
-    );
+        cakeCategory: _cakeData["cakeCategory"] ?? '',
+        cakeCount: _cakeData["cakeCount"] ?? 1,
+        cakePrice: _cakeData["cakePrice"] ?? '',
+        cakeSize: _cakeData["cakeSize"] ?? '',
+        customerName: _cakeData["customerName"],
+        customerPhone: _cakeData["customerPhone"],
+        documentId: snapshot.id,
+        orderDate: _cakeData["orderDate"].toDate(),
+        partTimer: _cakeData["partTimer"] ?? '',
+        payStatus: _cakeData["payStatus"] ?? false,
+        pickUpDate: _cakeData["pickUpDate"].toDate(),
+        pickUpStatus: _cakeData["pickUpStatus"] ?? false,
+        remark: _cakeData["remark"] ?? '',
+        decoStatus: _cakeData["decoStatus"] ?? false);
   }
 }
 

@@ -7,15 +7,12 @@ import 'package:intl/intl.dart';
 import 'addDropDown.dart';
 import 'selectDate.dart';
 import 'cakeCount.dart';
+import 'package:tip_dialog/tip_dialog.dart';
 
 class AddOrder extends StatefulWidget {
-  final CakeData cakeData;
-  final bool isDetailPage;
   // final bool canAlter;
   const AddOrder({
     Key key,
-    this.cakeData,
-    this.isDetailPage,
   }) : super(key: key);
   @override
   _AddOrderState createState() => _AddOrderState();
@@ -25,15 +22,19 @@ class AddOrder extends StatefulWidget {
 class _AddOrderState extends AddOrderParent<AddOrder> {
   @override
   setInitData() {
-    isDetailPage = widget.isDetailPage ?? false;
-    cakeData = widget.cakeData ?? null;
+    isDetailPage = false;
+  }
+
+  @override
+  setAlterable() {
+    isDetailPage = false;
   }
 }
 
 abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
   @override
   // TODO: implement widget
-
+  // factory AddOrderParent.toDetailPage();
   final scaffoldKey = GlobalKey<ScaffoldState>();
   double _text_MARGIN = 10;
   double _text_Font_Size = 15;
@@ -69,6 +70,15 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
     selectedCakeName = null;
     partTimer = null;
   }
+
+  String orderDate;
+  String orderTime;
+  String pickUpDate;
+  String pickUpTime;
+  String orderName;
+  String orderPhone;
+  String remarkText;
+  String aboutCakeText;
 
   @override
   void initState() {
@@ -112,44 +122,49 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
     customDate = CustomDate(
         context: context,
         setStateCallback: dateCallback,
-        isClickable: isDetailPage);
-    customDropDown =
-        CustomDropDown(context: context, setStateCallback: dropDownCallback);
+        isClickable: !isDetailPage);
+    customDropDown = CustomDropDown(
+        context: context,
+        setStateCallback: dropDownCallback,
+        isClickable: !isDetailPage);
     cakeCountWidget =
         CakeCountWidget(cakeCount: cakeCount, callback: cakeCountCallback);
 
-    return Scaffold(
-      key: scaffoldKey,
-      resizeToAvoidBottomPadding: true,
-      appBar: AppBar(
-        title: Text('예약하기'),
-      ),
-      body: GestureDetector(
-        onTap: () {
-          //If tap ouside, hide keyboard
-          FocusScope.of(context).requestFocus(FocusNode());
-        },
-        child: Container(
-          height: double.infinity,
-          width: double.infinity,
-          color: Colors.transparent,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                firstLineBuild(),
-                secondLineBuild(),
-                thirdLineBuild(),
-                fourthLineBuild(),
-                fifthLineBuild(),
-                sixthLineBuild(),
-                addButton(),
-              ],
+    return Stack(children: <Widget>[
+      Scaffold(
+        key: scaffoldKey,
+        resizeToAvoidBottomPadding: true,
+        appBar: AppBar(
+          title: Text(!isDetailPage ? '예약하기' : "상세보기"),
+        ),
+        body: GestureDetector(
+          onTap: () {
+            //If tap ouside, hide keyboard
+            FocusScope.of(context).requestFocus(FocusNode());
+          },
+          child: Container(
+            height: double.infinity,
+            width: double.infinity,
+            color: Colors.transparent,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  firstLineBuild(),
+                  secondLineBuild(),
+                  thirdLineBuild(),
+                  fourthLineBuild(),
+                  fifthLineBuild(),
+                  sixthLineBuild(),
+                  !isDetailPage ? addButton() : Container(),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    );
+      TipDialogContainer(duration: const Duration(seconds: 2))
+    ]);
   }
 
   firstLineBuild() {
@@ -161,7 +176,8 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
             isOrderRow: true,
             controllerCalendar: textEditingControllerOrderDate,
             controllerTimer: textEditingControllerOrderTime,
-            isDetailPage: isDetailPage),
+            dateText: orderDate,
+            timeText: orderTime),
       ],
     );
   }
@@ -175,7 +191,8 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
             isOrderRow: false,
             controllerCalendar: textEditingControllerPickUpDate,
             controllerTimer: textEditingControllerPickUpTime,
-            isDetailPage: isDetailPage),
+            dateText: pickUpDate,
+            timeText: pickUpTime),
       ],
     );
   }
@@ -186,19 +203,26 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
       children: [
         Flexible(
           flex: 1,
-          child: customDropDown.selectCakeCategory(selectedCakeName),
+          child: customDropDown.selectCakeCategory(
+            selectedCakeName,
+            displayText: aboutCakeText,
+          ),
         ),
-        Flexible(
-          flex: 1,
-          child: customDropDown.selectCakePrice(
-              currentCakeCategory: selectedCakeName,
-              cakeList: cakeSizeList,
-              selectedCakeSize: selectedCakeSize),
-        ),
-        Flexible(
-            flex: 1,
-            child: cakeCountWidget.countWidget(
-                isvisible: selectedCakeName != null)),
+        !isDetailPage
+            ? Flexible(
+                flex: 1,
+                child: customDropDown.selectCakePrice(
+                    currentCakeCategory: selectedCakeName,
+                    cakeList: cakeSizeList,
+                    selectedCakeSize: selectedCakeSize),
+              )
+            : Container(),
+        !isDetailPage
+            ? Flexible(
+                flex: 1,
+                child: cakeCountWidget.countWidget(
+                    isvisible: selectedCakeName != null))
+            : Container(),
       ],
     );
   }
@@ -213,24 +237,41 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
             alignment: Alignment.centerLeft,
             child: _customTitle(title: '주문자 정보', important: true),
           ),
-          Row(children: <Widget>[
-            Flexible(
-                child: TextField(
-                    controller: textEditingControllerCustomerName,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: '성함',
-                    ))),
-            Flexible(
-              child: TextField(
-                  controller: textEditingControllerCustomerPhone,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: '전화번호',
-                  )),
-            )
-          ]),
+          !isDetailPage
+              ? Row(children: <Widget>[
+                  Flexible(
+                      child: TextField(
+                          controller: textEditingControllerCustomerName,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: '성함',
+                          ))),
+                  Flexible(
+                    child: TextField(
+                        controller: textEditingControllerCustomerPhone,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: '전화번호',
+                        )),
+                  )
+                ])
+              : Row(
+                  children: <Widget>[
+                    Icon(Icons.person),
+                    Expanded(
+                      child: Text(
+                        orderName ?? '',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Icon(Icons.phone),
+                    Expanded(
+                      child: Text(orderPhone ?? '',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
         ],
       ),
     );
@@ -383,7 +424,7 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
                             ),
                             padding: EdgeInsets.only(bottom: 4)),
                         Text(
-                          "displayedText",
+                          "저장 중 입니다.",
                           style: TextStyle(color: Colors.white, fontSize: 14),
                           textAlign: TextAlign.center,
                         )
@@ -399,10 +440,15 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
     });
   }
 
-  loadDialogCallback({bool isCompleted}) {
-    isCompleted == null
-        ? Navigator.of(context).popUntil(ModalRoute.withName('/'))
-        : Navigator.of(context).pop();
+  loadDialogCallback({bool isCompleted}) async {
+    if (isCompleted == null) {
+      Navigator.of(context).pop();
+      TipDialogHelper.success("저장 완료!");
+      await Future.delayed(Duration(seconds: 3));
+      Navigator.of(context).popUntil(ModalRoute.withName('/'));
+    } else {
+      Navigator.of(context).pop();
+    }
   }
 
   dateCallback(String param) {
@@ -430,8 +476,14 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
     cakeSizeList.clear();
     if (cakeCategory != null) {
       for (int i = 0; i < cakeCategory.cakePrice.length; i++) {
-        cakeSizeList.add(
-            CakeSizePrice(cakeCategory.cakeSize[i], cakeCategory.cakePrice[i]));
+        var _checkIntDouble = cakeCategory.cakePrice[i];
+        if (cakeCategory.cakePrice[i].runtimeType == double) {
+          print("here");
+          _checkIntDouble = _checkIntDouble.round();
+          print(_checkIntDouble.runtimeType);
+        }
+        cakeSizeList
+            .add(CakeSizePrice(cakeCategory.cakeSize[i], _checkIntDouble));
       }
     }
   }
@@ -486,33 +538,46 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
 
   _remarkTextField(BuildContext context) {
     return Center(
-      child: Container(
-        width: 350,
-        padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            right: 10,
-            left: 10),
-        decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
-        child: TextField(
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            labelText: '비고',
-            hintText: '만나서 카드결제 등',
-          ),
-          controller: textEditingControllerRemark,
-          keyboardType: TextInputType.multiline,
-          maxLines: null,
-          style: TextStyle(
-            fontSize: 15,
-          ),
-        ),
-      ),
-    );
+        child: !isDetailPage
+            ? Container(
+                // width: 350,
+                padding: EdgeInsets.only(
+                    // bottom: MediaQuery.of(context).viewInsets.bottom,
+                    right: 10,
+                    left: 10),
+                decoration:
+                    BoxDecoration(border: Border.all(color: Colors.grey)),
+                child: TextField(
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    labelText: '비고',
+                    hintText: '만나서 카드결제 등',
+                  ),
+                  controller: textEditingControllerRemark,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  style: TextStyle(
+                    fontSize: 15,
+                  ),
+                ),
+              )
+            : Container(
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.all(Radius.circular(5))),
+                margin: EdgeInsets.all(10),
+                padding: EdgeInsets.all(10),
+                child: Text(
+                  remarkText != '' ? remarkText : '메모된 것이 없습니다.',
+                  style: TextStyle(height: 1.3),
+                ),
+              ));
   }
 
   _payAndPickUpStatusCheckBox({@required isPayStatus}) {
     return Container(
-      margin: EdgeInsets.only(left: 50, top: 5, right: 5),
+      width: MediaQuery.of(context).size.width / 4,
+      margin: EdgeInsets.only(left: 10, top: 5, right: 5),
       child: Column(
         children: [
           isPayStatus
@@ -520,14 +585,17 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
               : _customTextBox(title: "픽업 여부", import: true),
           Checkbox(
             value: isPayStatus ? payStatus ?? false : pickUpStatus ?? false,
-            onChanged: (value) {
-              setState(() {
-                if (isPayStatus)
-                  payStatus = payStatus == null ? true : !payStatus;
-                else
-                  pickUpStatus = pickUpStatus == null ? true : !pickUpStatus;
-              });
-            },
+            onChanged: !isDetailPage
+                ? (value) {
+                    setState(() {
+                      if (isPayStatus)
+                        payStatus = payStatus == null ? true : !payStatus;
+                      else
+                        pickUpStatus =
+                            pickUpStatus == null ? true : !pickUpStatus;
+                    });
+                  }
+                : null,
           )
         ],
       ),

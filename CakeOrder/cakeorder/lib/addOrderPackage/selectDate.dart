@@ -10,51 +10,60 @@ class CustomDate {
   final bool isClickable;
   CustomDate({this.context, this.setStateCallback, this.isClickable});
 
-  Widget dateNtimeRow(
-      {@required bool isOrderRow,
-      @required TextEditingController controllerCalendar,
-      @required TextEditingController controllerTimer,
-      bool isDetailPage}) {
+  Widget dateNtimeRow({
+    String dateText,
+    String timeText,
+    @required bool isOrderRow,
+    @required TextEditingController controllerCalendar,
+    @required TextEditingController controllerTimer,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         //Pick Calendar
         Flexible(
-          child: Container(
-            padding: EdgeInsets.only(left: 5),
-            child: GestureDetector(
-              onTap: () => !isDetailPage
-                  ? showDialog(
-                      context: context,
-                      barrierColor: Colors.white,
-                      builder: (context) => Container(
-                        child: SfDateRangePicker(
-                          todayHighlightColor: Colors.red,
-                          enablePastDates: isOrderRow ? true : false,
-                          onSelectionChanged: (arg) =>
-                              _onSelectionChanged(arg, isOrderRow),
-                        ),
-                      ),
-                    )
-                  : null,
-              child: _customTextField(controllerCalendar,
-                  isOrderDate: isOrderRow, isCalendar: true),
-            ),
-          ),
-        ),
+            child: Container(
+                padding: EdgeInsets.only(left: 5),
+                child: GestureDetector(
+                  onTap: () {
+                    return isClickable
+                        ? showDialog(
+                            context: context,
+                            barrierColor: Colors.white,
+                            builder: (context) => Container(
+                              child: SfDateRangePicker(
+                                todayHighlightColor: Colors.red,
+                                enablePastDates: isOrderRow ? true : false,
+                                onSelectionChanged: (arg) =>
+                                    _onSelectionChanged(arg, isOrderRow),
+                              ),
+                            ),
+                          )
+                        : null;
+                  },
+                  child: _customTextField(controllerCalendar,
+                      isOrderDate: isOrderRow,
+                      isCalendar: true,
+                      displayText: dateText),
+                )
+                // : Container(child: Text(dateText ?? '')),
+                )),
         // Setting time
         Flexible(
           child: Container(
-            padding: EdgeInsets.only(right: 5),
-            child: GestureDetector(
-              onTap: () => !isDetailPage
-                  ? showAlertDialog(context,
-                      isOrderTime: isOrderRow, pickUpTime: controllerTimer)
-                  : null,
-              child: _customTextField(controllerTimer,
-                  isOrderDate: isOrderRow, isCalendar: false),
-            ),
-          ),
+              padding: EdgeInsets.only(right: 5),
+              child: GestureDetector(
+                onTap: () {
+                  return isClickable
+                      ? showAlertDialog(context,
+                          isOrderTime: isOrderRow, pickUpTime: controllerTimer)
+                      : null;
+                },
+                child: _customTextField(controllerTimer,
+                    isOrderDate: isOrderRow,
+                    isCalendar: false,
+                    displayText: timeText),
+              )),
         ),
         // SfDateRangePicker()
       ],
@@ -72,17 +81,28 @@ class CustomDate {
   }
 
   _customTextField(TextEditingController textEditingController,
-      {@required bool isOrderDate, @required bool isCalendar}) {
-    return TextField(
-      enabled: false,
-      controller: textEditingController,
-      decoration: InputDecoration(
-        labelText: isOrderDate ?? '날짜' ? '주문 날짜' : '픽업 날짜',
-        labelStyle:
-            TextStyle(color: isOrderDate ? Colors.black : Colors.redAccent),
-        icon: isCalendar ? Icon(Icons.calendar_today) : Icon(Icons.timer),
-      ),
-    );
+      {@required bool isOrderDate,
+      @required bool isCalendar,
+      String displayText}) {
+    return isClickable
+        ? TextField(
+            enabled: false,
+            controller: textEditingController,
+            decoration: InputDecoration(
+              labelText: isOrderDate ?? '날짜' ? '주문 날짜' : '픽업 날짜',
+              labelStyle: TextStyle(
+                  color: isOrderDate ? Colors.black : Colors.redAccent),
+              icon: isCalendar ? Icon(Icons.calendar_today) : Icon(Icons.timer),
+            ),
+          )
+        : Container(
+            margin: EdgeInsets.only(left: 10),
+            child: Row(
+              children: [
+                Icon(isCalendar ? Icons.calendar_today : Icons.timer),
+                Text(displayText ?? ''),
+              ],
+            ));
   }
 
   void showAlertDialog(BuildContext context,
@@ -121,7 +141,7 @@ class CustomDate {
         ? isOrder
             ? _now //set Current Time
             : DateTime.parse(DateTime.now().toString().split(' ')[0] +
-                " 00:00:00.000") //set 00
+                " 12:00:00.000") //set 00
         : DateTime.parse(DateTime.now().toString().split(' ')[0] +
             " " +
             pickUpTime.text +

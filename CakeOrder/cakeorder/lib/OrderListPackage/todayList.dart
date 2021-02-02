@@ -14,6 +14,73 @@ class OrderPage extends StatefulWidget {
 class _AddOrderState extends _TodayParent<OrderPage> {
   @override
   setListData() => Provider.of<List<CakeDataOrder>>(context);
+
+  @override
+  List<Widget> customSwipeIconWidget(int index) {
+    var _cakeData = _listData[index];
+    return [
+      IconSlideAction(
+        caption: 'Delete!',
+        color: Colors.redAccent,
+        icon: Icons.delete,
+        closeOnTap: false,
+        onTap: () {
+          setState(() {
+            _firestoreDataUpdate(_cakeData, isUndo: false);
+            _listData.remove(_cakeData);
+          });
+          Scaffold.of(context).showSnackBar(_deleteSnackBar(index, _cakeData));
+        },
+      )
+    ];
+  }
+
+  _deleteSnackBar(int index, var _cakeData) {
+    return SnackBar(
+      content: Text('삭제 완료!'),
+      action: SnackBarAction(
+        label: '취소',
+        onPressed: () {
+          setState(() {
+            _firestoreDataUpdate(_cakeData, isUndo: true);
+            _listData.insert(index, _cakeData);
+          });
+        },
+      ),
+    );
+  }
+
+  Future _firestoreDataUpdate(CakeData cakeData,
+      {@required bool isUndo}) async {
+    if (isUndo) {
+      cakeData.unDoFireStore();
+    } else {
+      FirebaseFirestore.instance
+          .collection("Cake")
+          .doc(cakeData.documentId)
+          .delete();
+    }
+  }
+
+  @override
+  setSlidableDrawerActionPane(int index) {
+    // TODO: implement setSlidableDrawerActionPanevar _cakeData = _listData[index];
+    var _cakeData = _listData[index];
+    return SlidableDismissal(
+      child: SlidableDrawerDismissal(
+        key: UniqueKey(),
+      ),
+      onDismissed: (actionType) {
+        setState(() {
+          _listData.remove(_cakeData);
+          _firestoreDataUpdate(_cakeData, isUndo: false);
+        });
+
+        Scaffold.of(context).showSnackBar(_deleteSnackBar(index, _cakeData));
+      },
+    );
+    // return super.setSlidableDrawerActionPane();
+  }
 }
 
 class PickUpPage extends StatefulWidget {
@@ -45,27 +112,55 @@ class _PickUpPageState extends _TodayParent<PickUpPage> {
   }
 
   @override
-  setSlidableDrawerActionPane(int index) {
-    SnackBar snackbar = SnackBar(
+  List<Widget> customSwipeIconWidget(int index) {
+    var _cakeData = _listData[index];
+    return [
+      IconSlideAction(
+        caption: 'Pick Up!',
+        color: Colors.redAccent,
+        icon: Icons.takeout_dining,
+        closeOnTap: false,
+        onTap: () {
+          setState(() {
+            _firestoreDataUpdate(_cakeData, isUndo: false);
+            _listData.remove(_cakeData);
+          });
+          Scaffold.of(context).showSnackBar(_pickUpSnackBar(_cakeData));
+        },
+      )
+    ];
+  }
+
+  _pickUpSnackBar(var _cakeData) {
+    return SnackBar(
       content: Text('픽업 완료!'),
       action: SnackBarAction(
         label: '취소',
         onPressed: () {
-          _firestoreDataUpdate(_listData[index], isUndo: true);
+          setState(() {
+            _listData.add(_cakeData);
+            _firestoreDataUpdate(_cakeData, isUndo: true);
+          });
         },
       ),
     );
+  }
+
+  @override
+  setSlidableDrawerActionPane(int index) {
+    var _cakeData = _listData[index];
+
     return SlidableDismissal(
       child: SlidableDrawerDismissal(
         key: UniqueKey(),
       ),
       onDismissed: (actionType) {
         setState(() {
-          _firestoreDataUpdate(_listData[index], isUndo: false);
-          _listData.remove(_listData[index]);
+          _listData.remove(_cakeData);
+          _firestoreDataUpdate(_cakeData, isUndo: false);
         });
 
-        Scaffold.of(context).showSnackBar(snackbar);
+        Scaffold.of(context).showSnackBar(_pickUpSnackBar(_cakeData));
       },
     );
     // return super.setSlidableDrawerActionPane();
@@ -124,17 +219,14 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T> {
                   itemCount: _listData.length,
                   itemBuilder: (context, index) {
                     return Slidable(
-                      key: ValueKey(index),
+                      key: ValueKey(_listData[index].documentId),
                       actionPane: SlidableDrawerActionPane(),
-                      secondaryActions: customSwipeIconWidget(),
+                      secondaryActions: customSwipeIconWidget(index),
                       dismissal: setSlidableDrawerActionPane(index),
                       child: GestureDetector(
                         onTap: () {
-                          // print('hi + ${_listData[index].documentId}');
                           Navigator.pushNamed(context, '/DetailPage',
-                              arguments: {
-                                "CAKEID": _listData[index].documentId
-                              });
+                              arguments: {"DATA": _listData[index]});
                         },
                         child: Container(
                             margin: EdgeInsets.all(5),
@@ -165,25 +257,23 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T> {
           );
   }
 
-  List<Widget> customSwipeIconWidget() {
+  List<Widget> customSwipeIconWidget(int index) {
     return [
+      // IconSlideAction(
+      //   caption: 'Update',
+      //   color: Colors.grey,
+      //   icon: Icons.edit,
+      //   closeOnTap: false,
+      //   onTap: () {
+      //     // Navigator.pushNamed(context, '/AddOrder',arguments: );
+      //   },
+      // ),
       IconSlideAction(
-        caption: 'Update',
-        color: Colors.grey,
-        icon: Icons.edit,
-        closeOnTap: false,
-        onTap: () {
-          // Navigator.pushNamed(context, '/AddOrder',arguments: );
-        },
-      ),
-      IconSlideAction(
-        caption: 'Delete',
+        caption: 'PickUp!',
         color: Colors.redAccent,
         icon: Icons.close,
         closeOnTap: false,
-        onTap: () {
-          print('2');
-        },
+        onTap: () {},
       )
     ];
   }
@@ -260,29 +350,48 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T> {
     _orderDateData.removeRange(_dateLength - 7, _dateLength);
     _pickUpDateData.removeRange(_dateLength - 7, _dateLength);
 
-    return Container(
-        margin: EdgeInsets.only(top: 3, left: 3),
-        child: Row(children: [
-          Icon(
-            Icons.event,
-            size: 20,
+    return FittedBox(
+      fit: BoxFit.fitWidth,
+      child: Container(
+        margin: EdgeInsets.only(top: 3, left: 3, right: 5),
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.event,
+                size: 20,
+              ),
+              Text(
+                _pickUpDateData.join(),
+                style: TextStyle(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13),
+              ),
+            ],
           ),
-          Text(
-            _pickUpDateData.join(),
-            style: TextStyle(
-                color: Colors.redAccent,
-                fontWeight: FontWeight.bold,
-                fontSize: 13),
+          SizedBox(
+            width: MediaQuery.of(context).size.width / 4,
           ),
-          Spacer(),
-          Icon(
-            Icons.person,
-            size: 15,
+          Row(
+            children: [
+              Icon(
+                Icons.person,
+                size: 15,
+              ),
+              FittedBox(
+                fit: BoxFit.fitWidth,
+                child: Text(
+                  _listData[index].partTimer + "  " + _orderDateData.join(),
+                  style: TextStyle(color: Colors.grey, fontSize: 10),
+                ),
+              ),
+            ],
           ),
-          Text(
-            _listData[index].partTimer + "  " + _orderDateData.join(),
-            style: TextStyle(color: Colors.grey, fontSize: 10),
-          ),
-        ]));
+        ]),
+      ),
+    );
   }
 }

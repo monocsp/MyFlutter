@@ -5,6 +5,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'ProviderPackage/cakeDataClass.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class CalendarPage extends StatefulWidget {
   @override
@@ -18,6 +19,7 @@ class _CalendarPageState extends State<CalendarPage>
   List<dynamic> _selectedEvents;
   AnimationController _animationController;
   CalendarController _calendarController;
+  bool payStatus;
 
   @override
   void initState() {
@@ -52,7 +54,6 @@ class _CalendarPageState extends State<CalendarPage>
             return _temp;
           });
         } else {
-          print("hi");
           _events.addAll({
             _day: [element]
           });
@@ -94,7 +95,8 @@ class _CalendarPageState extends State<CalendarPage>
   }
 
   _builder() {
-    thisMonthCakeDataList = Provider.of<List<CakeDataCalendar>>(context);
+    thisMonthCakeDataList =
+        Provider.of<List<CakeDataCalendar>>(context, listen: true);
     initEventData();
     return Column(
       mainAxisSize: MainAxisSize.max,
@@ -140,10 +142,10 @@ class _CalendarPageState extends State<CalendarPage>
     return _events != null
         ? ListView(
             children: _selectedEvents.map((event) {
+              payStatus = true;
               var _pickupdate = event.pickUpDate.toString().split('');
               _pickupdate.removeRange(
                   _pickupdate.length - 7, _pickupdate.length);
-
               return Container(
                 decoration: BoxDecoration(
                   border: Border.all(width: 0.8),
@@ -152,15 +154,40 @@ class _CalendarPageState extends State<CalendarPage>
                 margin:
                     const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                 child: ListTile(
-                  leading: Icon(Icons.cake),
-                  title: Text(event.cakeCategory +
-                      event.cakeSize +
-                      " X" +
-                      event.cakeCount.toString() +
-                      "개 "),
-                  subtitle: Text(_pickupdate.join()),
-                  onTap: () => print('${event.cakeCategory} tapped!'),
-                ),
+                    leading: Icon(Icons.cake),
+                    title: Text(event.cakeCategory +
+                        event.cakeSize +
+                        " X" +
+                        event.cakeCount.toString() +
+                        "개 "),
+                    subtitle: Text(_pickupdate.join()),
+                    trailing: Container(
+                        child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      Container(
+                          margin: EdgeInsets.only(left: 5, right: 5),
+                          child: Icon(
+                            Icons.payment,
+                            color: payStatus ? Colors.red : Colors.grey,
+                          )),
+                      Container(
+                        margin: EdgeInsets.only(left: 5, right: 5),
+                        child: Icon(
+                          Icons.takeout_dining,
+                          color: event.pickUpStatus ? Colors.red : Colors.grey,
+                        ),
+                      ),
+                    ])
+                        // Checkbox(
+                        //   value: event.pickUpStatus,
+                        // )
+
+                        ),
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/DetailPage', arguments: {
+                          "DATA": event,
+                        })),
+
+                // ),
               );
             }).toList(),
           )

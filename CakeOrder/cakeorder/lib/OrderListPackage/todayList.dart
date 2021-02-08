@@ -225,6 +225,8 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T> {
                       dismissal: setSlidableDrawerActionPane(index),
                       child: GestureDetector(
                         onTap: () {
+                          // Navigator.pushNamed(context, '/DetailPage',
+                          //     arguments: {"DATA": _listData[index]});
                           Navigator.pushNamed(context, '/DetailPage',
                               arguments: {"DATA": _listData[index]});
                         },
@@ -279,6 +281,8 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T> {
   }
 
   listViewFirstRow(int index) {
+    bool isCakePriceNull = _listData[index].cakePrice == null;
+    bool isCakeCountNull = _listData[index].cakeCount == null;
     int _totalPrice = _listData[index].cakePrice * _listData[index].cakeCount;
     List _addColon = _totalPrice.toString().split('');
     if (_addColon.length - 3 > 0 && _addColon.length != null) {
@@ -300,10 +304,12 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T> {
             size: 20,
           ),
           Text(
-            _listData[index].cakeCategory +
-                _listData[index].cakeSize +
-                " X" +
-                _listData[index].cakeCount.toString(),
+            !isCakePriceNull
+                ? _listData[index].cakeCategory +
+                    _listData[index].cakeSize +
+                    " X" +
+                    _listData[index].cakeCount.toString()
+                : "EMPTY",
             style: TextStyle(
                 color: Colors.redAccent,
                 fontWeight: FontWeight.bold,
@@ -311,7 +317,7 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T> {
           ),
           Spacer(),
           Icon(Icons.money),
-          Text(_addColon.join())
+          Text(!isCakeCountNull ? _addColon.join() : "EMPTY")
         ]));
   }
 
@@ -332,18 +338,10 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T> {
   }
 
   listViewThirdRow(int index) {
-    var _orderDateData = _listData[index]
-        .orderDate
-        // .add(
-        // Duration(hours: 9)
-        // )
-        .toString()
-        .split('');
-    var _pickUpDateData = _listData[index]
-        .pickUpDate
-        // .add(Duration(hours: 9))
-        .toString()
-        .split('');
+    bool isOrderDateNull = _listData[index].orderDate == null;
+    bool isPickUpDateNull = _listData[index].pickUpDate == null;
+    var _orderDateData = _listData[index].orderDate.toString().split('');
+    var _pickUpDateData = _listData[index].pickUpDate.toString().split('');
 
     int _dateLength = _listData[index].orderDate.toString().split('').length;
 
@@ -364,7 +362,7 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T> {
                 size: 20,
               ),
               Text(
-                _pickUpDateData.join(),
+                !isPickUpDateNull ? _pickUpDateData.join() : "EMPTY",
                 style: TextStyle(
                     color: Colors.redAccent,
                     fontWeight: FontWeight.bold,
@@ -384,7 +382,11 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T> {
               FittedBox(
                 fit: BoxFit.fitWidth,
                 child: Text(
-                  _listData[index].partTimer + "  " + _orderDateData.join(),
+                  !isOrderDateNull
+                      ? _listData[index].partTimer +
+                          "  " +
+                          _orderDateData.join()
+                      : "EMPTY",
                   style: TextStyle(color: Colors.grey, fontSize: 10),
                 ),
               ),

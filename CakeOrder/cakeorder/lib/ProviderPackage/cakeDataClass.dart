@@ -72,7 +72,6 @@ class CakeData {
   }
 
   Future unDoFireStore() async {
-    print(orderDate.runtimeType);
     this.orderDate = Timestamp.fromDate(orderDate);
     this.pickUpDate = Timestamp.fromDate(pickUpDate);
 
@@ -91,6 +90,29 @@ class CakeData {
       "cakeCount": cakeCount,
       "decoStatus": decoStatus ?? false,
     }).then((value) {});
+  }
+
+  Future updateFireStore(callback) async {
+    this.orderDate = Timestamp.fromDate(f.parse(orderDate));
+    this.pickUpDate = Timestamp.fromDate(f.parse(pickUpDate));
+
+    await FirebaseFirestore.instance.collection("Cake").doc(documentId).set({
+      "orderDate": orderDate,
+      "pickUpDate": pickUpDate,
+      "cakeCategory": cakeCategory,
+      "cakeSize": cakeSize,
+      "cakePrice": cakePrice,
+      "customerName": customerName,
+      "customerPhone": customerPhone,
+      "partTimer": partTimer,
+      "remark": remark,
+      "payStatus": payStatus ?? false,
+      "pickUpStatus": pickUpStatus ?? false,
+      "cakeCount": cakeCount,
+      "decoStatus": decoStatus ?? false,
+    }).then((value) {
+      callback();
+    });
   }
 
   forRead() {
@@ -222,8 +244,8 @@ class CakeDataPickUp extends CakeData {
   }
 }
 
-class CakeDataCalendar extends CakeData {
-  CakeDataCalendar(
+class CakeDataCalendarPickUp extends CakeData {
+  CakeDataCalendarPickUp(
       {var orderDate,
       var pickUpDate,
       String cakeCategory,
@@ -253,9 +275,60 @@ class CakeDataCalendar extends CakeData {
             pickUpDate: pickUpDate,
             pickUpStatus: pickUpStatus,
             remark: remark);
-  factory CakeDataCalendar.fromFireStore(DocumentSnapshot snapshot) {
+  factory CakeDataCalendarPickUp.fromFireStore(DocumentSnapshot snapshot) {
     var _cakeData = snapshot.data();
-    return CakeDataCalendar(
+    return CakeDataCalendarPickUp(
+        cakeCategory: _cakeData["cakeCategory"] ?? '',
+        cakeCount: _cakeData["cakeCount"] ?? 1,
+        cakePrice: _cakeData["cakePrice"] ?? '',
+        cakeSize: _cakeData["cakeSize"] ?? '',
+        customerName: _cakeData["customerName"],
+        customerPhone: _cakeData["customerPhone"],
+        documentId: snapshot.id,
+        orderDate: _cakeData["orderDate"].toDate(),
+        partTimer: _cakeData["partTimer"] ?? '',
+        payStatus: _cakeData["payStatus"] ?? false,
+        pickUpDate: _cakeData["pickUpDate"].toDate(),
+        pickUpStatus: _cakeData["pickUpStatus"] ?? false,
+        remark: _cakeData["remark"] ?? '',
+        decoStatus: _cakeData["decoStatus"] ?? false);
+  }
+}
+
+class CakeDataCalendarOrder extends CakeData {
+  CakeDataCalendarOrder(
+      {var orderDate,
+      var pickUpDate,
+      String cakeCategory,
+      String cakeSize,
+      String customerName,
+      int cakePrice,
+      String customerPhone,
+      String partTimer,
+      String remark,
+      bool payStatus,
+      bool pickUpStatus,
+      String documentId,
+      int cakeCount,
+      bool decoStatus})
+      : super(
+            cakeCategory: cakeCategory,
+            cakeCount: cakeCount,
+            cakePrice: cakePrice,
+            cakeSize: cakeSize,
+            customerName: customerName,
+            customerPhone: customerPhone,
+            decoStatus: decoStatus,
+            documentId: documentId,
+            orderDate: orderDate,
+            partTimer: partTimer,
+            payStatus: payStatus,
+            pickUpDate: pickUpDate,
+            pickUpStatus: pickUpStatus,
+            remark: remark);
+  factory CakeDataCalendarOrder.fromFireStore(DocumentSnapshot snapshot) {
+    var _cakeData = snapshot.data();
+    return CakeDataCalendarOrder(
         cakeCategory: _cakeData["cakeCategory"] ?? '',
         cakeCount: _cakeData["cakeCount"] ?? 1,
         cakePrice: _cakeData["cakePrice"] ?? '',
@@ -284,5 +357,11 @@ class CakeCategory {
         name: snapshot.id ?? '',
         cakeSize: _data.keys.toList() ?? [],
         cakePrice: _data.values.toList() ?? []);
+  }
+  getCake(String cakeName) {
+    return FirebaseFirestore.instance
+        .collection("CakeList")
+        .doc(cakeName)
+        .get();
   }
 }

@@ -4,31 +4,96 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
-import 'ProviderPackage/cakeDataClass.dart';
+import '../ProviderPackage/cakeDataClass.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-class CalendarPage extends StatefulWidget {
+class CalendarPickUp extends StatefulWidget {
+  bool refresh;
+  CalendarPickUp({this.refresh}) {
+    print("hi");
+  }
+
   @override
-  _CalendarPageState createState() => _CalendarPageState();
+  _CalendarPickUpState createState() => _CalendarPickUpState();
 }
 
-class _CalendarPageState extends State<CalendarPage>
+class _CalendarPickUpState extends _CalendarParent<CalendarPickUp> {
+  @override
+  Widget build(BuildContext context) {
+    calendarRefreshButton(widget.refresh ?? false);
+
+    return super.build(context);
+  }
+
+  calendarRefreshButton(bool refresh) {
+    if (refresh) {
+      setState(() {
+        selectedEvents = [];
+        _events = {};
+        // setCalendarCakeData();
+      });
+      widget.refresh = false;
+    }
+  }
+
+  @override
+  bool get isPickUpCalendar => true;
+  @override
+  setCalendarCakeData() =>
+      Provider.of<List<CakeDataCalendarPickUp>>(context, listen: true);
+}
+
+class CalendarOrder extends StatefulWidget {
+  bool refresh;
+  CalendarOrder({this.refresh});
+  @override
+  _CalendarOrderState createState() => _CalendarOrderState();
+}
+
+class _CalendarOrderState extends _CalendarParent<CalendarOrder> {
+  @override
+  bool get isPickUpCalendar => false;
+  @override
+  setCalendarCakeData() =>
+      Provider.of<List<CakeDataCalendarOrder>>(context, listen: true);
+  calendarRefreshButton(bool refresh) {
+    if (refresh) {
+      setState(() {
+        selectedEvents = [];
+        _events = {};
+        // setCalendarCakeData();
+      });
+      widget.refresh = false;
+    }
+  }
+
+  @override
+  builder() {
+    calendarRefreshButton(widget.refresh ?? false);
+    return super.builder();
+  }
+}
+
+abstract class _CalendarParent<T extends StatefulWidget> extends State<T>
     with TickerProviderStateMixin {
-  List<CakeDataCalendar> thisMonthCakeDataList;
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+  List<CakeData> thisMonthCakeDataList;
   Map<DateTime, List> _events;
-  List<dynamic> _selectedEvents;
+  List<dynamic> selectedEvents;
   AnimationController _animationController;
   CalendarController _calendarController;
   bool payStatus;
+  bool isPickUpCalendar;
 
   @override
   void initState() {
     super.initState();
+
     // initEventData();
     final _selectedDay = DateTime.now();
     _events = {};
 
-    _selectedEvents = _events[_selectedDay] ?? [];
+    selectedEvents = _events[_selectedDay] ?? [];
     _calendarController = CalendarController();
     _animationController = AnimationController(
       vsync: this,
@@ -42,9 +107,9 @@ class _CalendarPageState extends State<CalendarPage>
     var a;
     if (thisMonthCakeDataList != null) {
       thisMonthCakeDataList.forEach((element) {
-        DateTime _pickUpdate = element.pickUpDate;
-        DateTime _day =
-            DateTime(_pickUpdate.year, _pickUpdate.month, _pickUpdate.day);
+        DateTime _date =
+            isPickUpCalendar ? element.pickUpDate : element.orderDate;
+        DateTime _day = DateTime(_date.year, _date.month, _date.day);
 
         if (a == _day) {
           _events.update(_day, (value) {
@@ -73,7 +138,7 @@ class _CalendarPageState extends State<CalendarPage>
   void _onDaySelected(DateTime day, List events, List holidays) {
     print('CALLBACK: _onDaySelected');
     setState(() {
-      _selectedEvents = events;
+      selectedEvents = events;
     });
   }
 
@@ -88,15 +153,16 @@ class _CalendarPageState extends State<CalendarPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Center(child: Text('Calendar.')),
-        ),
-        body: _builder());
+      key: scaffoldKey,
+      body: builder(),
+      resizeToAvoidBottomPadding: false,
+    );
   }
 
-  _builder() {
-    thisMonthCakeDataList =
-        Provider.of<List<CakeDataCalendar>>(context, listen: true);
+  setCalendarCakeData();
+
+  builder() {
+    thisMonthCakeDataList = setCalendarCakeData() ?? [];
     initEventData();
     return Column(
       mainAxisSize: MainAxisSize.max,
@@ -141,11 +207,12 @@ class _CalendarPageState extends State<CalendarPage>
   Widget _buildEventList() {
     return _events != null
         ? ListView(
-            children: _selectedEvents.map((event) {
+            children: selectedEvents.map((event) {
               payStatus = true;
-              var _pickupdate = event.pickUpDate.toString().split('');
-              _pickupdate.removeRange(
-                  _pickupdate.length - 7, _pickupdate.length);
+              var _date = isPickUpCalendar
+                  ? event.pickUpDate.toString().split('')
+                  : event.orderDate.toString().split('');
+              _date.removeRange(_date.length - 7, _date.length);
               return Container(
                 decoration: BoxDecoration(
                   border: Border.all(width: 0.8),
@@ -160,7 +227,7 @@ class _CalendarPageState extends State<CalendarPage>
                         " X" +
                         event.cakeCount.toString() +
                         "개 "),
-                    subtitle: Text(_pickupdate.join()),
+                    subtitle: Text(_date.join()),
                     trailing: Container(
                         child: Row(mainAxisSize: MainAxisSize.min, children: [
                       Container(
@@ -182,10 +249,52 @@ class _CalendarPageState extends State<CalendarPage>
                         // )
 
                         ),
-                    onTap: () =>
-                        Navigator.pushNamed(context, '/DetailPage', arguments: {
-                          "DATA": event,
-                        })),
+                    onTap: () async {
+                      await Navigator.pushNamed(context, '/DetailPage',
+                          arguments: {
+                            "DATA": event,
+                          }).then((value) {
+                        print(value);
+                        setState(() {
+                          selectedEvents = [];
+                          _events = {};
+                          // setCalendarCakeData();
+                        });
+                        if (value.runtimeType == CakeDataCalendarPickUp ||
+                            value.runtimeType == CakeDataCalendarOrder ||
+                            value.runtimeType == CakeData) {
+                          CakeData deletedCakeData = value;
+                          Scaffold.of(context).showSnackBar(new SnackBar(
+                            content: Text("hi"),
+                            action: SnackBarAction(
+                              label: "취소",
+                              textColor: Colors.redAccent,
+                              onPressed: () {
+                                deletedCakeData.unDoFireStore();
+                                setState(() {
+                                  selectedEvents = [];
+                                  _events = {};
+                                  // setCalendarCakeData();
+                                });
+                              },
+                            ),
+                            // Container(
+                            //     //color: Colors.white,
+                            //     decoration: BoxDecoration(
+                            //         color: Colors.white,
+                            //         border: Border.all(
+                            //             width: 2.0, color: Colors.black),
+                            //         borderRadius: BorderRadius.circular(20)),
+                            //     margin: EdgeInsets.fromLTRB(0, 0, 0, 75),
+                            //     child: Padding(
+                            //       padding: const EdgeInsets.all(8.0),
+                            //       child: Text('Yay! A SnackBar!'),
+                            //     )),
+                            duration: Duration(milliseconds: 1500),
+                          ));
+                        }
+                      });
+                    }),
 
                 // ),
               );

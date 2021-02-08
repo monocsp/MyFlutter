@@ -30,46 +30,52 @@ class _TodayListState extends State<TodayList>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // key: scaffoldKey,
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(100),
-        child: AppBar(
-          title: Center(child: Text("Today.")),
-          bottom: TabBar(
-            controller: _tabController,
-            indicator: UnderlineTabIndicator(
-                borderSide: BorderSide(width: 5.0),
-                insets: EdgeInsets.symmetric(horizontal: 16.0)),
-            onTap: (index) {},
-            tabs: [
-              Tab(
-                icon: Icon(Icons.book),
-              ),
-              Tab(icon: Icon(Icons.takeout_dining))
-            ],
-          ),
+    return SafeArea(
+      child: Scaffold(
+        // key: scaffoldKey,
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(100),
+          child: AppBar(
+            title: Center(child: Text("Today.")),
+            bottom: TabBar(
+              controller: _tabController,
+              indicator: UnderlineTabIndicator(
+                  borderSide: BorderSide(width: 5.0),
+                  insets: EdgeInsets.symmetric(horizontal: 16.0)),
+              onTap: (index) {},
+              tabs: [
+                Tab(
+                  icon: Icon(Icons.book),
+                  text: "Order",
+                ),
+                Tab(
+                  icon: Icon(Icons.takeout_dining),
+                  text: "PickUp",
+                )
+              ],
+            ),
 
-          // bottom:
+            // bottom:
+          ),
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.of(context).pushNamed('/AddOrder');
+          },
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          child: Icon(Icons.cake),
+          // label: Text("추가"),
+        ),
+        body: TabBarView(
+            physics: NeverScrollableScrollPhysics(),
+            controller: _tabController,
+            children: [
+              OrderPage(),
+              // OrderPage(),
+              PickUpPage()
+            ]),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).pushNamed('/AddOrder');
-        },
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        child: Icon(Icons.cake),
-        // label: Text("추가"),
-      ),
-      body: TabBarView(
-          physics: NeverScrollableScrollPhysics(),
-          controller: _tabController,
-          children: [
-            OrderPage(),
-            // OrderPage(),
-            PickUpPage()
-          ]),
     );
   }
 

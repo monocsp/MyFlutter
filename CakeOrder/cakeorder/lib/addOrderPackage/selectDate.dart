@@ -84,25 +84,16 @@ class CustomDate {
       {@required bool isOrderDate,
       @required bool isCalendar,
       String displayText}) {
-    return isClickable
-        ? TextField(
-            enabled: false,
-            controller: textEditingController,
-            decoration: InputDecoration(
-              labelText: isOrderDate ?? '날짜' ? '주문 날짜' : '픽업 날짜',
-              labelStyle: TextStyle(
-                  color: isOrderDate ? Colors.black : Colors.redAccent),
-              icon: isCalendar ? Icon(Icons.calendar_today) : Icon(Icons.timer),
-            ),
-          )
-        : Container(
-            margin: EdgeInsets.only(left: 10),
-            child: Row(
-              children: [
-                Icon(isCalendar ? Icons.calendar_today : Icons.timer),
-                Text(displayText ?? ''),
-              ],
-            ));
+    return TextField(
+      enabled: false,
+      controller: textEditingController,
+      decoration: InputDecoration(
+        labelText: isOrderDate ?? '날짜' ? '주문 날짜' : '픽업 날짜',
+        labelStyle:
+            TextStyle(color: isOrderDate ? Colors.black : Colors.redAccent),
+        icon: isCalendar ? Icon(Icons.calendar_today) : Icon(Icons.timer),
+      ),
+    );
   }
 
   void showAlertDialog(BuildContext context,
@@ -116,7 +107,7 @@ class CustomDate {
           content: TimePickerSpinner(
             is24HourMode: true,
             time: setInitDateTime(isOrderTime, pickUpTime),
-            minutesInterval: isOrderTime ? 1 : 5,
+            minutesInterval: isOrderTime ? 1 : 30,
             spacing: 50,
             itemHeight: 80,
             isForce2Digits: true,

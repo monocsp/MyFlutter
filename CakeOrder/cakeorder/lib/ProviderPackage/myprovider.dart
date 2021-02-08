@@ -19,6 +19,11 @@ class SetProvider {
         list.docs.map((doc) => CakeCategory.fromFireStore(doc)).toList());
   }
 
+  Stream<List<CakeData>> getCakeData() {
+    return _db.collection("Cake").snapshots().map(
+        (list) => list.docs.map((doc) => CakeData.fromFireStore(doc)).toList());
+  }
+
   Stream<List<CakeDataOrder>> getTodayOrderCakeData() {
     var today = new DateTime.now();
     DateTime _todayStart =
@@ -53,7 +58,7 @@ class SetProvider {
             list.docs.map((doc) => CakeDataPickUp.fromFireStore(doc)).toList());
   }
 
-  Stream<List<CakeDataCalendar>> getThisMonthCakeData() {
+  Stream<List<CakeDataCalendarPickUp>> getCalendarPickUpCakeData() {
     var today = new DateTime.now();
     DateTime _monthStart = new DateTime(today.year, today.month - 3);
     DateTime _monthEnd = new DateTime(today.year, today.month + 3, 0);
@@ -64,7 +69,22 @@ class SetProvider {
         .orderBy("pickUpDate")
         .snapshots()
         .map((list) => list.docs
-            .map((doc) => CakeDataCalendar.fromFireStore(doc))
+            .map((doc) => CakeDataCalendarPickUp.fromFireStore(doc))
+            .toList());
+  }
+
+  Stream<List<CakeDataCalendarOrder>> getCalendarOrderCakeData() {
+    var today = new DateTime.now();
+    DateTime _monthStart = new DateTime(today.year, today.month - 3);
+    DateTime _monthEnd = new DateTime(today.year, today.month + 3, 0);
+    return _db
+        .collection("Cake")
+        .where("orderDate", isGreaterThanOrEqualTo: _monthStart)
+        .where("orderDate", isLessThanOrEqualTo: _monthEnd)
+        .orderBy("orderDate")
+        .snapshots()
+        .map((list) => list.docs
+            .map((doc) => CakeDataCalendarOrder.fromFireStore(doc))
             .toList());
   }
 }

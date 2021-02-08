@@ -24,11 +24,6 @@ class _AddOrderState extends AddOrderParent<AddOrder> {
   setInitData() {
     isDetailPage = false;
   }
-
-  @override
-  setAlterable() {
-    isDetailPage = false;
-  }
 }
 
 abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
@@ -79,7 +74,7 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
   String orderPhone;
   String remarkText;
   String aboutCakeText;
-
+  String currentDocumentId;
   @override
   void initState() {
     customInitData();
@@ -96,9 +91,12 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
         ..text = _todayTime;
       textEditingControllerPickUpDate = TextEditingController();
       textEditingControllerPickUpTime = TextEditingController();
-      textEditingControllerRemark = TextEditingController();
-      textEditingControllerCustomerName = TextEditingController();
-      textEditingControllerCustomerPhone = TextEditingController();
+      textEditingControllerRemark = TextEditingController()
+        ..text = remarkText ?? '';
+      textEditingControllerCustomerName = TextEditingController()
+        ..text = orderName ?? '';
+      textEditingControllerCustomerPhone = TextEditingController()
+        ..text = orderPhone ?? '';
     } else {
       textEditingControllerOrderDate.dispose();
       textEditingControllerOrderTime.dispose();
@@ -111,10 +109,18 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
 
   @override
   void dispose() {
-    initNdisposeTextEditController(init: false);
     // TODO: implement dispose
+
+    initNdisposeTextEditController(init: false);
     super.dispose();
   }
+
+  Widget setAppbarMethod() {
+    return AppBar(title: Text("예약하기"));
+  }
+
+  settingOnWillPopMethod() =>
+      !_catchWrite() ? Navigator.pop(context) : navigatorPopAlertDialog();
 
   @override
   Widget build(BuildContext context) {
@@ -127,37 +133,40 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
         context: context,
         setStateCallback: dropDownCallback,
         isClickable: !isDetailPage);
-    cakeCountWidget =
-        CakeCountWidget(cakeCount: cakeCount, callback: cakeCountCallback);
+    cakeCountWidget = CakeCountWidget(
+        cakeCount: cakeCount,
+        callback: cakeCountCallback,
+        isDetailPage: isDetailPage);
 
     return Stack(children: <Widget>[
       Scaffold(
         key: scaffoldKey,
         resizeToAvoidBottomPadding: true,
-        appBar: AppBar(
-          title: Text(!isDetailPage ? '예약하기' : "상세보기"),
-        ),
-        body: GestureDetector(
-          onTap: () {
-            //If tap ouside, hide keyboard
-            FocusScope.of(context).requestFocus(FocusNode());
-          },
-          child: Container(
-            height: double.infinity,
-            width: double.infinity,
-            color: Colors.transparent,
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  firstLineBuild(),
-                  secondLineBuild(),
-                  thirdLineBuild(),
-                  fourthLineBuild(),
-                  fifthLineBuild(),
-                  sixthLineBuild(),
-                  !isDetailPage ? addButton() : Container(),
-                ],
+        appBar: setAppbarMethod(),
+        body: WillPopScope(
+          onWillPop: () => settingOnWillPopMethod(),
+          child: GestureDetector(
+            onTap: () {
+              //If tap ouside, hide keyboard
+              FocusScope.of(context).requestFocus(FocusNode());
+            },
+            child: Container(
+              height: double.infinity,
+              width: double.infinity,
+              color: Colors.transparent,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    firstLineBuild(),
+                    secondLineBuild(),
+                    thirdLineBuild(),
+                    fourthLineBuild(),
+                    fifthLineBuild(),
+                    sixthLineBuild(),
+                    !isDetailPage ? addButton() : Container(),
+                  ],
+                ),
               ),
             ),
           ),
@@ -205,24 +214,19 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
           flex: 1,
           child: customDropDown.selectCakeCategory(
             selectedCakeName,
-            displayText: aboutCakeText,
           ),
         ),
-        !isDetailPage
-            ? Flexible(
-                flex: 1,
-                child: customDropDown.selectCakePrice(
-                    currentCakeCategory: selectedCakeName,
-                    cakeList: cakeSizeList,
-                    selectedCakeSize: selectedCakeSize),
-              )
-            : Container(),
-        !isDetailPage
-            ? Flexible(
-                flex: 1,
-                child: cakeCountWidget.countWidget(
-                    isvisible: selectedCakeName != null))
-            : Container(),
+        Flexible(
+          flex: 1,
+          child: customDropDown.selectCakePrice(
+              currentCakeCategory: selectedCakeName,
+              cakeList: cakeSizeList,
+              selectedCakeSize: selectedCakeSize),
+        ),
+        Flexible(
+            flex: 1,
+            child: cakeCountWidget.countWidget(
+                isvisible: selectedCakeName != null))
       ],
     );
   }
@@ -237,41 +241,26 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
             alignment: Alignment.centerLeft,
             child: _customTitle(title: '주문자 정보', important: true),
           ),
-          !isDetailPage
-              ? Row(children: <Widget>[
-                  Flexible(
-                      child: TextField(
-                          controller: textEditingControllerCustomerName,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: '성함',
-                          ))),
-                  Flexible(
-                    child: TextField(
-                        controller: textEditingControllerCustomerPhone,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: '전화번호',
-                        )),
-                  )
-                ])
-              : Row(
-                  children: <Widget>[
-                    Icon(Icons.person),
-                    Expanded(
-                      child: Text(
-                        orderName ?? '',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    Icon(Icons.phone),
-                    Expanded(
-                      child: Text(orderPhone ?? '',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                  ],
-                ),
+          Row(children: <Widget>[
+            Flexible(
+                child: TextField(
+                    enabled: !isDetailPage,
+                    controller: textEditingControllerCustomerName,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: '성함',
+                    ))),
+            Flexible(
+              child: TextField(
+                  enabled: !isDetailPage,
+                  controller: textEditingControllerCustomerPhone,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: '전화번호',
+                  )),
+            )
+          ])
         ],
       ),
     );
@@ -280,8 +269,8 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
   fifthLineBuild() {
     return Row(children: [
       customDropDown.selectPartTimerDropDown(partTimer),
-      _payAndPickUpStatusCheckBox(isPayStatus: true),
-      _payAndPickUpStatusCheckBox(isPayStatus: false)
+      payAndPickUpStatusCheckBox(isPayStatus: true),
+      payAndPickUpStatusCheckBox(isPayStatus: false)
     ]);
   }
 
@@ -314,7 +303,7 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
             onPressed: () {
               // _addData();
               if (!_catchNull()) {
-                _addData();
+                addData();
                 dialogProgressIndicator();
               }
             }),
@@ -322,7 +311,7 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
     );
   }
 
-  _addData() async {
+  addData() async {
     // print(textEditingControllerPickUpDate.text);
     CakeData data = CakeData(
         orderDate: textEditingControllerOrderDate.text +
@@ -342,6 +331,49 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
         pickUpStatus: pickUpStatus,
         cakeCount: cakeCount);
     await data.toFireStore(loadDialogCallback);
+  }
+
+  navigatorPopAlertDialog() async {
+    String result = await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('작성 중'),
+          content: Text("변경된 내용은 저장이 되지 않습니다."),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('나가기'),
+              onPressed: () {
+                int count = 0;
+                Navigator.of(context).popUntil(ModalRoute.withName("/"));
+              },
+            ),
+            FlatButton(
+              child: Text('유지'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  _catchWrite() {
+    if (textEditingControllerPickUpDate.text == '') {
+      if (textEditingControllerPickUpTime.text == '') {
+        if (textEditingControllerCustomerName.text == '') {
+          if (textEditingControllerCustomerPhone.text == '') {
+            if (textEditingControllerRemark.text == '') {
+              return false;
+            }
+          }
+        }
+      }
+    }
+    return true;
   }
 
   _catchNull() {
@@ -568,13 +600,18 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
                 margin: EdgeInsets.all(10),
                 padding: EdgeInsets.all(10),
                 child: Text(
-                  remarkText != '' ? remarkText : '메모된 것이 없습니다.',
+                  remarkText != null
+                      ? remarkText != ''
+                          ? remarkText
+                          : '메모된 것이 없습니다.'
+                      : '메모된 것이 없습니다.',
                   style: TextStyle(height: 1.3),
                 ),
               ));
   }
 
-  _payAndPickUpStatusCheckBox({@required isPayStatus}) {
+  payAndPickUpStatusCheckBox(
+      {@required isPayStatus, Function payStatusUpdateFireStore}) {
     return Container(
       width: MediaQuery.of(context).size.width / 4,
       margin: EdgeInsets.only(left: 10, top: 5, right: 5),
@@ -584,19 +621,22 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
               ? _customTextBox(title: "결제 여부", import: true)
               : _customTextBox(title: "픽업 여부", import: true),
           Checkbox(
-            value: isPayStatus ? payStatus ?? false : pickUpStatus ?? false,
-            onChanged: !isDetailPage
-                ? (value) {
-                    setState(() {
-                      if (isPayStatus)
-                        payStatus = payStatus == null ? true : !payStatus;
-                      else
-                        pickUpStatus =
-                            pickUpStatus == null ? true : !pickUpStatus;
-                    });
+              value: isPayStatus ? payStatus ?? false : pickUpStatus ?? false,
+              onChanged: (value) {
+                setState(() {
+                  if (isPayStatus) {
+                    if (isDetailPage && payStatusUpdateFireStore != null) {
+                      payStatusUpdateFireStore("payStatus");
+                    }
+                    payStatus = payStatus == null ? true : !payStatus;
+                  } else {
+                    if (isDetailPage && payStatusUpdateFireStore != null) {
+                      payStatusUpdateFireStore("pickUpStatus");
+                    }
+                    pickUpStatus = pickUpStatus == null ? true : !pickUpStatus;
                   }
-                : null,
-          )
+                });
+              })
         ],
       ),
     );

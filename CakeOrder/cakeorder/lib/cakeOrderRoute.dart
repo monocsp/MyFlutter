@@ -1,12 +1,12 @@
-import 'package:cakeorder/AlterPage/settingPartTimer.dart';
+import 'package:cakeorder/Alter/settingPartTimer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'addOrderPackage/addOrder.dart';
-import 'addOrderPackage/test.dart';
 import 'checkingOS.dart';
 import 'main.dart';
-import 'OrderListPackage/detailPage.dart';
+
 import 'package:path/path.dart' as p;
+import 'OrderListPackage/alterDetailPage.dart';
 
 class CakeOrderRouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -37,6 +37,11 @@ class CakeOrderRouteGenerator {
         break;
       case 'DetailPage':
         _pageWidget = DetailPage(
+          cakeData: arguments["DATA"],
+        );
+        break;
+      case 'AlterPage':
+        _pageWidget = AlterPage(
           cakeData: arguments["DATA"],
         );
         break;

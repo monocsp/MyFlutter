@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 class CakeCountWidget {
   int cakeCount;
   Function callback;
-  CakeCountWidget({this.cakeCount, this.callback});
+  final bool isDetailPage;
+  CakeCountWidget({this.cakeCount, this.callback, this.isDetailPage});
   Widget countWidget({bool isvisible}) {
     return Visibility(
       visible: isvisible ?? false,
@@ -23,7 +24,9 @@ class CakeCountWidget {
           Container(
             // margin: EdgeInsets.only(top: 15),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: !isDetailPage
+                  ? MainAxisAlignment.end
+                  : MainAxisAlignment.center,
               children: [_minusButton(), _countTextField(), _plusButton()],
             ),
           ),
@@ -33,32 +36,39 @@ class CakeCountWidget {
   }
 
   _minusButton() {
-    return Visibility(
-        visible: cakeCount > 1,
-        child: Container(
-            child: IconButton(
-          icon: Icon(Icons.horizontal_rule),
-          onPressed: () {
-            callback(--cakeCount);
-          },
-        )));
+    return !isDetailPage
+        ? Visibility(
+            visible: cakeCount > 1,
+            child: Container(
+                child: IconButton(
+              icon: Icon(Icons.horizontal_rule),
+              onPressed: () {
+                callback(--cakeCount);
+              },
+            )))
+        : Container();
   }
 
   _countTextField() {
+    String _text =
+        !isDetailPage ? cakeCount.toString() : cakeCount.toString() + "개";
     return Container(
         child: Text(
-      cakeCount.toString(),
-      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+      _text,
+      style: TextStyle(
+          fontSize: !isDetailPage ? 13 : 15, fontWeight: FontWeight.bold),
     ));
   }
 
   _plusButton() {
-    return Container(
-        child: IconButton(
-      icon: Icon(Icons.add),
-      onPressed: () {
-        callback(++cakeCount);
-      },
-    ));
+    return !isDetailPage
+        ? Container(
+            child: IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {
+              callback(++cakeCount);
+            },
+          ))
+        : Container();
   }
 }

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:cakeorder/ProviderPackage/cakeDataClass.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-import 'package:cakeorder/calendarPage.dart';
 import 'OrderListPackage/todayPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,8 +10,8 @@ import 'ProviderPackage/myprovider.dart';
 import 'customBottomNavi.dart';
 import 'checkingOS.dart';
 import 'cakeOrderRoute.dart';
-import 'calendarPage.dart';
-import 'AlterPage/alterPage.dart';
+import 'Alter/alterPage.dart';
+import 'Calendar/calendarPage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,6 +47,13 @@ class _CakeOrderAppState extends State<CakeOrderApp> {
   Widget build(BuildContext context) {
     return MultiProvider(
         providers: [
+          StreamProvider<List<CakeData>>.value(
+            value: db.getCakeData(),
+            catchError: (context, error) {
+              print(error);
+              return null;
+            },
+          ),
           StreamProvider<List<CakeDataOrder>>.value(
             value: db.getTodayOrderCakeData(),
             catchError: (context, error) {
@@ -73,8 +79,15 @@ class _CakeOrderAppState extends State<CakeOrderApp> {
               return null;
             },
           ),
-          StreamProvider<List<CakeDataCalendar>>.value(
-            value: db.getThisMonthCakeData(),
+          StreamProvider<List<CakeDataCalendarOrder>>.value(
+            value: db.getCalendarOrderCakeData(),
+            catchError: (context, error) {
+              print(error);
+              return null;
+            },
+          ),
+          StreamProvider<List<CakeDataCalendarPickUp>>.value(
+            value: db.getCalendarPickUpCakeData(),
             catchError: (context, error) {
               print(error);
               return null;

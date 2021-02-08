@@ -16,7 +16,9 @@ class CustomDropDown {
     getData(context);
   }
   Future getData(BuildContext context) async {
-    partTimerProvider = Provider.of<List<dynamic>>(context);
+    partTimerProvider = Provider.of<List<dynamic>>(
+      context,
+    );
     cakeCategoryProvider = Provider.of<List<CakeCategory>>(context);
   }
 
@@ -51,19 +53,15 @@ class CustomDropDown {
       child: Column(
         children: [
           _customTitle(title: "주문 받은사람", important: true),
-          isClickable
-              ? DropdownButton(
-                  isExpanded: true,
-                  value: partTimer,
-                  items: _partTimerList,
-                  onChanged: (value) =>
-                      setStateCallback("?parm1=partTimer&parm2=$value"),
-                )
-              : Center(
-                  child: Text(
-                  partTimer ?? '',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                )),
+          IgnorePointer(
+            ignoring: !isClickable,
+            child: DropdownButton(
+                isExpanded: true,
+                value: partTimer,
+                items: _partTimerList,
+                onChanged: (value) =>
+                    setStateCallback("?parm1=partTimer&parm2=$value")),
+          )
 
           // setStateCallback(value)),
         ],
@@ -71,17 +69,17 @@ class CustomDropDown {
     );
   }
 
-  selectCakeCategory(CakeCategory cakeCategory, {String displayText}) {
-    List<DropdownMenuItem<CakeCategory>> _cakeCategories = [];
+  selectCakeCategory(CakeCategory cakeCategory) {
+    List<DropdownMenuItem<String>> _cakeCategories = [];
     if (cakeCategoryProvider == null) {
       Container(
         child: CupertinoActivityIndicator(),
       );
     } else {
       cakeCategoryProvider.forEach((element) {
-        _cakeCategories.add(new DropdownMenuItem<CakeCategory>(
-          child: Text("${element.name}"),
-          value: element,
+        _cakeCategories.add(new DropdownMenuItem<String>(
+          child: Center(child: Text("${element.name}")),
+          value: element.name,
         ));
       });
     }
@@ -90,70 +88,85 @@ class CustomDropDown {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           _customTitle(
               title: isClickable ? "주문 케이크 종류" : "주문 케이크", important: true),
-          isClickable
-              ? DropdownButton(
-                  isExpanded: true,
-                  value: cakeCategory,
-                  items: _cakeCategories,
-                  onChanged: (value) {
-                    print('$value');
-                    setStateCallback("?parm1=cakeCategory",
-                        cakeCategory: value);
-                  })
-              : Row(
-                  children: [
-                    Container(
-                      margin: EdgeInsets.only(left: 15),
-                      child: Icon(
-                        Icons.cake,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(displayText ?? ''),
-                    ),
-                  ],
-                ),
+          IgnorePointer(
+            ignoring: !isClickable,
+            child: DropdownButton(
+                isExpanded: true,
+                value: cakeCategory != null ? cakeCategory.name : cakeCategory,
+                items: _cakeCategories,
+                onChanged: (value) {
+                  CakeCategory cake;
+                  for (final element in cakeCategoryProvider) {
+                    if (element.name == value) {
+                      cake = element;
+                    }
+                  }
+
+                  setStateCallback("?parm1=cakeCategory", cakeCategory: cake);
+                }),
+          ),
+          // Row(
+          //     children: [
+          //       Container(
+          //         margin: EdgeInsets.only(left: 15),
+          //         child: Icon(
+          //           Icons.cake,
+          //           color: Colors.grey,
+          //         ),
+          //       ),
+          //       Expanded(
+          //         child: Text(displayText ?? ''),
+          //       ),
+          // ],
+          // ),
         ]));
   }
 
   selectCakePrice(
       {@required CakeCategory currentCakeCategory,
       List<CakeSizePrice> cakeList,
-      CakeSizePrice selectedCakeSize,
-      String displayText}) {
-    if (isClickable) {
-      return currentCakeCategory != null
-          ? Container(
-              margin: EdgeInsets.only(left: 10, top: 20),
-              child: Column(children: [
-                _customTitle(title: "케이크 호수", important: true),
-                cakeSizeList != null
-                    ? DropdownButton<CakeSizePrice>(
+      CakeSizePrice selectedCakeSize}) {
+    return currentCakeCategory != null
+        ? Container(
+            margin: EdgeInsets.only(left: 10, top: 20),
+            child: Column(children: [
+              _customTitle(title: "케이크 호수", important: true),
+              cakeSizeList != null
+                  ? IgnorePointer(
+                      ignoring: !isClickable,
+                      child: DropdownButton<String>(
                         isExpanded: true,
                         hint: Text("선택하세요"),
-                        value: selectedCakeSize,
-                        onChanged: (CakeSizePrice value) => setStateCallback(
-                            "?parm1=cakePrice",
-                            cakePrice: value),
+                        value: selectedCakeSize != null
+                            ? selectedCakeSize.cakeSize
+                            : selectedCakeSize,
+                        onChanged: (String value) {
+                          var result;
+                          for (final _cake in cakeList) {
+                            if (_cake.cakeSize == value) {
+                              result = _cake;
+                              break;
+                            }
+                          }
+                          setStateCallback("?parm1=cakePrice",
+                              cakePrice: result);
+                        },
                         items: cakeList.map((CakeSizePrice cake) {
-                          return DropdownMenuItem<CakeSizePrice>(
-                            value: cake,
+                          return DropdownMenuItem<String>(
+                            value: cake.cakeSize,
                             child: Text("${cake.cakeSize} : ${cake.cakePrice}"),
                           );
                         }).toList(),
-                      )
-                    : Container(
-                        child: CupertinoActivityIndicator(),
                       ),
-              ]),
-            )
-          : Container(
-              margin: EdgeInsets.only(top: 20),
-              child: _customTitle(
-                  title: '케이크를 선택해주세요', important: true, fontSize: 13));
-    } else {
-      return Container(child: Text(displayText ?? ''));
-    }
+                    )
+                  : Container(
+                      child: CupertinoActivityIndicator(),
+                    ),
+            ]),
+          )
+        : Container(
+            margin: EdgeInsets.only(top: 20),
+            child: _customTitle(
+                title: '케이크를 선택해주세요', important: true, fontSize: 13));
   }
 }

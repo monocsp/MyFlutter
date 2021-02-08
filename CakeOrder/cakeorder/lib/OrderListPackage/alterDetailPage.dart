@@ -338,8 +338,6 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
                 style: TextStyle(color: Colors.redAccent),
               ),
               onPressed: () {
-                // TipDialogHelper.success("삭제 완료!");
-                // await Future.delayed(Duration(seconds: 2));
                 Navigator.pop(context, true);
               },
             ),

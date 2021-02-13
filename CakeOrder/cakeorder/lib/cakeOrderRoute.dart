@@ -1,4 +1,6 @@
+import 'package:cakeorder/Alter/reportPage.dart';
 import 'package:cakeorder/Alter/settingPartTimer.dart';
+import 'package:cakeorder/Alter/alterCake.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'addOrderPackage/addOrder.dart';
@@ -47,6 +49,12 @@ class CakeOrderRouteGenerator {
         break;
       case 'SettingPartTimer':
         _pageWidget = SettingPartTimer();
+        break;
+      case 'ReportPage':
+        _pageWidget = ReportPage();
+        break;
+      case 'CakeSetting':
+        _pageWidget = CakeSetting();
         break;
     }
     return CurrentOSCheck.instance['Android']

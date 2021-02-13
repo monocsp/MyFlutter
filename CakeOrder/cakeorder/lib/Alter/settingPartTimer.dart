@@ -54,12 +54,12 @@ class _SettingPartTimerState extends State<SettingPartTimer> {
         });
 
         _scaffoldKey.currentState
-            .showSnackBar(_pickUpSnackBar(index, _partTimerName));
+            .showSnackBar(_snackBar(index, _partTimerName));
       },
     );
   }
 
-  Future _firestoreDataUpdate(String _partTimerName,
+  Future _firestoreDataUpdate(String partTimerName,
       {@required bool isUndo}) async {
     FirebaseFirestore.instance
         .collection("PartTimer")
@@ -67,16 +67,20 @@ class _SettingPartTimerState extends State<SettingPartTimer> {
         .update({"PartTimerList": partTimerProvider});
   }
 
-  _pickUpSnackBar(int index, String _partTimerName) {
+  _snackBar(int index, String _partTimerName) {
     return SnackBar(
       duration: Duration(milliseconds: 1500),
       content: Text('삭제 완료!'),
       action: SnackBarAction(
         label: '취소',
+        textColor: Colors.redAccent,
         onPressed: () {
           setState(() {
             partTimerProvider.insert(index, _partTimerName);
-            _firestoreDataUpdate(_partTimerName, isUndo: true);
+            _firestoreDataUpdate(
+              _partTimerName,
+              isUndo: true,
+            );
           });
         },
       ),
@@ -93,11 +97,11 @@ class _SettingPartTimerState extends State<SettingPartTimer> {
         closeOnTap: false,
         onTap: () {
           setState(() {
-            _firestoreDataUpdate(_partTimerName, isUndo: false);
             partTimerProvider.remove(_partTimerName);
+            _firestoreDataUpdate(_partTimerName, isUndo: false);
           });
           _scaffoldKey.currentState
-              .showSnackBar(_pickUpSnackBar(index, _partTimerName));
+              .showSnackBar(_snackBar(index, _partTimerName));
         },
       )
     ];
@@ -147,7 +151,6 @@ class _SettingPartTimerState extends State<SettingPartTimer> {
   }
 
   _makePartTimerListTile() {
-    print(partTimerProvider.runtimeType);
     List<Widget> _list = [];
     if (partTimerProvider != null)
       partTimerProvider.asMap().forEach((index, element) {

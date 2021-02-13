@@ -8,8 +8,15 @@ class AlterPage extends StatefulWidget {
 }
 
 class _AlterPageState extends State<AlterPage> {
+  var device_width;
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+    device_width = MediaQuery.of(context).size.width;
     return Scaffold(
         appBar: AppBar(
           title: Center(child: Text("Setting.")),
@@ -23,50 +30,57 @@ class _AlterPageState extends State<AlterPage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.max,
         children: [
-          Container(
-            margin: EdgeInsets.only(left: 10, right: 10, top: 20, bottom: 20),
-            child: GestureDetector(
+          GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, "/CakeSetting");
+            },
+            child: Container(
+                width: device_width,
+                margin:
+                    EdgeInsets.only(left: 10, right: 10, top: 20, bottom: 20),
                 child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Container(
-                  child: Icon(
-                    Icons.cake,
-                    color: Colors.grey,
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.only(left: 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        child: Text("Cake Setting",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 20,
-                            )),
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      child: Icon(
+                        Icons.cake,
+                        color: Colors.grey,
                       ),
-                      Container(
-                        margin: EdgeInsets.only(left: 5),
-                        child: Text("케이크 종류, 사이즈 및 가격을 설정합니다.",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 15,
-                            )),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(left: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            child: Text("Cake Setting",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 20,
+                                )),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(left: 5),
+                            child: Text("케이크 종류, 사이즈 및 가격을 설정합니다.",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 15,
+                                )),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              ],
-            )),
+                    ),
+                  ],
+                )),
           ),
-          Container(
-            margin: EdgeInsets.only(left: 10, right: 10, top: 20, bottom: 20),
-            child: GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pushNamed('/SettingPartTimer');
-                },
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pushNamed('/SettingPartTimer');
+            },
+            child: Container(
+                width: device_width,
+                margin:
+                    EdgeInsets.only(left: 10, right: 10, top: 20, bottom: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -100,9 +114,12 @@ class _AlterPageState extends State<AlterPage> {
                 )),
           ),
           Container(
+              width: device_width,
               margin: EdgeInsets.only(left: 10, right: 10, top: 20, bottom: 20),
               child: GestureDetector(
+                onTap: () => Navigator.of(context).pushNamed('/ReportPage'),
                 child: Row(
+                  mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Container(
@@ -110,6 +127,7 @@ class _AlterPageState extends State<AlterPage> {
                         Icon(Icons.calendar_today, color: Colors.grey),
                         Icon(
                           Icons.money,
+                          color: Colors.grey,
                           size: 18,
                         )
                       ]),

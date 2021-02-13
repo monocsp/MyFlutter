@@ -8,6 +8,7 @@ import 'addDropDown.dart';
 import 'selectDate.dart';
 import 'cakeCount.dart';
 import 'package:tip_dialog/tip_dialog.dart';
+import 'package:async/async.dart';
 
 class AddOrder extends StatefulWidget {
   // final bool canAlter;
@@ -148,7 +149,7 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
           child: GestureDetector(
             onTap: () {
               //If tap ouside, hide keyboard
-              FocusScope.of(context).requestFocus(FocusNode());
+              FocusScope.of(context).unfocus();
             },
             child: Container(
               height: double.infinity,
@@ -303,6 +304,8 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
             onPressed: () {
               // _addData();
               if (!_catchNull()) {
+                FocusScope.of(context).unfocus();
+                print("pickUp : " + textEditingControllerPickUpTime.text);
                 addData();
                 dialogProgressIndicator();
               }

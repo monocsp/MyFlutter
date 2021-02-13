@@ -107,8 +107,11 @@ abstract class _CalendarParent<T extends StatefulWidget> extends State<T>
     var a;
     if (thisMonthCakeDataList != null) {
       thisMonthCakeDataList.forEach((element) {
-        DateTime _date =
+        var convertDate =
             isPickUpCalendar ? element.pickUpDate : element.orderDate;
+        if (convertDate.runtimeType == Timestamp)
+          convertDate = convertDate.toDate();
+        DateTime _date = convertDate;
         DateTime _day = DateTime(_date.year, _date.month, _date.day);
 
         if (a == _day) {
@@ -208,7 +211,6 @@ abstract class _CalendarParent<T extends StatefulWidget> extends State<T>
     return _events != null
         ? ListView(
             children: selectedEvents.map((event) {
-              payStatus = true;
               var _date = isPickUpCalendar
                   ? event.pickUpDate.toString().split('')
                   : event.orderDate.toString().split('');
@@ -234,7 +236,7 @@ abstract class _CalendarParent<T extends StatefulWidget> extends State<T>
                           margin: EdgeInsets.only(left: 5, right: 5),
                           child: Icon(
                             Icons.payment,
-                            color: payStatus ? Colors.red : Colors.grey,
+                            color: event.payStatus ? Colors.red : Colors.grey,
                           )),
                       Container(
                         margin: EdgeInsets.only(left: 5, right: 5),
@@ -265,7 +267,7 @@ abstract class _CalendarParent<T extends StatefulWidget> extends State<T>
                             value.runtimeType == CakeData) {
                           CakeData deletedCakeData = value;
                           Scaffold.of(context).showSnackBar(new SnackBar(
-                            content: Text("hi"),
+                            content: Text("삭제 완료!"),
                             action: SnackBarAction(
                               label: "취소",
                               textColor: Colors.redAccent,
@@ -278,18 +280,6 @@ abstract class _CalendarParent<T extends StatefulWidget> extends State<T>
                                 });
                               },
                             ),
-                            // Container(
-                            //     //color: Colors.white,
-                            //     decoration: BoxDecoration(
-                            //         color: Colors.white,
-                            //         border: Border.all(
-                            //             width: 2.0, color: Colors.black),
-                            //         borderRadius: BorderRadius.circular(20)),
-                            //     margin: EdgeInsets.fromLTRB(0, 0, 0, 75),
-                            //     child: Padding(
-                            //       padding: const EdgeInsets.all(8.0),
-                            //       child: Text('Yay! A SnackBar!'),
-                            //     )),
                             duration: Duration(milliseconds: 1500),
                           ));
                         }

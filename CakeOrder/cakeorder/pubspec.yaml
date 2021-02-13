@@ -38,7 +38,9 @@ dependencies:
   flutter_slidable:
   table_calendar: ^2.3.3
   tip_dialog: ^3.1.0
-
+  sliding_up_panel: ^1.0.2
+  fl_chart: ^0.12.2
+  date_util: ^0.1.4
 dev_dependencies:
   flutter_test:
     sdk: flutter

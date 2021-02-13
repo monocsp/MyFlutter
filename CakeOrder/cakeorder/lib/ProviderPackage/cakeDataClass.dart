@@ -15,7 +15,8 @@ class CakeSizePrice {
 }
 
 class CakeData {
-  DateFormat f = DateFormat("yyyy-MM-dd hh:mm");
+  //hh : 12, HH : 24
+  DateFormat f = DateFormat("yyyy-MM-dd HH:mm");
   var orderDate;
   var pickUpDate;
   final String cakeCategory;

@@ -34,6 +34,7 @@ class CustomDropDown {
 
   selectPartTimerDropDown(String partTimer) {
     List<DropdownMenuItem> _partTimerList = [];
+    Widget dropDown;
     if (partTimerProvider != null) {
       partTimerProvider.forEach((element) {
         _partTimerList.add(new DropdownMenuItem(
@@ -47,21 +48,35 @@ class CustomDropDown {
       );
     }
 
+    try {
+      dropDown = DropdownButton(
+          onTap: () {
+            FocusScope.of(context).unfocus();
+          },
+          isExpanded: true,
+          value: partTimer,
+          items: _partTimerList,
+          onChanged: (value) =>
+              setStateCallback("?parm1=partTimer&parm2=$value"));
+    } on AssertionError {
+      dropDown = DropdownButton(
+          onTap: () {
+            FocusScope.of(context).unfocus();
+          },
+          isExpanded: true,
+          value: null,
+          items: _partTimerList,
+          onChanged: (value) =>
+              setStateCallback("?parm1=partTimer&parm2=$value"));
+    }
+
     return Container(
       width: MediaQuery.of(context).size.width / 3,
       margin: EdgeInsets.only(left: 10, top: 15),
       child: Column(
         children: [
           _customTitle(title: "주문 받은사람", important: true),
-          IgnorePointer(
-            ignoring: !isClickable,
-            child: DropdownButton(
-                isExpanded: true,
-                value: partTimer,
-                items: _partTimerList,
-                onChanged: (value) =>
-                    setStateCallback("?parm1=partTimer&parm2=$value")),
-          )
+          IgnorePointer(ignoring: !isClickable, child: dropDown)
 
           // setStateCallback(value)),
         ],
@@ -91,6 +106,9 @@ class CustomDropDown {
           IgnorePointer(
             ignoring: !isClickable,
             child: DropdownButton(
+                onTap: () {
+                  FocusScope.of(context).unfocus();
+                },
                 isExpanded: true,
                 value: cakeCategory != null ? cakeCategory.name : cakeCategory,
                 items: _cakeCategories,
@@ -135,6 +153,9 @@ class CustomDropDown {
                   ? IgnorePointer(
                       ignoring: !isClickable,
                       child: DropdownButton<String>(
+                        onTap: () {
+                          FocusScope.of(context).unfocus();
+                        },
                         isExpanded: true,
                         hint: Text("선택하세요"),
                         value: selectedCakeSize != null

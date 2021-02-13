@@ -248,6 +248,15 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
     _setCakeData();
     initData().then((cake) {
       setState(() {
+        var dateTimePickUpDate = _cakeData.pickUpDate;
+        var dateTimeOrderDate = _cakeData.orderDate;
+        if (dateTimePickUpDate.runtimeType == Timestamp) {
+          dateTimePickUpDate = dateTimePickUpDate.toDate();
+        }
+        if (dateTimeOrderDate.runtimeType == Timestamp) {
+          dateTimePickUpDate = _cakeData.orderDate.toDate();
+        }
+
         selectedCakeName = CakeCategory(
             name: cake.id,
             cakeSize: cake["CakePrice"].keys.toList(),
@@ -273,11 +282,11 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
           textEditingControllerPickUpDate = TextEditingController()
             ..text = _cakeData.pickUpDate.toString().split(' ')[0];
           textEditingControllerPickUpTime = TextEditingController()
-            ..text = DateFormat('kk:mm').format(_cakeData.pickUpDate);
+            ..text = DateFormat('kk:mm').format(dateTimePickUpDate);
           textEditingControllerOrderDate = TextEditingController()
             ..text = _cakeData.orderDate.toString().split(' ')[0];
           textEditingControllerOrderTime = TextEditingController()
-            ..text = DateFormat('kk:mm').format(_cakeData.orderDate);
+            ..text = DateFormat('kk:mm').format(dateTimeOrderDate);
           currentDocumentId = _cakeData.documentId;
         });
       });
@@ -352,15 +361,15 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
       },
     ).then((value) async {
       if (value != null && value) {
-        // await FirebaseFirestore.instance
-        //     .collection("Cake")
-        //     .doc(_cakeData.documentId)
-        //     .delete()
-        //     .catchError((onError) {
-        //       TipDialogHelper.fail("삭제 실패! \n $onError");
-        //     })
-        //     .then((value) {})
-        //     .whenComplete(() => );
+        await FirebaseFirestore.instance
+            .collection("Cake")
+            .doc(_cakeData.documentId)
+            .delete()
+            .catchError((onError) {
+              TipDialogHelper.fail("삭제 실패! \n $onError");
+            })
+            .then((value) {})
+            .whenComplete(() {});
         Navigator.pop(context, _cakeData);
       }
     });

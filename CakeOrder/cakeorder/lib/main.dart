@@ -10,7 +10,7 @@ import 'ProviderPackage/myprovider.dart';
 import 'customBottomNavi.dart';
 import 'checkingOS.dart';
 import 'cakeOrderRoute.dart';
-import 'Alter/alterPage.dart';
+import 'Alter/alterMainPage.dart';
 import 'Calendar/calendarPage.dart';
 
 void main() async {

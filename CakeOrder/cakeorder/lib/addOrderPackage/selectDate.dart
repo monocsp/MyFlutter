@@ -26,6 +26,7 @@ class CustomDate {
                 padding: EdgeInsets.only(left: 5),
                 child: GestureDetector(
                   onTap: () {
+                    FocusScope.of(context).unfocus();
                     return isClickable
                         ? showDialog(
                             context: context,
@@ -54,6 +55,7 @@ class CustomDate {
               padding: EdgeInsets.only(right: 5),
               child: GestureDetector(
                 onTap: () {
+                  FocusScope.of(context).unfocus();
                   return isClickable
                       ? showAlertDialog(context,
                           isOrderTime: isOrderRow, pickUpTime: controllerTimer)

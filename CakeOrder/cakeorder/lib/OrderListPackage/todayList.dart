@@ -29,21 +29,23 @@ class _AddOrderState extends _TodayParent<OrderPage> {
             _firestoreDataUpdate(_cakeData, isUndo: false);
             _listData.remove(_cakeData);
           });
-          Scaffold.of(context).showSnackBar(_deleteSnackBar(index, _cakeData));
+          Scaffold.of(context)
+              .showSnackBar(_deleteSnackBar(_cakeData, index: index));
         },
       )
     ];
   }
 
-  _deleteSnackBar(int index, var _cakeData) {
+  _deleteSnackBar(var cakeData, {int index}) {
     return SnackBar(
       content: Text('삭제 완료!'),
       action: SnackBarAction(
         label: '취소',
+        textColor: Colors.redAccent,
         onPressed: () {
           setState(() {
-            _firestoreDataUpdate(_cakeData, isUndo: true);
-            _listData.insert(index, _cakeData);
+            _firestoreDataUpdate(cakeData, isUndo: true);
+            _listData.insert(index, cakeData);
           });
         },
       ),
@@ -76,7 +78,8 @@ class _AddOrderState extends _TodayParent<OrderPage> {
           _firestoreDataUpdate(_cakeData, isUndo: false);
         });
 
-        Scaffold.of(context).showSnackBar(_deleteSnackBar(index, _cakeData));
+        Scaffold.of(context)
+            .showSnackBar(_deleteSnackBar(_cakeData, index: index));
       },
     );
     // return super.setSlidableDrawerActionPane();
@@ -93,6 +96,72 @@ class PickUpPage extends StatefulWidget {
 class _PickUpPageState extends _TodayParent<PickUpPage> {
   @override
   setListData() => Provider.of<List<CakeDataPickUp>>(context);
+  @override
+  listViewThirdRow(int index) {
+    bool isPickUpDateNull = _listData[index].pickUpDate == null;
+    var _orderDateData = _listData[index].orderDate.toString().split('');
+    var _pickUpDateData = _listData[index].pickUpDate.toString().split('');
+
+    int _dateLength = _listData[index].orderDate.toString().split('').length;
+
+    _orderDateData.removeRange(_dateLength - 7, _dateLength);
+    _pickUpDateData.removeRange(_dateLength - 7, _dateLength);
+
+    return FittedBox(
+      fit: BoxFit.fitWidth,
+      child: Container(
+        margin: EdgeInsets.only(top: 3, left: 3),
+        child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              SizedBox(
+                width: MediaQuery.of(context).size.width / 2,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.event,
+                      size: 20,
+                    ),
+                    Text(
+                      !isPickUpDateNull ? _pickUpDateData.join() : "EMPTY",
+                      style: TextStyle(
+                          color: Colors.redAccent,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width / 2,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width / 12,
+                    ),
+                    Icon(
+                      Icons.person,
+                      size: 15,
+                    ),
+                    Expanded(
+                      child: Text(
+                        _listData[index].customerName +
+                            "  " +
+                            _listData[index].customerPhone,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: Colors.black, fontSize: 13),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ]),
+      ),
+    );
+  }
 
   @override
   listViewSecondRow(int index) {
@@ -105,6 +174,18 @@ class _PickUpPageState extends _TodayParent<PickUpPage> {
           ),
           Icon(
             _listData[index].pickUpStatus ? Icons.check : Icons.close,
+            color: Colors.redAccent,
+            size: 18,
+          ),
+          Container(
+            margin: EdgeInsets.only(left: 5),
+            child: Icon(
+              Icons.payment,
+              size: 20,
+            ),
+          ),
+          Icon(
+            _listData[index].payStatus ? Icons.check : Icons.close,
             color: Colors.redAccent,
             size: 18,
           )
@@ -136,6 +217,7 @@ class _PickUpPageState extends _TodayParent<PickUpPage> {
       content: Text('픽업 완료!'),
       action: SnackBarAction(
         label: '취소',
+        textColor: Colors.redAccent,
         onPressed: () {
           setState(() {
             _listData.add(_cakeData);
@@ -176,6 +258,7 @@ class _PickUpPageState extends _TodayParent<PickUpPage> {
 }
 
 abstract class _TodayParent<T extends StatefulWidget> extends State<T> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   List<CakeData> _listData;
   SlidableController slidableController;
   Animation<double> _rotationAnimation;
@@ -213,40 +296,43 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T> {
 
     return _listData != null
         ? _listData.length != 0
-            ? Container(
-                margin: EdgeInsets.only(top: 5),
-                child: ListView.builder(
-                  itemCount: _listData.length,
-                  itemBuilder: (context, index) {
-                    return Slidable(
-                      key: ValueKey(_listData[index].documentId),
-                      actionPane: SlidableDrawerActionPane(),
-                      secondaryActions: customSwipeIconWidget(index),
-                      dismissal: setSlidableDrawerActionPane(index),
-                      child: GestureDetector(
-                        onTap: () {
-                          // Navigator.pushNamed(context, '/DetailPage',
-                          //     arguments: {"DATA": _listData[index]});
-                          Navigator.pushNamed(context, '/DetailPage',
-                              arguments: {"DATA": _listData[index]});
-                        },
-                        child: Container(
-                            margin: EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(5.0)),
-                                border: Border.all(width: 1.0)),
-                            height: 85,
-                            child: Column(
-                              children: [
-                                listViewFirstRow(index),
-                                listViewSecondRow(index),
-                                listViewThirdRow(index)
-                              ],
-                            )),
-                      ),
-                    );
-                  },
+            ? Scaffold(
+                key: _scaffoldKey,
+                body: Container(
+                  margin: EdgeInsets.only(top: 5),
+                  child: ListView.builder(
+                    itemCount: _listData.length,
+                    itemBuilder: (context, index) {
+                      return Slidable(
+                        key: ValueKey(_listData[index].documentId),
+                        actionPane: SlidableDrawerActionPane(),
+                        secondaryActions: customSwipeIconWidget(index),
+                        dismissal: setSlidableDrawerActionPane(index),
+                        child: GestureDetector(
+                          onTap: () {
+                            // Navigator.pushNamed(context, '/DetailPage',
+                            //     arguments: {"DATA": _listData[index]});
+                            Navigator.pushNamed(context, '/DetailPage',
+                                arguments: {"DATA": _listData[index]});
+                          },
+                          child: Container(
+                              margin: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(5.0)),
+                                  border: Border.all(width: 1.0)),
+                              height: 85,
+                              child: Column(
+                                children: [
+                                  listViewFirstRow(index),
+                                  listViewSecondRow(index),
+                                  listViewThirdRow(index)
+                                ],
+                              )),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               )
             : Center(

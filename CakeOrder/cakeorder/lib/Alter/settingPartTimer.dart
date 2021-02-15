@@ -69,6 +69,7 @@ class _SettingPartTimerState extends State<SettingPartTimer> {
 
   _snackBar(int index, String _partTimerName) {
     return SnackBar(
+      behavior: SnackBarBehavior.floating,
       duration: Duration(milliseconds: 1500),
       content: Text('삭제 완료!'),
       action: SnackBarAction(

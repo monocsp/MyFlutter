@@ -41,6 +41,8 @@ dependencies:
   sliding_up_panel: ^1.0.2
   fl_chart: ^0.12.2
   date_util: ^0.1.4
+  pull_to_refresh: 1.6.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

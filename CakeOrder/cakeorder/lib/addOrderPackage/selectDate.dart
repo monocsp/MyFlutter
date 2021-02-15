@@ -33,6 +33,17 @@ class CustomDate {
                             barrierColor: Colors.white,
                             builder: (context) => Container(
                               child: SfDateRangePicker(
+                                monthCellStyle: DateRangePickerMonthCellStyle(
+                                    weekendTextStyle: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 12,
+                                        color: Colors.red)),
+                                monthViewSettings:
+                                    DateRangePickerMonthViewSettings(
+                                        weekendDays: <int>[
+                                      DateTime.saturday,
+                                      DateTime.sunday
+                                    ]),
                                 todayHighlightColor: Colors.red,
                                 enablePastDates: isOrderRow ? true : false,
                                 onSelectionChanged: (arg) =>

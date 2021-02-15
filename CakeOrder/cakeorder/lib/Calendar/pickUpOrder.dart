@@ -2,17 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import '../ProviderPackage/cakeDataClass.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class CalendarPickUp extends StatefulWidget {
-  bool refresh;
-  CalendarPickUp({this.refresh}) {
-    print("hi");
-  }
-
   @override
   _CalendarPickUpState createState() => _CalendarPickUpState();
 }
@@ -20,32 +14,30 @@ class CalendarPickUp extends StatefulWidget {
 class _CalendarPickUpState extends _CalendarParent<CalendarPickUp> {
   @override
   Widget build(BuildContext context) {
-    calendarRefreshButton(widget.refresh ?? false);
-
     return super.build(context);
   }
 
-  calendarRefreshButton(bool refresh) {
-    if (refresh) {
-      setState(() {
-        selectedEvents = [];
-        _events = {};
-        // setCalendarCakeData();
-      });
-      widget.refresh = false;
-    }
-  }
+  // calendarRefreshButton(bool refresh) {
+  //   if (refresh) {
+  //     setState(() {
+  //       selectedEvents = [];
+  //       _events = {};
+  //       // setCalendarCakeData();
+  //     });
+  //   }
+  // }
 
   @override
   bool get isPickUpCalendar => true;
   @override
   setCalendarCakeData() =>
       Provider.of<List<CakeDataCalendarPickUp>>(context, listen: true);
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 class CalendarOrder extends StatefulWidget {
-  bool refresh;
-  CalendarOrder({this.refresh});
   @override
   _CalendarOrderState createState() => _CalendarOrderState();
 }
@@ -56,27 +48,17 @@ class _CalendarOrderState extends _CalendarParent<CalendarOrder> {
   @override
   setCalendarCakeData() =>
       Provider.of<List<CakeDataCalendarOrder>>(context, listen: true);
-  calendarRefreshButton(bool refresh) {
-    if (refresh) {
-      setState(() {
-        selectedEvents = [];
-        _events = {};
-        // setCalendarCakeData();
-      });
-      widget.refresh = false;
-    }
-  }
 
   @override
-  builder() {
-    calendarRefreshButton(widget.refresh ?? false);
-    return super.builder();
-  }
+  bool get wantKeepAlive => true;
 }
 
 abstract class _CalendarParent<T extends StatefulWidget> extends State<T>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  GlobalKey _refresherKey = GlobalKey();
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
   List<CakeData> thisMonthCakeDataList;
   Map<DateTime, List> _events;
   List<dynamic> selectedEvents;
@@ -128,7 +110,7 @@ abstract class _CalendarParent<T extends StatefulWidget> extends State<T>
         }
         a = _day;
       });
-    } else {}
+    }
   }
 
   @override
@@ -153,12 +135,46 @@ abstract class _CalendarParent<T extends StatefulWidget> extends State<T>
     print('CALLBACK: _onCalendarCreated');
   }
 
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //     key: scaffoldKey,
+  //     body: builder(),
+  //     resizeToAvoidBottomPadding: false,
+  //   );
+  // }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: scaffoldKey,
-      body: builder(),
-      resizeToAvoidBottomPadding: false,
+    // TODO: implement build
+    return SmartRefresher(
+      key: _refresherKey,
+      controller: _refreshController,
+      enablePullUp: true,
+      child: builder(),
+      header: ClassicHeader(),
+      onRefresh: () async {
+        //monitor fetch data from network
+        await Future.delayed(Duration(milliseconds: 500));
+        if (mounted)
+          setState(() {
+            // print("1");
+            selectedEvents = [];
+            _events = {};
+          });
+        _refreshController.refreshCompleted();
+      },
+      // onLoading: () async {
+      //   //monitor fetch data from network
+      //   // await Future.delayed(Duration(milliseconds: 1000));
+      //   if (mounted)
+      //     setState(() {
+      //       print("2");
+      //       // selectedEvents = [];
+      //       // _events = {};
+      //     });
+      //   _refreshController.loadComplete();
+      // }
+//    pageIndex++;
     );
   }
 
@@ -172,7 +188,9 @@ abstract class _CalendarParent<T extends StatefulWidget> extends State<T>
       children: <Widget>[
         _buildTableCalendar(),
         const SizedBox(height: 8.0),
-        Expanded(child: _buildEventList()),
+        Expanded(
+          child: _buildEventList(),
+        ),
       ],
     );
   }
@@ -210,6 +228,7 @@ abstract class _CalendarParent<T extends StatefulWidget> extends State<T>
   Widget _buildEventList() {
     return _events != null
         ? ListView(
+            shrinkWrap: true,
             children: selectedEvents.map((event) {
               var _date = isPickUpCalendar
                   ? event.pickUpDate.toString().split('')
@@ -229,7 +248,19 @@ abstract class _CalendarParent<T extends StatefulWidget> extends State<T>
                         " X" +
                         event.cakeCount.toString() +
                         "개 "),
-                    subtitle: Text(_date.join()),
+                    subtitle: Container(
+                      margin: EdgeInsets.only(left: 5),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(_date.join()),
+                          Text(
+                            event.customerName,
+                            style: TextStyle(fontSize: 13),
+                          )
+                        ],
+                      ),
+                    ),
                     trailing: Container(
                         child: Row(mainAxisSize: MainAxisSize.min, children: [
                       Container(
@@ -241,7 +272,7 @@ abstract class _CalendarParent<T extends StatefulWidget> extends State<T>
                       Container(
                         margin: EdgeInsets.only(left: 5, right: 5),
                         child: Icon(
-                          Icons.takeout_dining,
+                          Icons.shopping_bag_outlined,
                           color: event.pickUpStatus ? Colors.red : Colors.grey,
                         ),
                       ),
@@ -256,33 +287,33 @@ abstract class _CalendarParent<T extends StatefulWidget> extends State<T>
                           arguments: {
                             "DATA": event,
                           }).then((value) {
-                        print(value);
-                        setState(() {
-                          selectedEvents = [];
-                          _events = {};
-                          // setCalendarCakeData();
-                        });
-                        if (value.runtimeType == CakeDataCalendarPickUp ||
-                            value.runtimeType == CakeDataCalendarOrder ||
-                            value.runtimeType == CakeData) {
-                          CakeData deletedCakeData = value;
-                          Scaffold.of(context).showSnackBar(new SnackBar(
-                            content: Text("삭제 완료!"),
-                            action: SnackBarAction(
-                              label: "취소",
-                              textColor: Colors.redAccent,
-                              onPressed: () {
-                                deletedCakeData.unDoFireStore();
-                                setState(() {
-                                  selectedEvents = [];
-                                  _events = {};
-                                  // setCalendarCakeData();
-                                });
-                              },
-                            ),
-                            duration: Duration(milliseconds: 1500),
-                          ));
-                        }
+                        //   print(value);
+                        //   setState(() {
+                        // selectedEvents = [];
+                        // _events = {};
+                        //     // setCalendarCakeData();
+                        //   });
+                        //   if (value.runtimeType == CakeDataCalendarPickUp ||
+                        //       value.runtimeType == CakeDataCalendarOrder ||
+                        //       value.runtimeType == CakeData) {
+                        //     CakeData deletedCakeData = value;
+                        //     Scaffold.of(context).showSnackBar(new SnackBar(
+                        //       content: Text("삭제 완료!"),
+                        //       action: SnackBarAction(
+                        //         label: "취소",
+                        //         textColor: Colors.redAccent,
+                        //         onPressed: () {
+                        //           deletedCakeData.unDoFireStore();
+                        //           setState(() {
+                        //             selectedEvents = [];
+                        //             _events = {};
+                        //             // setCalendarCakeData();
+                        //           });
+                        //         },
+                        //       ),
+                        //       duration: Duration(milliseconds: 1500),
+                        //     ));
+                        //   }
                       });
                     }),
 

@@ -12,15 +12,15 @@ class _CalendarPageState extends State<CalendarPage>
   final scaffoldKey = GlobalKey<ScaffoldState>();
   bool refresh = true;
   TabController _tabController;
-  CalendarPickUp _calendarPickUp;
-  CalendarOrder _calendarOrder;
+  // CalendarPickUp _calendarPickUp;
+  // CalendarOrder _calendarOrder;
   // final scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _calendarPickUp = CalendarPickUp();
-    _calendarOrder = CalendarOrder();
+    // _calendarPickUp = CalendarPickUp();
+    // _calendarOrder = CalendarOrder();
     _tabController = new TabController(length: 2, vsync: this);
   }
 
@@ -48,7 +48,7 @@ class _CalendarPageState extends State<CalendarPage>
                 onTap: (index) {},
                 tabs: [
                   Tab(
-                    icon: Icon(Icons.takeout_dining),
+                    icon: Icon(Icons.shopping_bag_outlined),
                     text: "PickUp",
                   ),
                   Tab(
@@ -61,26 +61,10 @@ class _CalendarPageState extends State<CalendarPage>
               // bottom:
             ),
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              setState(() {
-                _calendarPickUp = CalendarPickUp(
-                  refresh: true,
-                );
-                _calendarOrder = CalendarOrder(refresh: true);
-                // _calendarPickUp.;
-              });
-              // Navigator.of(context).pushNamed('/AddOrder');
-            },
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black,
-            child: Icon(Icons.refresh),
-            // label: Text("추가"),
-          ),
           body: TabBarView(
               physics: NeverScrollableScrollPhysics(),
               controller: _tabController,
-              children: [_calendarPickUp, _calendarOrder])),
+              children: [CalendarPickUp(), CalendarOrder()])),
     );
   }
 }

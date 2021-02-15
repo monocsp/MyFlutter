@@ -49,7 +49,7 @@ class _TodayListState extends State<TodayList>
                   text: "Order",
                 ),
                 Tab(
-                  icon: Icon(Icons.takeout_dining),
+                  icon: Icon(Icons.shopping_bag_outlined),
                   text: "PickUp",
                 )
               ],

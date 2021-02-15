@@ -34,10 +34,10 @@ class SetProvider {
         .collection("Cake")
         .where("orderDate", isGreaterThanOrEqualTo: _todayStart)
         .where("orderDate", isLessThanOrEqualTo: _todayEnd)
-        .orderBy("orderDate", descending: true)
         .snapshots()
         .map((list) =>
-            list.docs.map((doc) => CakeDataOrder.fromFireStore(doc)).toList());
+            list.docs.map((doc) => CakeDataOrder.fromFireStore(doc)).toList()
+              ..sort((a, b) => a.pickUpDate.compareTo(b.pickUpDate)));
   }
 
   Stream<List<CakeDataPickUp>> getTodayPickCupCakeData() {
@@ -51,11 +51,15 @@ class SetProvider {
         .collection("Cake")
         .where("pickUpDate",
             isGreaterThanOrEqualTo: _todayStart, isLessThanOrEqualTo: _todayEnd)
-        .where("pickUpStatus", isEqualTo: false)
-        // .orderBy("pickUpDate")
+        // .where("pickUpStatus", isEqualTo: false)
+        .orderBy("pickUpDate")
         .snapshots()
         .map((list) =>
-            list.docs.map((doc) => CakeDataPickUp.fromFireStore(doc)).toList());
+            list.docs.map((doc) => CakeDataPickUp.fromFireStore(doc)).toList()
+              ..sort((a, b) {
+                if (a.pickUpStatus) return 1;
+                return -1;
+              }));
   }
 
   Stream<List<CakeDataCalendarPickUp>> getCalendarPickUpCakeData() {

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:cakeorder/ProviderPackage/cakeDataClass.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:flutter/services.dart';
 
 class OrderPage extends StatefulWidget {
   @override
@@ -14,6 +15,46 @@ class OrderPage extends StatefulWidget {
 class _AddOrderState extends _TodayParent<OrderPage> {
   @override
   setListData() => Provider.of<List<CakeDataOrder>>(context);
+
+  @override
+  listViewSecondRow(int index) {
+    return Container(
+        width: MediaQuery.of(context).size.width,
+        margin: EdgeInsets.only(left: 3, top: 3, bottom: 3),
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Container(
+            width: MediaQuery.of(context).size.width / 2,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.payment,
+                  size: 20,
+                ),
+                Icon(
+                  _listData[index].payStatus ? Icons.check : Icons.close,
+                  color: Colors.redAccent,
+                  size: 18,
+                ),
+              ],
+            ),
+          ),
+          Container(
+            // width: MediaQuery.of(context).size.width / 2,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.person,
+                  size: 15,
+                ),
+                Container(
+                  child: Text(_listData[index].customerName),
+                ),
+              ],
+            ),
+          )
+        ]));
+  }
 
   @override
   List<Widget> customSwipeIconWidget(int index) {
@@ -84,6 +125,10 @@ class _AddOrderState extends _TodayParent<OrderPage> {
     );
     // return super.setSlidableDrawerActionPane();
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }
 
 class PickUpPage extends StatefulWidget {
@@ -152,6 +197,7 @@ class _PickUpPageState extends _TodayParent<PickUpPage> {
                             "  " +
                             _listData[index].customerPhone,
                         overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                         style: TextStyle(color: Colors.black, fontSize: 13),
                       ),
                     ),
@@ -195,21 +241,25 @@ class _PickUpPageState extends _TodayParent<PickUpPage> {
   @override
   List<Widget> customSwipeIconWidget(int index) {
     var _cakeData = _listData[index];
-    return [
-      IconSlideAction(
-        caption: 'Pick Up!',
-        color: Colors.redAccent,
-        icon: Icons.takeout_dining,
-        closeOnTap: false,
-        onTap: () {
-          setState(() {
-            _firestoreDataUpdate(_cakeData, isUndo: false);
-            _listData.remove(_cakeData);
-          });
-          Scaffold.of(context).showSnackBar(_pickUpSnackBar(_cakeData));
-        },
-      )
-    ];
+    if (!_listData[index].pickUpStatus) {
+      return [
+        IconSlideAction(
+          caption: 'Pick Up!',
+          color: Colors.blueAccent,
+          icon: Icons.shopping_bag_outlined,
+          closeOnTap: true,
+          onTap: () {
+            setState(() {
+              _firestoreDataUpdate(_cakeData, isUndo: false);
+              // _listData.remove(_cakeData);
+              // _listData.add(_cakeData);
+            });
+            Scaffold.of(context).showSnackBar(_pickUpSnackBar(_cakeData));
+          },
+        )
+      ];
+    }
+    return [];
   }
 
   _pickUpSnackBar(var _cakeData) {
@@ -220,7 +270,7 @@ class _PickUpPageState extends _TodayParent<PickUpPage> {
         textColor: Colors.redAccent,
         onPressed: () {
           setState(() {
-            _listData.add(_cakeData);
+            // _listData.add(_cakeData);
             _firestoreDataUpdate(_cakeData, isUndo: true);
           });
         },
@@ -230,21 +280,22 @@ class _PickUpPageState extends _TodayParent<PickUpPage> {
 
   @override
   setSlidableDrawerActionPane(int index) {
-    var _cakeData = _listData[index];
+    return;
+    // var _cakeData = _listData[index];
 
-    return SlidableDismissal(
-      child: SlidableDrawerDismissal(
-        key: UniqueKey(),
-      ),
-      onDismissed: (actionType) {
-        setState(() {
-          _listData.remove(_cakeData);
-          _firestoreDataUpdate(_cakeData, isUndo: false);
-        });
+    // return SlidableDismissal(
+    //   child: SlidableDrawerDismissal(
+    //     key: UniqueKey(),
+    //   ),
+    //   onDismissed: (actionType) {
+    //     setState(() {
+    //       _listData.remove(_cakeData);
+    //       _firestoreDataUpdate(_cakeData, isUndo: false);
+    //     });
 
-        Scaffold.of(context).showSnackBar(_pickUpSnackBar(_cakeData));
-      },
-    );
+    //     Scaffold.of(context).showSnackBar(_pickUpSnackBar(_cakeData));
+    //   },
+    // );
     // return super.setSlidableDrawerActionPane();
   }
 
@@ -255,9 +306,25 @@ class _PickUpPageState extends _TodayParent<PickUpPage> {
         .doc(cakeData.documentId)
         .update({"pickUpStatus": !isUndo ? true : false});
   }
+
+  @override
+  setListContainerBoxDecoration(int index) {
+    if (_listData[index].pickUpStatus) {
+      return BoxDecoration(
+          color: Colors.lightBlue[200],
+          borderRadius: BorderRadius.all(Radius.circular(5.0)));
+    } else {
+      return super.setListContainerBoxDecoration(index);
+    }
+  }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }
 
-abstract class _TodayParent<T extends StatefulWidget> extends State<T> {
+abstract class _TodayParent<T extends StatefulWidget> extends State<T>
+    with AutomaticKeepAliveClientMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   List<CakeData> _listData;
   SlidableController slidableController;
@@ -283,10 +350,11 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T> {
     });
   }
 
-  setSlidableDrawerActionPane(int index) {
-    return SlidableDismissal(
-      child: SlidableDrawerDismissal(),
-    );
+  setSlidableDrawerActionPane(int index);
+  setListContainerBoxDecoration(int index) {
+    return BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(5.0)),
+        border: Border.all(width: 1.0));
   }
 
   setListData();
@@ -317,10 +385,7 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T> {
                           },
                           child: Container(
                               margin: EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(5.0)),
-                                  border: Border.all(width: 1.0)),
+                              decoration: setListContainerBoxDecoration(index),
                               height: 85,
                               child: Column(
                                 children: [

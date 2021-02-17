@@ -52,11 +52,19 @@ class _CakeOrderAppState extends State<CakeOrderApp> {
     _widgetOptions = <Widget>[
       TodayList(),
       CalendarPage(),
-      // AlterPage(),
-      PasswordPage(
-          setPasswordCallback: passwordCallback,
-          correctPassword: isSavePassword)
+      AlterPage(),
+      // PasswordPage(
+      //     setPasswordCallback: passwordCallback,
+      //     correctPassword: isSavePassword)
     ];
+    // _widgetOptions = <Widget>[
+    //   TodayList(),
+    //   CalendarPage(),
+    //   // AlterPage(),
+    //   PasswordPage(
+    //       setPasswordCallback: passwordCallback,
+    //       correctPassword: isSavePassword)
+    // ];
     return MultiProvider(
         providers: [
           StreamProvider<List<CakeData>>.value(

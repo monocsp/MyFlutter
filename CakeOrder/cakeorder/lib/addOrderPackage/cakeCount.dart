@@ -12,7 +12,7 @@ class CakeCountWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            margin: EdgeInsets.only(top: 20),
+            margin: EdgeInsets.only(top: 15),
             child: Text(
               '수량',
               style: TextStyle(

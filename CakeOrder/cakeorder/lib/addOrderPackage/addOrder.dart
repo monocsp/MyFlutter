@@ -210,6 +210,7 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
   thirdLineBuild() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Flexible(
           flex: 1,

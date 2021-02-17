@@ -157,7 +157,8 @@ class _CakeSettingState extends State<CakeSetting> {
     ];
   }
 
-  void showAlertDialog({var cakeData}) {
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  void showAlertDialog({var cakeData}) async {
     bool isAlter = cakeData != null ? true : false;
     textEditingControllerCakeName..text = isAlter ? cakeData.id : "";
     saveCakePriceList = cakeData["CakePrice"].values.toList();
@@ -165,74 +166,85 @@ class _CakeSettingState extends State<CakeSetting> {
 
     cakeListCount = 1;
     if (cakeData != null) cakeListCount = cakeData["CakePrice"].keys.length;
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) => StatefulBuilder(
-          builder: (BuildContext context, setState) => new Dialog(
-                child: Container(
-                  // padding: EdgeInsets.all(5),
-                  // width: MediaQuery.of(context).size.width / 1.3,
-                  width: double.infinity,
-                  height: MediaQuery.of(context).size.height / 2,
-                  // height: double.infinity,
-                  child: SingleChildScrollView(
-                    child: Stack(children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            margin: EdgeInsets.only(top: 15, left: 5),
-                            child: Text("케이크 이름",
-                                style: TextStyle(
-                                    color: Colors.redAccent,
-                                    fontWeight: FontWeight.bold)),
-                          ),
-                          Container(
-                            padding: EdgeInsets.only(left: 5),
-                            margin: EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                                border:
-                                    Border.all(color: Colors.grey, width: 2),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(5))),
-                            child: TextFormField(
-                                controller: textEditingControllerCakeName,
-                                decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: "케이크 이름")),
-                          ),
-                        ]
-                          // ..addAll(widgetList)
-                          ..addAll(_dialogCakeSizePriceLine(
-                              cakeListCount, setState,
-                              cakeData: cakeData)),
-                      ),
-                      Positioned(
-                        left: MediaQuery.of(context).size.width / 1.5,
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.cancel_outlined,
-                            color: Colors.redAccent,
-                          ),
-                          onPressed: () => Navigator.pop(context),
+    await showDialog(
+            barrierDismissible: false,
+            context: context,
+            builder: (BuildContext context) => StatefulBuilder(
+                  builder: (BuildContext context, setState) => new Dialog(
+                    child:
+                        // Scaffold(
+                        //   key: _scaffoldKey,
+                        //   body:
+                        Container(
+                      // padding: EdgeInsets.all(5),
+                      // width: MediaQuery.of(context).size.width / 1.3,
+                      // width: double.infinity,
+                      height: MediaQuery.of(context).size.height / 2,
+                      // height: double.infinity,
+                      child: Scaffold(
+                        key: _scaffoldKey,
+                        body: SingleChildScrollView(
+                          child: Stack(children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.only(top: 15, left: 5),
+                                  child: Text("케이크 이름",
+                                      style: TextStyle(
+                                          color: Colors.redAccent,
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.only(left: 5),
+                                  margin: EdgeInsets.all(5),
+                                  decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: Colors.grey, width: 2),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(5))),
+                                  child: TextFormField(
+                                      controller: textEditingControllerCakeName,
+                                      decoration: InputDecoration(
+                                          border: InputBorder.none,
+                                          hintText: "케이크 이름")),
+                                ),
+                              ]
+                                // ..addAll(widgetList)
+                                ..addAll(_dialogCakeSizePriceLine(
+                                    cakeListCount, setState,
+                                    cakeData: cakeData)),
+                            ),
+                            Positioned(
+                              left: MediaQuery.of(context).size.width / 1.5,
+                              child: IconButton(
+                                icon: Icon(
+                                  Icons.cancel_outlined,
+                                  color: Colors.redAccent,
+                                ),
+                                onPressed: () => Navigator.pop(context),
+                              ),
+                            )
+                          ]),
                         ),
-                      )
-                    ]),
+                      ),
+                    ),
                   ),
-                ),
-              )),
+                ))
 
-      // content: Container(
+        // content: Container(
 
-      //   decoration: new BoxDecoration(
-      //     shape: BoxShape.rectangle,
-      //     color: const Color(0xFFFFFF),
-      //     borderRadius: new BorderRadius.all(new Radius.circular(32.0)),
-      //   ),
-      //   child: //Contents here
-      // ),
-    );
+        //   decoration: new BoxDecoration(
+        //     shape: BoxShape.rectangle,
+        //     color: const Color(0xFFFFFF),
+        //     borderRadius: new BorderRadius.all(new Radius.circular(32.0)),
+        //   ),
+        //   child: //Contents here
+        // ),
+        .then((value) => null)
+        .whenComplete(() {
+      setState(() {});
+    });
   }
 
   _dialogCakeSizePriceLine(int size, Function setState, {var cakeData}) {
@@ -305,7 +317,7 @@ class _CakeSettingState extends State<CakeSetting> {
                   saveCakePriceList.removeAt(number);
                   saveCakeSizeList.removeAt(number);
                 }
-                if (checkSaveData()) saveCakeData(cakeId: cakeData.id);
+                // if (checkSaveData()) saveCakeData(cakeId: cakeData.id);
               }
 
               cakeListCount -= 1;
@@ -315,17 +327,6 @@ class _CakeSettingState extends State<CakeSetting> {
       ],
       actionPane: SlidableDrawerActionPane(),
       child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-        // Container(
-        //     child: IconButton(
-        //   icon: Icon(
-        //     Icons.cancel,
-        //     color: Colors.redAccent,
-        //   ),
-        //   onPressed: () {
-        //     // print(saveCakePriceList[number]);
-        //     setState(() {});
-        //   },
-        // )),
         Container(
             margin: EdgeInsets.only(left: 10),
             width: MediaQuery.of(context).size.width / 3.5,
@@ -396,11 +397,19 @@ class _CakeSettingState extends State<CakeSetting> {
     saveCakeSizeList.forEach((element) {
       print("Element : " + element.toString());
     });
+
     if (cakeListCount == saveCakePriceList.length) {
       if (cakeListCount == saveCakeSizeList.length) {
-        return true;
+        if (!saveCakePriceList.contains('')) {
+          // print("save List" + saveCakePriceList.contains('').toString());
+          if (!saveCakeSizeList.contains('')) return true;
+        }
       }
     }
+    _scaffoldKey.currentState.showSnackBar(SnackBar(
+      content: Text("빈칸이 있는지 확인 해 주세요!"),
+      duration: Duration(seconds: 1),
+    ));
     return false;
   }
 

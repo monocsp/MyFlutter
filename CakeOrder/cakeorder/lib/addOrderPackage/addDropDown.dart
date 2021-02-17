@@ -6,6 +6,7 @@ import 'package:cakeorder/ProviderPackage/cakeDataClass.dart';
 class CustomDropDown {
   final BuildContext context;
   bool isClickable = true;
+  bool isDetail = false;
   static final double _text_Font_Size = 15;
   Function
       setStateCallback; //Callback Parameter Format : "?parm1='STRING'&parm2='DATA'"
@@ -103,40 +104,52 @@ class CustomDropDown {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           _customTitle(
               title: isClickable ? "주문 케이크 종류" : "주문 케이크", important: true),
-          IgnorePointer(
-            ignoring: !isClickable,
-            child: DropdownButton(
-                onTap: () {
-                  FocusScope.of(context).unfocus();
-                },
-                isExpanded: true,
-                value: cakeCategory != null ? cakeCategory.name : cakeCategory,
-                items: _cakeCategories,
-                onChanged: (value) {
-                  CakeCategory cake;
-                  for (final element in cakeCategoryProvider) {
-                    if (element.name == value) {
-                      cake = element;
-                    }
-                  }
+          // IgnorePointer(
+          //   ignoring: !isClickable,
+          //   child: DropdownButton(
+          //       onTap: () {
+          //         FocusScope.of(context).unfocus();
+          //       },
+          //       isExpanded: true,
+          //       value: cakeCategory != null ? cakeCategory.name : cakeCategory,
+          //       items: _cakeCategories,
+          //       onChanged: (value) {
+          //         CakeCategory cake;
+          //         for (final element in cakeCategoryProvider) {
+          //           if (element.name == value) {
+          //             cake = element;
+          //           }
+          //         }
 
-                  setStateCallback("?parm1=cakeCategory", cakeCategory: cake);
-                }),
-          ),
-          // Row(
-          //     children: [
-          //       Container(
-          //         margin: EdgeInsets.only(left: 15),
-          //         child: Icon(
-          //           Icons.cake,
-          //           color: Colors.grey,
-          //         ),
-          //       ),
-          //       Expanded(
-          //         child: Text(displayText ?? ''),
-          //       ),
-          // ],
+          //         setStateCallback("?parm1=cakeCategory", cakeCategory: cake);
+          //       }),
           // ),
+
+          isClickable
+              ? DropdownButton(
+                  onTap: () {
+                    FocusScope.of(context).unfocus();
+                  },
+                  isExpanded: true,
+                  value:
+                      cakeCategory != null ? cakeCategory.name : cakeCategory,
+                  items: _cakeCategories,
+                  onChanged: (value) {
+                    CakeCategory cake;
+                    for (final element in cakeCategoryProvider) {
+                      if (element.name == value) {
+                        cake = element;
+                      }
+                    }
+
+                    setStateCallback("?parm1=cakeCategory", cakeCategory: cake);
+                  })
+              : Container(
+                  margin: EdgeInsets.only(left: 10),
+                  child: Text(
+                    "${cakeCategory != null ? cakeCategory.name : ""}",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  )),
         ]));
   }
 
@@ -146,40 +159,82 @@ class CustomDropDown {
       CakeSizePrice selectedCakeSize}) {
     return currentCakeCategory != null
         ? Container(
-            margin: EdgeInsets.only(left: 10, top: 20),
+            margin: EdgeInsets.only(left: 10, top: 15),
             child: Column(children: [
               _customTitle(title: "케이크 호수", important: true),
               cakeSizeList != null
-                  ? IgnorePointer(
-                      ignoring: !isClickable,
-                      child: DropdownButton<String>(
-                        onTap: () {
-                          FocusScope.of(context).unfocus();
-                        },
-                        isExpanded: true,
-                        hint: Text("선택하세요"),
-                        value: selectedCakeSize != null
-                            ? selectedCakeSize.cakeSize
-                            : selectedCakeSize,
-                        onChanged: (String value) {
-                          var result;
-                          for (final _cake in cakeList) {
-                            if (_cake.cakeSize == value) {
-                              result = _cake;
-                              break;
+                  ?
+                  // ? IgnorePointer(
+                  //     ignoring: !isClickable,
+                  //     child: DropdownButton<String>(
+                  //       onTap: () {
+                  //         FocusScope.of(context).unfocus();
+                  //       },
+                  //       isExpanded: true,
+                  //       hint: Text("선택하세요"),
+                  //       value: selectedCakeSize != null
+                  //           ? selectedCakeSize.cakeSize
+                  //           : selectedCakeSize,
+                  //       onChanged: (String value) {
+                  //         var result;
+                  //         for (final _cake in cakeList) {
+                  //           if (_cake.cakeSize == value) {
+                  //             result = _cake;
+                  //             break;
+                  //           }
+                  //         }
+                  //         // print("result" + result);
+                  //         setStateCallback("?parm1=cakePrice",
+                  //             cakePrice: result);
+                  //       },
+                  //       items: cakeList.map((CakeSizePrice cake) {
+                  //         return DropdownMenuItem<String>(
+                  //           value: cake.cakeSize,
+                  //           child: Text("${cake.cakeSize} : ${cake.cakePrice}"),
+                  //         );
+                  //       }).toList(),
+                  //     ),
+                  //   )
+                  // : Container(
+                  //     child: CupertinoActivityIndicator(),
+                  //   ),
+                  isClickable
+                      ? DropdownButton<String>(
+                          onTap: () {
+                            FocusScope.of(context).unfocus();
+                          },
+                          isExpanded: true,
+                          hint: Text("선택하세요"),
+                          value: selectedCakeSize != null
+                              ? selectedCakeSize.cakeSize
+                              : selectedCakeSize,
+                          onChanged: (String value) {
+                            var result;
+                            for (final _cake in cakeList) {
+                              if (_cake.cakeSize == value) {
+                                result = _cake;
+                                break;
+                              }
                             }
-                          }
-                          setStateCallback("?parm1=cakePrice",
-                              cakePrice: result);
-                        },
-                        items: cakeList.map((CakeSizePrice cake) {
-                          return DropdownMenuItem<String>(
-                            value: cake.cakeSize,
-                            child: Text("${cake.cakeSize} : ${cake.cakePrice}"),
-                          );
-                        }).toList(),
-                      ),
-                    )
+                            // print("result" + result);
+                            setStateCallback("?parm1=cakePrice",
+                                cakePrice: result);
+                          },
+                          items: cakeList.map((CakeSizePrice cake) {
+                            return DropdownMenuItem<String>(
+                              value: cake.cakeSize,
+                              child:
+                                  Text("${cake.cakeSize} : ${cake.cakePrice}"),
+                            );
+                          }).toList(),
+                        )
+                      : Container(
+                          margin: EdgeInsets.only(left: 10),
+                          child: Text(
+                            "${selectedCakeSize != null ? selectedCakeSize.cakeSize.toString() + selectedCakeSize.cakePrice.toString() : ""}",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 15),
+                          ))
                   : Container(
                       child: CupertinoActivityIndicator(),
                     ),

@@ -8,15 +8,15 @@ import 'package:flutter/foundation.dart';
 import 'package:tip_dialog/tip_dialog.dart';
 import 'package:provider/provider.dart';
 
-class AlterPage extends StatefulWidget {
+class OrderAlterPage extends StatefulWidget {
   final CakeData cakeData;
-  AlterPage({Key key, this.cakeData}) : super(key: key);
+  OrderAlterPage({Key key, this.cakeData}) : super(key: key);
   @override
   _AlterPageState createState() => _AlterPageState();
   // State createState() => new MyAppState();
 }
 
-class _AlterPageState extends AddOrderParent<AlterPage> {
+class _AlterPageState extends AddOrderParent<OrderAlterPage> {
   List<CakeData> _forCrossValidationCakeList = [];
   CakeData _cakeData;
   @override
@@ -85,32 +85,32 @@ class _AlterPageState extends AddOrderParent<AlterPage> {
             cakePrice: cake["CakePrice"].values.toList());
         selectedCakeSize =
             CakeSizePrice(_cakeData.cakeSize, _cakeData.cakePrice);
-        cake["CakePrice"].keys.toList().asMap().forEach((index, size) {
-          cakeSizeList.add(new CakeSizePrice(
-              size, cake["CakePrice"].values.toList()[index]));
-          cakeCount = _cakeData.cakeCount;
-          payStatus = _cakeData.payStatus;
-          pickUpStatus = _cakeData.pickUpStatus;
-          orderName = _cakeData.customerName;
-          orderPhone = _cakeData.customerPhone;
-          partTimer = _cakeData.partTimer;
-          remarkText = _cakeData.remark ?? '';
-          textEditingControllerRemark = TextEditingController()
-            ..text = remarkText ?? '';
-          textEditingControllerCustomerName = TextEditingController()
-            ..text = orderName ?? '';
-          textEditingControllerCustomerPhone = TextEditingController()
-            ..text = orderPhone ?? '';
-          textEditingControllerPickUpDate = TextEditingController()
-            ..text = _cakeData.pickUpDate.toString().split(' ')[0];
-          textEditingControllerPickUpTime = TextEditingController()
-            ..text = DateFormat('kk:mm').format(_cakeData.pickUpDate);
-          textEditingControllerOrderDate = TextEditingController()
-            ..text = _cakeData.orderDate.toString().split(' ')[0];
-          textEditingControllerOrderTime = TextEditingController()
-            ..text = DateFormat('kk:mm').format(_cakeData.orderDate);
-          currentDocumentId = _cakeData.documentId;
-        });
+        cakeCount = _cakeData.cakeCount;
+        payStatus = _cakeData.payStatus;
+        pickUpStatus = _cakeData.pickUpStatus;
+        orderName = _cakeData.customerName;
+        orderPhone = _cakeData.customerPhone;
+        partTimer = _cakeData.partTimer;
+        remarkText = _cakeData.remark ?? '';
+        textEditingControllerRemark = TextEditingController()
+          ..text = remarkText ?? '';
+        textEditingControllerCustomerName = TextEditingController()
+          ..text = orderName ?? '';
+        textEditingControllerCustomerPhone = TextEditingController()
+          ..text = orderPhone ?? '';
+        textEditingControllerPickUpDate = TextEditingController()
+          ..text = _cakeData.pickUpDate.toString().split(' ')[0];
+        textEditingControllerPickUpTime = TextEditingController()
+          ..text = DateFormat('kk:mm').format(_cakeData.pickUpDate);
+        textEditingControllerOrderDate = TextEditingController()
+          ..text = _cakeData.orderDate.toString().split(' ')[0];
+        textEditingControllerOrderTime = TextEditingController()
+          ..text = DateFormat('kk:mm').format(_cakeData.orderDate);
+        currentDocumentId = _cakeData.documentId;
+      });
+      cake["CakePrice"].keys.toList().asMap().forEach((index, size) {
+        cakeSizeList.add(
+            new CakeSizePrice(size, cake["CakePrice"].values.toList()[index]));
       });
     });
   }
@@ -215,6 +215,8 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
   List<CakeData> _forCrossValidationCakeList = [];
   CakeData _cakeData;
   @override
+  bool get isDetailPage => true;
+  @override
   settingOnWillPopMethod() {
     Navigator.pop(context);
   }
@@ -248,6 +250,7 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
     _setCakeData();
     initData().then((cake) {
       setState(() {
+        print("hi");
         var dateTimePickUpDate = _cakeData.pickUpDate;
         var dateTimeOrderDate = _cakeData.orderDate;
         if (dateTimePickUpDate.runtimeType == Timestamp) {
@@ -263,31 +266,31 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
             cakePrice: cake["CakePrice"].values.toList());
         selectedCakeSize =
             CakeSizePrice(_cakeData.cakeSize, _cakeData.cakePrice);
+        cakeCount = _cakeData.cakeCount;
+        payStatus = _cakeData.payStatus;
+        pickUpStatus = _cakeData.pickUpStatus;
+        orderName = _cakeData.customerName;
+        orderPhone = _cakeData.customerPhone;
+        partTimer = _cakeData.partTimer;
+        remarkText = _cakeData.remark ?? '';
+        textEditingControllerRemark = TextEditingController()
+          ..text = remarkText ?? '';
+        textEditingControllerCustomerName = TextEditingController()
+          ..text = orderName ?? '';
+        textEditingControllerCustomerPhone = TextEditingController()
+          ..text = orderPhone ?? '';
+        textEditingControllerPickUpDate = TextEditingController()
+          ..text = _cakeData.pickUpDate.toString().split(' ')[0];
+        textEditingControllerPickUpTime = TextEditingController()
+          ..text = DateFormat('kk:mm').format(dateTimePickUpDate);
+        textEditingControllerOrderDate = TextEditingController()
+          ..text = _cakeData.orderDate.toString().split(' ')[0];
+        textEditingControllerOrderTime = TextEditingController()
+          ..text = DateFormat('kk:mm').format(dateTimeOrderDate);
+        currentDocumentId = _cakeData.documentId;
         cake["CakePrice"].keys.toList().asMap().forEach((index, size) {
           cakeSizeList.add(new CakeSizePrice(
               size, cake["CakePrice"].values.toList()[index]));
-          cakeCount = _cakeData.cakeCount;
-          payStatus = _cakeData.payStatus;
-          pickUpStatus = _cakeData.pickUpStatus;
-          orderName = _cakeData.customerName;
-          orderPhone = _cakeData.customerPhone;
-          partTimer = _cakeData.partTimer;
-          remarkText = _cakeData.remark ?? '';
-          textEditingControllerRemark = TextEditingController()
-            ..text = remarkText ?? '';
-          textEditingControllerCustomerName = TextEditingController()
-            ..text = orderName ?? '';
-          textEditingControllerCustomerPhone = TextEditingController()
-            ..text = orderPhone ?? '';
-          textEditingControllerPickUpDate = TextEditingController()
-            ..text = _cakeData.pickUpDate.toString().split(' ')[0];
-          textEditingControllerPickUpTime = TextEditingController()
-            ..text = DateFormat('kk:mm').format(dateTimePickUpDate);
-          textEditingControllerOrderDate = TextEditingController()
-            ..text = _cakeData.orderDate.toString().split(' ')[0];
-          textEditingControllerOrderTime = TextEditingController()
-            ..text = DateFormat('kk:mm').format(dateTimeOrderDate);
-          currentDocumentId = _cakeData.documentId;
         });
       });
     });
@@ -310,7 +313,7 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
         PopupMenuButton(
             onSelected: (route) {
               switch (route) {
-                case "AlterPage":
+                case "OrderAlterPage":
                   Navigator.pushNamed(context, "/" + route,
                       arguments: {"DATA": _cakeData});
                   break;
@@ -320,7 +323,7 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
               }
             },
             itemBuilder: (BuildContext bc) => [
-                  PopupMenuItem(child: Text("수정하기"), value: "AlterPage"),
+                  PopupMenuItem(child: Text("수정하기"), value: "OrderAlterPage"),
                   PopupMenuItem(
                       child: Text(
                         "삭제",

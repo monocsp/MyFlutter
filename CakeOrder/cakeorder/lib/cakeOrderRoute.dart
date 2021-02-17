@@ -1,3 +1,6 @@
+import 'package:cakeorder/Alter/alterMainPage.dart';
+import 'package:cakeorder/Alter/customPhone.dart';
+import 'package:cakeorder/Alter/passwordPage.dart';
 import 'package:cakeorder/Alter/reportPage.dart';
 import 'package:cakeorder/Alter/settingPartTimer.dart';
 import 'package:cakeorder/Alter/alterCake.dart';
@@ -42,10 +45,13 @@ class CakeOrderRouteGenerator {
           cakeData: arguments["DATA"],
         );
         break;
-      case 'AlterPage':
-        _pageWidget = AlterPage(
+      case 'OrderAlterPage':
+        _pageWidget = OrderAlterPage(
           cakeData: arguments["DATA"],
         );
+        break;
+      case 'AlterPage':
+        _pageWidget = AlterPage();
         break;
       case 'SettingPartTimer':
         _pageWidget = SettingPartTimer();
@@ -55,6 +61,12 @@ class CakeOrderRouteGenerator {
         break;
       case 'CakeSetting':
         _pageWidget = CakeSetting();
+        break;
+      case 'CustomerList':
+        _pageWidget = CustomerPhone();
+        break;
+      case 'PasswordPage':
+        _pageWidget = PasswordPage();
         break;
     }
     return CurrentOSCheck.instance['Android']

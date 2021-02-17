@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cakeorder/Alter/passwordPage.dart';
 import 'package:flutter/services.dart';
 import 'package:cakeorder/ProviderPackage/cakeDataClass.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -31,21 +32,31 @@ class _CakeOrderAppState extends State<CakeOrderApp> {
   @override
   var _os = CurrentOSCheck.instance;
   int _selectedIndex = 0;
+  bool isSavePassword;
+  passwordCallback(bool wasLogin) {
+    isSavePassword = wasLogin ?? false;
+  }
+
+  List<Widget> _widgetOptions;
+  @override
+  void initState() {
+    super.initState();
+    isSavePassword = false;
+  }
+
   // List<CakeData> temp = Provider.of(context)
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-  List<Widget> _widgetOptions = <Widget>[
-    TodayList(),
-    // Text(
-    //   'Index 1: Likes',
-    //   style: optionStyle,
-    // ),
-    CalendarPage(),
-    AlterPage(),
-  ];
+  TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
 
   @override
   Widget build(BuildContext context) {
+    _widgetOptions = <Widget>[
+      TodayList(),
+      CalendarPage(),
+      // AlterPage(),
+      PasswordPage(
+          setPasswordCallback: passwordCallback,
+          correctPassword: isSavePassword)
+    ];
     return MultiProvider(
         providers: [
           StreamProvider<List<CakeData>>.value(

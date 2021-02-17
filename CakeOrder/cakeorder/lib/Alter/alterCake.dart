@@ -81,7 +81,7 @@ class _CakeSettingState extends State<CakeSetting> {
                 return Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
+                    Container(
                       child: ListView.builder(
                           shrinkWrap: true,
                           itemCount: snapshot.data.size,
@@ -161,8 +161,10 @@ class _CakeSettingState extends State<CakeSetting> {
   void showAlertDialog({var cakeData}) async {
     bool isAlter = cakeData != null ? true : false;
     textEditingControllerCakeName..text = isAlter ? cakeData.id : "";
-    saveCakePriceList = cakeData["CakePrice"].values.toList();
-    saveCakeSizeList = cakeData["CakePrice"].keys.toList();
+    if (cakeData != null) {
+      saveCakePriceList = cakeData["CakePrice"].values.toList();
+      saveCakeSizeList = cakeData["CakePrice"].keys.toList();
+    }
 
     cakeListCount = 1;
     if (cakeData != null) cakeListCount = cakeData["CakePrice"].keys.length;
@@ -378,16 +380,13 @@ class _CakeSettingState extends State<CakeSetting> {
       saveCakeData.addAll({element: saveCakePriceList[index]});
     });
     if (cakeId != null) {
-      return FirebaseFirestore.instance
-          .collection("CakeList")
-          .doc(cakeId)
-          .set({"CakePrice": saveCakeData});
-    } else {
-      return FirebaseFirestore.instance
-          .collection("CakeList")
-          .doc(textEditingControllerCakeName.text)
-          .set({"CakePrice": saveCakeData});
+      if (cakeId != textEditingControllerCakeName.text)
+        FirebaseFirestore.instance.collection("CakeList").doc(cakeId).delete();
     }
+    return FirebaseFirestore.instance
+        .collection("CakeList")
+        .doc(textEditingControllerCakeName.text)
+        .set({"CakePrice": saveCakeData});
   }
 
   bool checkSaveData() {
@@ -401,7 +400,6 @@ class _CakeSettingState extends State<CakeSetting> {
     if (cakeListCount == saveCakePriceList.length) {
       if (cakeListCount == saveCakeSizeList.length) {
         if (!saveCakePriceList.contains('')) {
-          // print("save List" + saveCakePriceList.contains('').toString());
           if (!saveCakeSizeList.contains('')) return true;
         }
       }
@@ -446,47 +444,4 @@ class _CakeSettingState extends State<CakeSetting> {
           .doc(cakeData.id)
           .set({"CakePrice": cakeData["CakePrice"]});
   }
-
-  // _createCakeData() {
-  //   if (createButton) {
-  //     return Container(
-  //         height: 80,
-  //         child: Center(
-  //           child: IconButton(
-  //             icon: Icon(Icons.add),
-  //             onPressed: () {
-  //               setState(() {
-  //                 createButton = false;
-  //               });
-  //             },
-  //           ),
-  //         ));
-  //   } else {
-  //     return Container(
-  //         decoration: new BoxDecoration(
-  //             color: Colors.white,
-  //             borderRadius: BorderRadius.all(Radius.circular(10)),
-  //             border: Border.all(width: 1, color: Colors.black12)),
-  //         margin: EdgeInsets.only(left: 50, right: 50, top: 20, bottom: 20),
-  //         padding: EdgeInsets.only(left: 10),
-  //         child: TextField(
-  //           decoration: InputDecoration(
-  //               border: InputBorder.none,
-  //               hintText: '이름을 작성하세요.',
-  //               hintStyle: TextStyle(color: Colors.grey[300])),
-  //           cursorColor: Colors.blue,
-  //           maxLines: 1,
-  //           textInputAction: TextInputAction.go,
-  //           onSubmitted: (value) {
-  //             setState(() {
-  //               partTimerProvider.add(value);
-  //               _firestoreDataUpdate(value, isUndo: false);
-  //               createButton = true;
-  //               textEditingController.clear();
-  //             });
-  //           },
-  //           controller: textEditingController,
-  //         ));
-  //   }
-  // }
 }

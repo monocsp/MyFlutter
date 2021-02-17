@@ -514,7 +514,6 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
       for (int i = 0; i < cakeCategory.cakePrice.length; i++) {
         var _checkIntDouble = cakeCategory.cakePrice[i];
         if (cakeCategory.cakePrice[i].runtimeType == double) {
-          print("here");
           _checkIntDouble = _checkIntDouble.round();
           print(_checkIntDouble.runtimeType);
         }
@@ -537,7 +536,6 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
         }
         selectedCakeName = cakeCategory;
       } else if (arguments["parm1"] == "cakePrice") {
-        print(cakePrice);
         selectedCakeSize = cakePrice;
       }
     });

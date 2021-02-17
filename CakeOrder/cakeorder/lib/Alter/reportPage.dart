@@ -38,7 +38,8 @@ class _ReportPageState extends State<ReportPage> {
     isMemoizerRefresh = true;
     selectedDate = DateTime.now();
     monthStart = new DateTime(selectedDate.year, selectedDate.month);
-    monthEnd = new DateTime(selectedDate.year, selectedDate.month + 1, 0);
+    monthEnd =
+        new DateTime(selectedDate.year, selectedDate.month + 1, 0, 23, 59, 59);
     isShowingMainData = false;
   }
 
@@ -130,7 +131,7 @@ class _ReportPageState extends State<ReportPage> {
             },
           ),
           leftTitles: SideTitles(
-            interval: 50,
+            interval: bestEarning / 4,
             showTitles: true,
             getTextStyles: (value) => const TextStyle(
               color: Color(0xff75729e),
@@ -162,9 +163,12 @@ class _ReportPageState extends State<ReportPage> {
               ),
             )),
         minX: 0,
-        maxX: DateUtil()
-            .daysInMonth(selectedDate.month, selectedDate.year)
-            .toDouble(),
+        maxX:
+            //  spotList.length.toDouble(),
+            DateUtil()
+                    .daysInMonth(selectedDate.month, selectedDate.year)
+                    .toDouble() -
+                1,
         maxY: bestEarning,
         minY: 0,
         lineBarsData: [
@@ -199,19 +203,18 @@ class _ReportPageState extends State<ReportPage> {
     List<double> totalMoneybyDays = List<double>.generate(
         DateUtil().daysInMonth(selectedDate.month, selectedDate.year),
         (index) => 0);
-    // var cakeDataDocument = snapshot.docs;
+
     snapshot.docs.forEach((element) {
       double income = element["cakePrice"] / 1000;
       int day = element["orderDate"].toDate().day;
-      totalMoneybyDays.insert(day, totalMoneybyDays[day] + income);
+      totalMoneybyDays[day - 1] = totalMoneybyDays[day - 1] + income;
     });
-    // var cakeDataMap = snapshot.data;
+
     totalMoneybyDays.asMap().forEach((index, element) {
       totalEarning += element;
       if (bestEarning < element) bestEarning = element;
       result.add(new FlSpot(index.toDouble(), element));
     });
-
     return result;
   }
 
@@ -236,8 +239,8 @@ class _ReportPageState extends State<ReportPage> {
                         DateTime(selectedDate.year - 1, selectedDate.month, 1);
                     monthStart =
                         new DateTime(selectedDate.year, selectedDate.month);
-                    monthEnd = new DateTime(
-                        selectedDate.year, selectedDate.month + 1, 0);
+                    monthEnd = new DateTime(selectedDate.year,
+                        selectedDate.month + 1, 0, 23, 59, 59);
                   });
                 }),
           ),
@@ -261,8 +264,8 @@ class _ReportPageState extends State<ReportPage> {
                               selectedDate.year + 1, selectedDate.month, 1);
                           monthStart = new DateTime(
                               selectedDate.year, selectedDate.month);
-                          monthEnd = new DateTime(
-                              selectedDate.year, selectedDate.month + 1, 0);
+                          monthEnd = new DateTime(selectedDate.year,
+                              selectedDate.month + 1, 0, 23, 59, 59);
                         });
                       }),
                 )
@@ -329,7 +332,7 @@ class _ReportPageState extends State<ReportPage> {
                   monthStart =
                       new DateTime(selectedDate.year, selectedDate.month);
                   monthEnd = new DateTime(
-                      selectedDate.year, selectedDate.month + 1, 0);
+                      selectedDate.year, selectedDate.month + 1, 0, 23, 59, 59);
                 });
               },
               child: Center(
@@ -491,8 +494,8 @@ class _ReportPageState extends State<ReportPage> {
     return this._memoizer.runOnce(() async {
       return await _db
           .collection("Cake")
-          .where("pickUpDate", isGreaterThanOrEqualTo: monthStart)
-          .where("pickUpDate", isLessThanOrEqualTo: monthEnd)
+          .where("orderDate", isGreaterThanOrEqualTo: monthStart)
+          .where("orderDate", isLessThanOrEqualTo: monthEnd)
           .get();
     });
   }

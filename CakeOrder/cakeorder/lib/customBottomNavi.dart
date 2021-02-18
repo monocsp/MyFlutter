@@ -25,13 +25,13 @@ class CustomBottomNavi {
                   icon: Icons.today,
                   text: 'Today',
                 ),
-                // GButton(
-                //   icon: Icons.home,
-                //   text: 'Likes',
-                // ),
                 GButton(
                   icon: Icons.calendar_today_rounded,
                   text: 'Calendar',
+                ),
+                GButton(
+                  icon: Icons.bug_report,
+                  text: 'Report',
                 ),
                 GButton(
                   icon: Icons.person,

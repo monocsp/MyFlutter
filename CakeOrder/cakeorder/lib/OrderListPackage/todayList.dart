@@ -20,7 +20,7 @@ class _AddOrderState extends _TodayParent<OrderPage> {
   listViewSecondRow(int index) {
     return Container(
         width: MediaQuery.of(context).size.width,
-        margin: EdgeInsets.only(left: 3, top: 3, bottom: 3),
+        margin: EdgeInsets.only(top: 3, bottom: 3),
         child:
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Container(
@@ -155,7 +155,7 @@ class _PickUpPageState extends _TodayParent<PickUpPage> {
     return FittedBox(
       fit: BoxFit.fitWidth,
       child: Container(
-        margin: EdgeInsets.only(top: 3, left: 3),
+        margin: EdgeInsets.only(top: 3),
         child: Row(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -212,8 +212,8 @@ class _PickUpPageState extends _TodayParent<PickUpPage> {
   @override
   listViewSecondRow(int index) {
     return Container(
-        margin: EdgeInsets.all(3),
-        child: Row(children: [
+        margin: EdgeInsets.only(top: 2),
+        child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
           Icon(
             Icons.shopping_bag_outlined,
             size: 20,
@@ -224,7 +224,7 @@ class _PickUpPageState extends _TodayParent<PickUpPage> {
             size: 18,
           ),
           Container(
-            margin: EdgeInsets.only(left: 5),
+            margin: EdgeInsets.only(left: 10),
             child: Icon(
               Icons.payment,
               size: 20,
@@ -385,13 +385,16 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T>
                           },
                           child: Container(
                               margin: EdgeInsets.all(5),
+                              padding:
+                                  EdgeInsets.only(left: 5, right: 5, top: 3),
                               decoration: setListContainerBoxDecoration(index),
-                              height: 85,
+                              height: MediaQuery.of(context).size.height / 6.2,
                               child: Column(
                                 children: [
                                   listViewFirstRow(index),
                                   listViewSecondRow(index),
-                                  listViewThirdRow(index)
+                                  listViewThirdRow(index),
+                                  listViewFourthdRow(index)
                                 ],
                               )),
                         ),
@@ -408,6 +411,35 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T>
         : Center(
             child: Container(child: CupertinoActivityIndicator()),
           );
+  }
+
+  Widget listViewFourthdRow(int index) {
+    String remark;
+    if (_listData[index].remark == "")
+      remark = "작성된 메모가 없습니다.";
+    else
+      remark = _listData[index].remark;
+    return Container(
+      margin: EdgeInsets.only(top: 3),
+      child: Row(
+        children: [
+          Container(
+              child: Icon(
+            Icons.comment,
+            size: 20,
+          )),
+          Expanded(
+            child: Text(
+              remark,
+              style: TextStyle(fontSize: 14),
+              maxLines: 1,
+              textAlign: TextAlign.start,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   List<Widget> customSwipeIconWidget(int index) {
@@ -448,34 +480,32 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T>
     }
 
     return Container(
-        margin: EdgeInsets.all(3),
         child: Row(children: [
-          Icon(
-            Icons.cake_outlined,
-            size: 20,
-          ),
-          Text(
-            !isCakePriceNull
-                ? _listData[index].cakeCategory +
-                    _listData[index].cakeSize +
-                    " X" +
-                    _listData[index].cakeCount.toString()
-                : "EMPTY",
-            style: TextStyle(
-                color: Colors.redAccent,
-                fontWeight: FontWeight.bold,
-                fontSize: 13),
-          ),
-          Spacer(),
-          Icon(Icons.money),
-          Text(!isCakeCountNull ? _addColon.join() : "EMPTY")
-        ]));
+      Icon(
+        Icons.cake_outlined,
+        size: 20,
+      ),
+      Text(
+        !isCakePriceNull
+            ? _listData[index].cakeCategory +
+                _listData[index].cakeSize +
+                " X" +
+                _listData[index].cakeCount.toString()
+            : "EMPTY",
+        style: TextStyle(
+            color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 13),
+      ),
+      Spacer(),
+      Icon(Icons.money),
+      Text(!isCakeCountNull ? _addColon.join() : "EMPTY")
+    ]));
   }
 
   listViewSecondRow(int index) {
     return Container(
-        margin: EdgeInsets.all(3),
-        child: Row(children: [
+        margin: EdgeInsets.only(top: 3),
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Icon(
             Icons.payment,
             size: 20,
@@ -502,7 +532,7 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T>
     return FittedBox(
       fit: BoxFit.fitWidth,
       child: Container(
-        margin: EdgeInsets.only(top: 3, left: 3, right: 5),
+        margin: EdgeInsets.only(top: 3),
         child:
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Row(

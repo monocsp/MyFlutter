@@ -105,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Load the animation file from the bundle, note that you could also
     // download this. The RiveFile just expects a list of bytes.
-    rootBundle.load('assets/off_road_car.riv').then(
+    rootBundle.load('assets/teeny_tiny.riv').then(
       (data) async {
         final file = RiveFile();
 

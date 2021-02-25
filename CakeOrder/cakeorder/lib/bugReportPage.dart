@@ -14,6 +14,18 @@ class _BugReportPageState extends State<BugReportPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.white,
+        onPressed: () {
+          showtDialog();
+          textEditingControllerBug.clear();
+        },
+        child: Icon(
+          Icons.add,
+          size: 30,
+          color: Colors.black,
+        ),
+      ),
       appBar: AppBar(
         title: Center(
           child: Text(
@@ -28,7 +40,7 @@ class _BugReportPageState extends State<BugReportPage> {
   fetchData() {
     return FirebaseFirestore.instance
         .collection("BugReport")
-        .orderBy("createDate")
+        .orderBy("createDate", descending: true)
         .get();
   }
 
@@ -64,8 +76,30 @@ class _BugReportPageState extends State<BugReportPage> {
                             })
                       ]);
                 }
-                return Container(
-                  child: Text("hi"),
+
+                return Column(
+                  // mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: snapshot.data.size,
+                          itemBuilder: (context, index) {
+                            return Container(
+                              margin: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(5)),
+                                  border:
+                                      Border.all(color: Colors.grey, width: 1)),
+                              child: ListTile(
+                                title: Text(snapshot.data.docs[index]["Bug"]
+                                    .toString()),
+                              ),
+                            );
+                          }),
+                    ),
+                  ],
                 );
               }
           }
@@ -103,7 +137,22 @@ class _BugReportPageState extends State<BugReportPage> {
                       minLines: 5,
                     ),
                   ),
-                  RaisedButton(child: Text("저장"), onPressed: () {})
+                  RaisedButton(
+                      child: Text("저장"),
+                      onPressed: () {
+                        if (textEditingControllerBug.text != "") {
+                          FirebaseFirestore.instance
+                              .collection("BugReport")
+                              .add({
+                            "Bug": textEditingControllerBug.text,
+                            "createDate": Timestamp.fromDate(DateTime.now()),
+                            "isFixed": false
+                          }).then((value) {
+                            Navigator.pop(context);
+                            setState(() {});
+                          });
+                        }
+                      })
                 ],
               ),
             ),

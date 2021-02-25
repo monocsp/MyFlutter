@@ -52,7 +52,7 @@ class _AlterPageState extends AddOrderParent<OrderAlterPage> {
   void initState() {
     super.initState();
     new Future.delayed(Duration.zero, () {
-      test(context);
+      setInitiData(context);
     });
   }
 
@@ -71,7 +71,7 @@ class _AlterPageState extends AddOrderParent<OrderAlterPage> {
     return await CakeCategory().getCake(_cakeData.cakeCategory);
   }
 
-  test(BuildContext context) {
+  setInitiData(BuildContext context) {
     _cakeData = widget.cakeData;
     // Future.delayed(Duration(milliseconds: 1000));
     _forCrossValidationCakeList =
@@ -109,8 +109,12 @@ class _AlterPageState extends AddOrderParent<OrderAlterPage> {
         currentDocumentId = _cakeData.documentId;
       });
       cake["CakePrice"].keys.toList().asMap().forEach((index, size) {
-        cakeSizeList.add(
-            new CakeSizePrice(size, cake["CakePrice"].values.toList()[index]));
+        int cakePrice;
+        if (cake["CakePrice"].values.toList()[index].runtimeType == String)
+          cakePrice = int.parse(cake["CakePrice"].values.toList()[index]);
+        else
+          cakePrice = cake["CakePrice"].values.toList()[index];
+        cakeSizeList.add(new CakeSizePrice(size, cakePrice));
       });
     });
   }
@@ -250,7 +254,6 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
     _setCakeData();
     initData().then((cake) {
       setState(() {
-        print("hi");
         var dateTimePickUpDate = _cakeData.pickUpDate;
         var dateTimeOrderDate = _cakeData.orderDate;
         if (dateTimePickUpDate.runtimeType == Timestamp) {
@@ -289,8 +292,12 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
           ..text = DateFormat('kk:mm').format(dateTimeOrderDate);
         currentDocumentId = _cakeData.documentId;
         cake["CakePrice"].keys.toList().asMap().forEach((index, size) {
-          cakeSizeList.add(new CakeSizePrice(
-              size, cake["CakePrice"].values.toList()[index]));
+          int cakePrice;
+          if (cake["CakePrice"].values.toList()[index].runtimeType == String)
+            cakePrice = int.parse(cake["CakePrice"].values.toList()[index]);
+          else
+            cakePrice = cake["CakePrice"].values.toList()[index];
+          cakeSizeList.add(new CakeSizePrice(size, cakePrice));
         });
       });
     });

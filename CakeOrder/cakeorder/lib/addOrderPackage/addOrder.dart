@@ -607,8 +607,8 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
                   remarkText != null
                       ? remarkText != ''
                           ? remarkText
-                          : '메모된 것이 없습니다.'
-                      : '메모된 것이 없습니다.',
+                          : '작성된 메모가 없습니다.'
+                      : '작성된 메모가 없습니다.',
                   style: TextStyle(height: 1.3),
                 ),
               ));

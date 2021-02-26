@@ -37,6 +37,8 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
   bool payStatus;
   bool pickUpStatus;
   bool isDetailPage;
+  bool payInStore;
+  bool payInCash;
   CustomDate customDate;
   CustomDropDown customDropDown;
   CakeCountWidget cakeCountWidget;
@@ -65,6 +67,8 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
     pickUpStatus = null;
     selectedCakeName = null;
     partTimer = null;
+    payInStore = null;
+    payInCash = null;
   }
 
   String orderDate;
@@ -271,7 +275,9 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
   fifthLineBuild() {
     return Row(children: [
       customDropDown.selectPartTimerDropDown(partTimer),
-      payAndPickUpStatusCheckBox(isPayStatus: true),
+      payStatus != null
+          ? payAndPickUpStatusCheckBox(isPayStatus: true)
+          : checkPay(),
       payAndPickUpStatusCheckBox(isPayStatus: false)
     ]);
   }
@@ -612,6 +618,47 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
                   style: TextStyle(height: 1.3),
                 ),
               ));
+  }
+
+  Widget checkPay() {
+    return Container(
+      margin: EdgeInsets.only(left: 50, top: 5, right: 5),
+      child: Column(
+        children: [
+          _customTextBox(title: "결제 여부", import: true),
+          Row(
+            children: [
+              Checkbox(
+                value: payInStore ?? false,
+                onChanged: (value) {
+                  setState(() {
+                    if (payInStore != null) {
+                      payInStore = !payInStore;
+                    } else {
+                      payInStore = true;
+                    }
+                    if (payInCash != null) if (payInCash) payInCash = false;
+                  });
+                },
+              ),
+              Checkbox(
+                value: payInCash ?? false,
+                onChanged: (value) {
+                  setState(() {
+                    if (payInCash != null) {
+                      payInCash = !payInCash;
+                    } else {
+                      payInCash = true;
+                    }
+                    if (payInStore != null) if (payInStore) payInStore = false;
+                  });
+                },
+              )
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   payAndPickUpStatusCheckBox(

@@ -4,8 +4,10 @@ import 'package:cakeorder/Alter/passwordPage.dart';
 import 'package:cakeorder/Alter/reportPage.dart';
 import 'package:cakeorder/Alter/settingPartTimer.dart';
 import 'package:cakeorder/Alter/alterCake.dart';
+import 'package:cakeorder/ProviderPackage/myprovider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'addOrderPackage/addOrder.dart';
 import 'checkingOS.dart';
 import 'main.dart';
@@ -63,7 +65,12 @@ class CakeOrderRouteGenerator {
         _pageWidget = CakeSetting();
         break;
       case 'CustomerList':
-        _pageWidget = CustomerPhone();
+        _pageWidget =
+            Consumer<CustomerProvider>(builder: (context, customerProvider, _) {
+          return CustomerPhone(
+            customerProvider: customerProvider,
+          );
+        });
         break;
       case 'PasswordPage':
         _pageWidget = PasswordPage();

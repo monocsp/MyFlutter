@@ -36,6 +36,7 @@ class CustomDropDown {
   selectPartTimerDropDown(String partTimer) {
     List<DropdownMenuItem> _partTimerList = [];
     Widget dropDown;
+    partTimer = partTimer ?? "";
     if (partTimerProvider != null) {
       partTimerProvider.forEach((element) {
         _partTimerList.add(new DropdownMenuItem(
@@ -77,7 +78,14 @@ class CustomDropDown {
       child: Column(
         children: [
           _customTitle(title: "주문 받은사람", important: true),
-          IgnorePointer(ignoring: !isClickable, child: dropDown)
+          isClickable
+              ? IgnorePointer(ignoring: !isClickable, child: dropDown)
+              : Container(
+                  margin: EdgeInsets.only(left: 10),
+                  child: Text(
+                    "${partTimer}",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  )),
 
           // setStateCallback(value)),
         ],
@@ -104,27 +112,6 @@ class CustomDropDown {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           _customTitle(
               title: isClickable ? "주문 케이크 종류" : "주문 케이크", important: true),
-          // IgnorePointer(
-          //   ignoring: !isClickable,
-          //   child: DropdownButton(
-          //       onTap: () {
-          //         FocusScope.of(context).unfocus();
-          //       },
-          //       isExpanded: true,
-          //       value: cakeCategory != null ? cakeCategory.name : cakeCategory,
-          //       items: _cakeCategories,
-          //       onChanged: (value) {
-          //         CakeCategory cake;
-          //         for (final element in cakeCategoryProvider) {
-          //           if (element.name == value) {
-          //             cake = element;
-          //           }
-          //         }
-
-          //         setStateCallback("?parm1=cakeCategory", cakeCategory: cake);
-          //       }),
-          // ),
-
           isClickable
               ? DropdownButton(
                   onTap: () {

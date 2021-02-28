@@ -253,7 +253,14 @@ abstract class _CalendarParent<T extends StatefulWidget> extends State<T>
                           margin: EdgeInsets.only(left: 5, right: 5),
                           child: Icon(
                             Icons.payment,
-                            color: event.payStatus ? Colors.red : Colors.grey,
+                            color: event.payStatus != null
+                                ? event.payStatus
+                                    ? Colors.red
+                                    : Colors.grey
+                                : (event.payInCash || event.payInStore)
+                                    ? Colors.red
+                                    : Colors.grey,
+                            // color: event.payStatus ? Colors.red : Colors.grey,
                           )),
                       Container(
                         margin: EdgeInsets.only(left: 5, right: 5),
@@ -262,12 +269,7 @@ abstract class _CalendarParent<T extends StatefulWidget> extends State<T>
                           color: event.pickUpStatus ? Colors.red : Colors.grey,
                         ),
                       ),
-                    ])
-                        // Checkbox(
-                        //   value: event.pickUpStatus,
-                        // )
-
-                        ),
+                    ])),
                     onTap: () async {
                       await Navigator.pushNamed(context, '/DetailPage',
                           arguments: {

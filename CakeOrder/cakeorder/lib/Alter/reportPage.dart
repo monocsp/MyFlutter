@@ -21,6 +21,7 @@ class _ReportPageState extends State<ReportPage> {
   bool isShowingMainData;
   double bestEarning;
   double totalEarning;
+  String totalEarningIncludeDot;
 
   var device_width;
   var device_height;
@@ -197,6 +198,7 @@ class _ReportPageState extends State<ReportPage> {
   }
 
   setFlSpotList(QuerySnapshot snapshot) {
+    totalEarningIncludeDot = '';
     bestEarning = 0;
     totalEarning = 0;
     List<FlSpot> result = [];
@@ -215,6 +217,18 @@ class _ReportPageState extends State<ReportPage> {
       if (bestEarning < element) bestEarning = element;
       result.add(new FlSpot(index.toDouble(), element));
     });
+    //Set Total Text include Dot
+    totalEarningIncludeDot = (totalEarning * 1000).toString().split('.')[0];
+    int numberLength = totalEarningIncludeDot.split('').length;
+    int dotCount = (numberLength - 1) ~/ 3;
+
+    int firstDotLocation = ((numberLength - 1) % 3) + 1;
+    for (int i = 0; i < dotCount; i++) {
+      List<String> totalEarningIncludeDotList =
+          totalEarningIncludeDot.split('');
+      totalEarningIncludeDotList.insert(firstDotLocation + i * 4, ',');
+      totalEarningIncludeDot = totalEarningIncludeDotList.join();
+    }
     return result;
   }
 
@@ -382,14 +396,6 @@ class _ReportPageState extends State<ReportPage> {
                           decoration: BoxDecoration(
                             color: Colors.yellow[200],
                             borderRadius: BorderRadius.all(Radius.circular(18)),
-                            // gradient: LinearGradient(
-                            //   colors: [
-                            //     Colors.indigo[200],
-                            //     Colors.indigo[200],
-                            //   ],
-                            //   begin: Alignment.bottomCenter,
-                            //   end: Alignment.topCenter,
-                            // ),
                           ),
                           child: Stack(
                             children: <Widget>[
@@ -421,31 +427,26 @@ class _ReportPageState extends State<ReportPage> {
                                     height: 30,
                                   ),
                                   Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                          right: 16.0, left: 6.0),
+                                    child: Container(
+                                      padding:
+                                          EdgeInsets.only(right: 16, left: 6),
                                       child: LineChart(
                                         settingChartData(
                                             setFlSpotList(snapshot.data)),
                                       ),
                                     ),
+                                    // ),
                                   ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
+                                  Container(
+                                      margin: EdgeInsets.only(left: 5, top: 10),
+                                      child: Text(
+                                        "단위 : 1000원",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.redAccent),
+                                      )),
                                 ],
                               ),
-                              Container(
-                                  margin: EdgeInsets.only(
-                                      top: device_height / 2 -
-                                          device_height / 10,
-                                      left: device_width / 20),
-                                  child: Text(
-                                    "단위 : 1000원",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.redAccent),
-                                  )),
                             ],
                           ),
                         ),
@@ -454,7 +455,8 @@ class _ReportPageState extends State<ReportPage> {
                         margin: EdgeInsets.only(top: 5),
                         child: Center(
                           child: Text(
-                            "TOTAL : ${(totalEarning * 1000).toString().split('.')[0]}원",
+                            // "TOTAL : ${(totalEarning * 1000).toString().split('.')[0]}원",
+                            "TOTAL : ${totalEarningIncludeDot}원",
                             style: TextStyle(
                                 color: Colors.redAccent,
                                 fontWeight: FontWeight.bold,

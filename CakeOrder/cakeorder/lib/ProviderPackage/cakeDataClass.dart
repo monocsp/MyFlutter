@@ -30,6 +30,8 @@ class CakeData {
   final bool pickUpStatus;
   final int cakeCount;
   final bool decoStatus;
+  final bool payInStore;
+  final bool payInCash;
 
   String documentId;
 
@@ -47,7 +49,9 @@ class CakeData {
       this.pickUpStatus,
       this.documentId,
       this.cakeCount,
-      this.decoStatus});
+      this.decoStatus,
+      this.payInCash,
+      this.payInStore});
 
   Future toFireStore(callback) async {
     this.orderDate = Timestamp.fromDate(f.parse(orderDate));
@@ -63,7 +67,9 @@ class CakeData {
       "customerPhone": customerPhone,
       "partTimer": partTimer,
       "remark": remark,
-      "payStatus": payStatus ?? false,
+      "payStatus": payStatus,
+      "payInCash": payInCash ?? false,
+      "payInStore": payInStore ?? false,
       "pickUpStatus": pickUpStatus ?? false,
       "cakeCount": cakeCount,
       "decoStatus": decoStatus ?? false,
@@ -86,7 +92,9 @@ class CakeData {
       "customerPhone": customerPhone,
       "partTimer": partTimer,
       "remark": remark,
-      "payStatus": payStatus ?? false,
+      "payStatus": payStatus,
+      "payInCash": payInCash ?? false,
+      "payInStore": payInStore ?? false,
       "pickUpStatus": pickUpStatus ?? false,
       "cakeCount": cakeCount,
       "decoStatus": decoStatus ?? false,
@@ -107,7 +115,9 @@ class CakeData {
       "customerPhone": customerPhone,
       "partTimer": partTimer,
       "remark": remark,
-      "payStatus": payStatus ?? false,
+      "payStatus": payStatus,
+      "payInCash": payInCash ?? false,
+      "payInStore": payInStore ?? false,
       "pickUpStatus": pickUpStatus ?? false,
       "cakeCount": cakeCount,
       "decoStatus": decoStatus ?? false,
@@ -133,7 +143,9 @@ class CakeData {
         documentId: snapshot.id,
         orderDate: _cakeData["orderDate"].toDate(),
         partTimer: _cakeData["partTimer"] ?? '',
-        payStatus: _cakeData["payStatus"] ?? false,
+        payStatus: _cakeData["payStatus"],
+        payInCash: _cakeData["payInCash"] ?? false,
+        payInStore: _cakeData["payInStore"] ?? false,
         pickUpDate: _cakeData["pickUpDate"].toDate(),
         pickUpStatus: _cakeData["pickUpStatus"] ?? false,
         remark: _cakeData["remark"] ?? '',
@@ -156,7 +168,9 @@ class CakeDataOrder extends CakeData {
       bool pickUpStatus,
       String documentId,
       int cakeCount,
-      bool decoStatus})
+      bool decoStatus,
+      bool payInStore,
+      bool payInCash})
       : super(
             cakeCategory: cakeCategory,
             cakeCount: cakeCount,
@@ -171,7 +185,9 @@ class CakeDataOrder extends CakeData {
             payStatus: payStatus,
             pickUpDate: pickUpDate,
             pickUpStatus: pickUpStatus,
-            remark: remark);
+            remark: remark,
+            payInCash: payInCash,
+            payInStore: payInStore);
 
   factory CakeDataOrder.fromFireStore(DocumentSnapshot snapshot) {
     var _cakeData = snapshot.data();
@@ -185,7 +201,9 @@ class CakeDataOrder extends CakeData {
         documentId: snapshot.id,
         orderDate: _cakeData["orderDate"].toDate(),
         partTimer: _cakeData["partTimer"] ?? '',
-        payStatus: _cakeData["payStatus"] ?? false,
+        payStatus: _cakeData["payStatus"],
+        payInCash: _cakeData["payInCash"] ?? false,
+        payInStore: _cakeData["payInStore"] ?? false,
         pickUpDate: _cakeData["pickUpDate"].toDate(),
         pickUpStatus: _cakeData["pickUpStatus"] ?? false,
         remark: _cakeData["remark"] ?? '',
@@ -208,22 +226,27 @@ class CakeDataPickUp extends CakeData {
       bool pickUpStatus,
       String documentId,
       int cakeCount,
-      bool decoStatus})
+      bool decoStatus,
+      bool payInStore,
+      bool payInCash})
       : super(
-            cakeCategory: cakeCategory,
-            cakeCount: cakeCount,
-            cakePrice: cakePrice,
-            cakeSize: cakeSize,
-            customerName: customerName,
-            customerPhone: customerPhone,
-            decoStatus: decoStatus,
-            documentId: documentId,
-            orderDate: orderDate,
-            partTimer: partTimer,
-            payStatus: payStatus,
-            pickUpDate: pickUpDate,
-            pickUpStatus: pickUpStatus,
-            remark: remark);
+          cakeCategory: cakeCategory,
+          cakeCount: cakeCount,
+          cakePrice: cakePrice,
+          cakeSize: cakeSize,
+          customerName: customerName,
+          customerPhone: customerPhone,
+          decoStatus: decoStatus,
+          documentId: documentId,
+          orderDate: orderDate,
+          partTimer: partTimer,
+          payStatus: payStatus,
+          pickUpDate: pickUpDate,
+          pickUpStatus: pickUpStatus,
+          remark: remark,
+          payInStore: payInStore,
+          payInCash: payInCash,
+        );
 
   factory CakeDataPickUp.fromFireStore(DocumentSnapshot snapshot) {
     var _cakeData = snapshot.data();
@@ -237,7 +260,9 @@ class CakeDataPickUp extends CakeData {
         documentId: snapshot.id,
         orderDate: _cakeData["orderDate"].toDate(),
         partTimer: _cakeData["partTimer"] ?? '',
-        payStatus: _cakeData["payStatus"] ?? false,
+        payStatus: _cakeData["payStatus"],
+        payInCash: _cakeData["payInCash"] ?? false,
+        payInStore: _cakeData["payInStore"] ?? false,
         pickUpDate: _cakeData["pickUpDate"].toDate(),
         pickUpStatus: _cakeData["pickUpStatus"] ?? false,
         remark: _cakeData["remark"] ?? '',
@@ -260,7 +285,9 @@ class CakeDataCalendarPickUp extends CakeData {
       bool pickUpStatus,
       String documentId,
       int cakeCount,
-      bool decoStatus})
+      bool decoStatus,
+      bool payInStore,
+      bool payInCash})
       : super(
             cakeCategory: cakeCategory,
             cakeCount: cakeCount,
@@ -275,6 +302,8 @@ class CakeDataCalendarPickUp extends CakeData {
             payStatus: payStatus,
             pickUpDate: pickUpDate,
             pickUpStatus: pickUpStatus,
+            payInStore: payInStore,
+            payInCash: payInCash,
             remark: remark);
   factory CakeDataCalendarPickUp.fromFireStore(DocumentSnapshot snapshot) {
     var _cakeData = snapshot.data();
@@ -288,7 +317,9 @@ class CakeDataCalendarPickUp extends CakeData {
         documentId: snapshot.id,
         orderDate: _cakeData["orderDate"].toDate(),
         partTimer: _cakeData["partTimer"] ?? '',
-        payStatus: _cakeData["payStatus"] ?? false,
+        payStatus: _cakeData["payStatus"],
+        payInCash: _cakeData["payInCash"] ?? false,
+        payInStore: _cakeData["payInStore"] ?? false,
         pickUpDate: _cakeData["pickUpDate"].toDate(),
         pickUpStatus: _cakeData["pickUpStatus"] ?? false,
         remark: _cakeData["remark"] ?? '',
@@ -311,7 +342,9 @@ class CakeDataCalendarOrder extends CakeData {
       bool pickUpStatus,
       String documentId,
       int cakeCount,
-      bool decoStatus})
+      bool decoStatus,
+      bool payInStore,
+      bool payInCash})
       : super(
             cakeCategory: cakeCategory,
             cakeCount: cakeCount,
@@ -326,6 +359,8 @@ class CakeDataCalendarOrder extends CakeData {
             payStatus: payStatus,
             pickUpDate: pickUpDate,
             pickUpStatus: pickUpStatus,
+            payInStore: payInStore,
+            payInCash: payInCash,
             remark: remark);
   factory CakeDataCalendarOrder.fromFireStore(DocumentSnapshot snapshot) {
     var _cakeData = snapshot.data();
@@ -339,7 +374,9 @@ class CakeDataCalendarOrder extends CakeData {
         documentId: snapshot.id,
         orderDate: _cakeData["orderDate"].toDate(),
         partTimer: _cakeData["partTimer"] ?? '',
-        payStatus: _cakeData["payStatus"] ?? false,
+        payStatus: _cakeData["payStatus"],
+        payInCash: _cakeData["payInCash"] ?? false,
+        payInStore: _cakeData["payInStore"] ?? false,
         pickUpDate: _cakeData["pickUpDate"].toDate(),
         pickUpStatus: _cakeData["pickUpStatus"] ?? false,
         remark: _cakeData["remark"] ?? '',
@@ -364,5 +401,17 @@ class CakeCategory {
         .collection("CakeList")
         .doc(cakeName)
         .get();
+  }
+}
+
+class CustomerData {
+  final String name;
+  final String phoneNumber;
+  CustomerData({this.name, this.phoneNumber});
+  factory CustomerData.fromFireStore(DocumentSnapshot snapshot) {
+    Map _cakeData = snapshot.data();
+    return CustomerData(
+        name: _cakeData["customerName"],
+        phoneNumber: _cakeData["customerPhone"]);
   }
 }

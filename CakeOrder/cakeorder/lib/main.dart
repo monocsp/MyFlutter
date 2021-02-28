@@ -110,6 +110,8 @@ class _CakeOrderAppState extends State<CakeOrderApp> {
               return null;
             },
           ),
+          ChangeNotifierProvider<CustomerProvider>.value(
+              value: new CustomerProvider()),
         ],
         child: _os['Android']
             ? MaterialApp(

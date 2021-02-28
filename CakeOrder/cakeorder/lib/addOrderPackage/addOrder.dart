@@ -278,7 +278,7 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
       payStatus != null
           ? payAndPickUpStatusCheckBox(isPayStatus: true)
           : checkPay(),
-      payAndPickUpStatusCheckBox(isPayStatus: false)
+      // payAndPickUpStatusCheckBox(isPayStatus: false)
     ]);
   }
 
@@ -336,8 +336,10 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
         customerName: textEditingControllerCustomerName.text,
         customerPhone: textEditingControllerCustomerPhone.text,
         partTimer: partTimer,
-        remark: textEditingControllerRemark.text,
-        payStatus: payStatus,
+        remark: textEditingControllerRemark.text.trim(),
+        // payStatus: payStatus,
+        payInCash: payInCash,
+        payInStore: payInStore,
         pickUpStatus: pickUpStatus,
         cakeCount: cakeCount);
     await data.toFireStore(loadDialogCallback);
@@ -486,7 +488,7 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
     if (isCompleted == null) {
       Navigator.of(context).pop();
       TipDialogHelper.success("저장 완료!");
-      await Future.delayed(Duration(seconds: 3));
+      await Future.delayed(Duration(seconds: 2));
       Navigator.of(context).popUntil(ModalRoute.withName('/'));
     } else {
       Navigator.of(context).pop();
@@ -620,14 +622,16 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
               ));
   }
 
-  Widget checkPay() {
+  Widget checkPay({Function snakbarCallback}) {
     return Container(
-      margin: EdgeInsets.only(left: 50, top: 5, right: 5),
-      child: Column(
+      margin: EdgeInsets.only(left: 50, top: 5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _customTextBox(title: "결제 여부", import: true),
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              _customTextBox(title: "매장 결제", import: true),
               Checkbox(
                 value: payInStore ?? false,
                 onChanged: (value) {
@@ -639,8 +643,14 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
                     }
                     if (payInCash != null) if (payInCash) payInCash = false;
                   });
+                  if (snakbarCallback != null) snakbarCallback();
                 },
               ),
+            ],
+          ),
+          Column(
+            children: [
+              _customTextBox(title: "계좌 입금", import: true),
               Checkbox(
                 value: payInCash ?? false,
                 onChanged: (value) {
@@ -652,8 +662,9 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
                     }
                     if (payInStore != null) if (payInStore) payInStore = false;
                   });
+                  if (snakbarCallback != null) snakbarCallback();
                 },
-              )
+              ),
             ],
           ),
         ],
@@ -663,9 +674,12 @@ abstract class AddOrderParent<T extends StatefulWidget> extends State<T> {
 
   payAndPickUpStatusCheckBox(
       {@required isPayStatus, Function payStatusUpdateFireStore}) {
+    bool isDetailPage = payStatusUpdateFireStore != null ? true : false;
     return Container(
       width: MediaQuery.of(context).size.width / 4,
-      margin: EdgeInsets.only(left: 10, top: 5, right: 5),
+      margin: isDetailPage
+          ? EdgeInsets.only(top: 5, right: 5)
+          : EdgeInsets.only(left: 10, top: 5, right: 5),
       child: Column(
         children: [
           isPayStatus

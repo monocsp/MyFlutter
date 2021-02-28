@@ -117,14 +117,21 @@ class _BugReportPageState extends State<BugReportPage> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
+                  Row(
+                    children: [
+                      IconButton(
+                          icon: Icon(Icons.cancel_outlined, color: Colors.red),
+                          onPressed: () => Navigator.pop(context)),
+                      Container(
+                          margin: EdgeInsets.only(top: 10, bottom: 10),
+                          child: Text(
+                            "버그 제보하기",
+                            style: TextStyle(fontSize: 20),
+                          )),
+                    ],
+                  ),
                   Container(
-                      margin: EdgeInsets.only(top: 5, bottom: 10),
-                      child: Text(
-                        "버그 제보하기",
-                        style: TextStyle(fontSize: 20),
-                      )),
-                  Container(
-                    margin: EdgeInsets.only(top: 5, bottom: 5),
+                    margin: EdgeInsets.all(5),
                     padding: EdgeInsets.only(left: 5, right: 5),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5),

@@ -92,3 +92,61 @@ class SetProvider {
             .toList());
   }
 }
+
+class CustomerProvider with ChangeNotifier {
+  final _productsSnapshot = <DocumentSnapshot>[];
+  String _errorMessage = "Customer Provider RuntimeError";
+  int documentLimit = 15;
+  bool _hasNext = true;
+  bool _isFetchingUsers = false;
+
+  String get errorMessage => _errorMessage;
+  bool get hasNext => _hasNext;
+
+  List<CustomerData> get data => _productsSnapshot.map((snap) {
+        return CustomerData.fromFireStore(snap);
+      }).toList();
+
+  Future fetchNextProducts() async {
+    if (_isFetchingUsers) return;
+    _isFetchingUsers = true;
+
+    try {
+      final snap = await FirebaseApi.getBoard(
+        documentLimit,
+        startAfter:
+            _productsSnapshot.isNotEmpty ? _productsSnapshot.last : null,
+      );
+      _productsSnapshot.addAll(snap.docs);
+
+      if (snap.docs.length < documentLimit) _hasNext = false;
+      notifyListeners();
+    } catch (error) {
+      _errorMessage = error.toString();
+      notifyListeners();
+    }
+
+    _isFetchingUsers = false;
+  }
+}
+
+class FirebaseApi {
+  static Future<QuerySnapshot> getBoard(
+    // 장터 상품 불러오기
+    int limit, {
+    DocumentSnapshot startAfter,
+  }) async {
+    var refProducts;
+
+    refProducts = FirebaseFirestore.instance
+        .collection('Cake')
+        .orderBy("orderDate", descending: true)
+        .limit(limit);
+
+    if (startAfter == null) {
+      return refProducts.get();
+    } else {
+      return refProducts.startAfterDocument(startAfter).get();
+    }
+  }
+}

@@ -62,11 +62,6 @@ class _AlterPageState extends AddOrderParent<OrderAlterPage> {
     super.dispose();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
   initData() async {
     return await CakeCategory().getCake(_cakeData.cakeCategory);
   }
@@ -88,6 +83,9 @@ class _AlterPageState extends AddOrderParent<OrderAlterPage> {
         cakeCount = _cakeData.cakeCount;
         payStatus = _cakeData.payStatus;
         pickUpStatus = _cakeData.pickUpStatus;
+        partTimer = _cakeData.partTimer;
+        payInCash = _cakeData.payInCash;
+        payInStore = _cakeData.payInStore;
         orderName = _cakeData.customerName;
         orderPhone = _cakeData.customerPhone;
         partTimer = _cakeData.partTimer;
@@ -177,7 +175,7 @@ class _AlterPageState extends AddOrderParent<OrderAlterPage> {
         customerName: textEditingControllerCustomerName.text,
         customerPhone: textEditingControllerCustomerPhone.text,
         partTimer: partTimer,
-        remark: textEditingControllerRemark.text,
+        remark: textEditingControllerRemark.text.trim(),
         payStatus: payStatus,
         pickUpStatus: pickUpStatus,
         cakeCount: cakeCount,
@@ -262,11 +260,13 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
         if (dateTimeOrderDate.runtimeType == Timestamp) {
           dateTimePickUpDate = _cakeData.orderDate.toDate();
         }
+        try {
+          selectedCakeName = CakeCategory(
+              name: cake.id,
+              cakeSize: cake["CakePrice"].keys.toList(),
+              cakePrice: cake["CakePrice"].values.toList());
+        } on Exception {}
 
-        selectedCakeName = CakeCategory(
-            name: cake.id,
-            cakeSize: cake["CakePrice"].keys.toList(),
-            cakePrice: cake["CakePrice"].values.toList());
         selectedCakeSize =
             CakeSizePrice(_cakeData.cakeSize, _cakeData.cakePrice);
         cakeCount = _cakeData.cakeCount;
@@ -275,6 +275,9 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
         orderName = _cakeData.customerName;
         orderPhone = _cakeData.customerPhone;
         partTimer = _cakeData.partTimer;
+        payInCash = _cakeData.payInCash;
+        payInStore = _cakeData.payInStore;
+        payStatus = _cakeData.payStatus;
         remarkText = _cakeData.remark ?? '';
         textEditingControllerRemark = TextEditingController()
           ..text = remarkText ?? '';
@@ -425,14 +428,67 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
     }
   }
 
+  Future updatePayStatus() async {
+    await FirebaseFirestore.instance
+        .collection("Cake")
+        .doc(_cakeData.documentId)
+        .update({
+      "payInCash": payInCash,
+      "payInStore": payInStore
+    }).whenComplete(() {
+      scaffoldKey.currentState.showSnackBar(SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text(
+            "결제가 업데이트 되었습니다!",
+          ),
+          duration: Duration(seconds: 1)));
+    });
+  }
+
+  @override
+  thirdLineBuild() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Flexible(
+          flex: 1,
+          child: customDropDown.selectCakeCategory(
+            selectedCakeName,
+          ),
+        ),
+        Flexible(
+          flex: 1,
+          child: customDropDown.selectCakePrice(
+              currentCakeCategory: selectedCakeName,
+              cakeList: cakeSizeList,
+              selectedCakeSize: selectedCakeSize),
+        ),
+        Flexible(
+            flex: 1,
+            child: cakeCountWidget.countWidget(
+                isvisible: selectedCakeName != null)),
+        payAndPickUpStatusCheckBox(
+            isPayStatus: false, payStatusUpdateFireStore: updateStatus)
+      ],
+    );
+  }
+
   @override
   fifthLineBuild() {
-    return Row(children: [
-      customDropDown.selectPartTimerDropDown(partTimer),
-      payAndPickUpStatusCheckBox(
-          isPayStatus: true, payStatusUpdateFireStore: updateStatus),
-      payAndPickUpStatusCheckBox(
-          isPayStatus: false, payStatusUpdateFireStore: updateStatus)
-    ]);
+    if (payStatus != null) {
+      return Row(children: [
+        customDropDown.selectPartTimerDropDown(partTimer),
+        payAndPickUpStatusCheckBox(
+            isPayStatus: true, payStatusUpdateFireStore: updateStatus),
+        payAndPickUpStatusCheckBox(
+            isPayStatus: false, payStatusUpdateFireStore: updateStatus)
+      ]);
+    } else {
+      return Row(children: [
+        customDropDown.selectPartTimerDropDown(partTimer),
+        checkPay(snakbarCallback: updatePayStatus),
+      ]);
+    }
   }
 }

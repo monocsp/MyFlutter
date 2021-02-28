@@ -18,6 +18,12 @@ class _AddOrderState extends _TodayParent<OrderPage> {
 
   @override
   listViewSecondRow(int index) {
+    bool payStatus;
+    if (_listData[index].payStatus != null)
+      payStatus = _listData[index].payStatus;
+    else
+      payStatus = _listData[index].payInCash || _listData[index].payInStore;
+
     return Container(
         width: MediaQuery.of(context).size.width,
         margin: EdgeInsets.only(top: 3, bottom: 3),
@@ -32,7 +38,7 @@ class _AddOrderState extends _TodayParent<OrderPage> {
                   size: 20,
                 ),
                 Icon(
-                  _listData[index].payStatus ? Icons.check : Icons.close,
+                  payStatus ? Icons.check : Icons.close,
                   color: Colors.redAccent,
                   size: 18,
                 ),
@@ -211,30 +217,35 @@ class _PickUpPageState extends _TodayParent<PickUpPage> {
 
   @override
   listViewSecondRow(int index) {
+    bool payStatus;
+    if (_listData[index].payStatus != null)
+      payStatus = _listData[index].payStatus;
+    else
+      payStatus = _listData[index].payInCash || _listData[index].payInStore;
     return Container(
         margin: EdgeInsets.only(top: 2),
         child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
           Icon(
-            Icons.shopping_bag_outlined,
+            Icons.payment,
             size: 20,
           ),
           Icon(
-            _listData[index].pickUpStatus ? Icons.check : Icons.close,
+            payStatus ? Icons.check : Icons.close,
             color: Colors.redAccent,
             size: 18,
           ),
           Container(
             margin: EdgeInsets.only(left: 10),
             child: Icon(
-              Icons.payment,
+              Icons.shopping_bag_outlined,
               size: 20,
             ),
           ),
           Icon(
-            _listData[index].payStatus ? Icons.check : Icons.close,
+            _listData[index].pickUpStatus ? Icons.check : Icons.close,
             color: Colors.redAccent,
             size: 18,
-          )
+          ),
         ]));
   }
 
@@ -245,7 +256,7 @@ class _PickUpPageState extends _TodayParent<PickUpPage> {
       return [
         IconSlideAction(
           caption: 'Pick Up!',
-          color: Colors.blueAccent,
+          color: Colors.yellowAccent,
           icon: Icons.shopping_bag_outlined,
           closeOnTap: true,
           onTap: () {
@@ -311,7 +322,7 @@ class _PickUpPageState extends _TodayParent<PickUpPage> {
   setListContainerBoxDecoration(int index) {
     if (_listData[index].pickUpStatus) {
       return BoxDecoration(
-          color: Colors.lightBlue[200],
+          color: Colors.yellowAccent,
           borderRadius: BorderRadius.all(Radius.circular(5.0)));
     } else {
       return super.setListContainerBoxDecoration(index);
@@ -467,16 +478,12 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T>
     bool isCakePriceNull = _listData[index].cakePrice == null;
     bool isCakeCountNull = _listData[index].cakeCount == null;
     int _totalPrice = _listData[index].cakePrice * _listData[index].cakeCount;
-    List _addColon = _totalPrice.toString().split('');
-    if (_addColon.length - 3 > 0 && _addColon.length != null) {
-      int count = _addColon.length ~/ 3;
-      int modulus = (_addColon.length - 3) % 3;
-      for (int i = 0; i < count; i++) {
-        if (i * 3 + modulus == 0) {
-          continue;
-        }
-        _addColon.insert(i * 3 + modulus, ',');
-      }
+    List<String> _addColon = _totalPrice.toString().split('');
+    int numberLength = _addColon.length;
+    int dotCount = (numberLength - 1) ~/ 3;
+    int firstDotLocation = ((numberLength - 1) % 3) + 1;
+    for (int i = 0; i < dotCount; i++) {
+      _addColon.insert(firstDotLocation + i * 4, ',');
     }
 
     return Container(
@@ -502,6 +509,12 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T>
   }
 
   listViewSecondRow(int index) {
+    bool payStatus;
+    if (_listData[index].payStatus != null)
+      payStatus = _listData[index].payStatus;
+    else
+      payStatus = _listData[index].payInCash || _listData[index].payInStore;
+
     return Container(
         margin: EdgeInsets.only(top: 3),
         child:
@@ -511,7 +524,7 @@ abstract class _TodayParent<T extends StatefulWidget> extends State<T>
             size: 20,
           ),
           Icon(
-            _listData[index].payStatus ? Icons.check : Icons.close,
+            payStatus ? Icons.check : Icons.close,
             color: Colors.redAccent,
             size: 18,
           )

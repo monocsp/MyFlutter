@@ -402,6 +402,21 @@ class CakeCategory {
         .doc(cakeName)
         .get();
   }
+
+  checkCakeCateogry(String cakeName) async {
+    return await FirebaseFirestore.instance
+        .collection("CakeList")
+        .get()
+        .then((value) {
+      bool checkResult = false;
+      if (value != null) {
+        value.docs.forEach((element) {
+          if (element.id == cakeName) checkResult = true;
+        });
+      }
+      return checkResult;
+    });
+  }
 }
 
 class CustomerData {

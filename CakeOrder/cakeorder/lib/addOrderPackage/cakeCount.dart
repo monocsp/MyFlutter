@@ -5,9 +5,12 @@ class CakeCountWidget {
   Function callback;
   final bool isDetailPage;
   CakeCountWidget({this.cakeCount, this.callback, this.isDetailPage});
+
   Widget countWidget({bool isvisible}) {
+    cakeCount = cakeCount ?? 0;
+    isvisible = isvisible ?? false;
     return Visibility(
-      visible: isvisible ?? false,
+      visible: isvisible,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

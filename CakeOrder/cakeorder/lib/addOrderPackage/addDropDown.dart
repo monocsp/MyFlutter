@@ -93,7 +93,9 @@ class CustomDropDown {
     );
   }
 
-  selectCakeCategory(CakeCategory cakeCategory) {
+  selectCakeCategory(CakeCategory cakeCategory, {String cakeCategoryName}) {
+    cakeCategoryName = cakeCategoryName ?? '';
+
     List<DropdownMenuItem<String>> _cakeCategories = [];
     if (cakeCategoryProvider == null) {
       Container(
@@ -134,7 +136,7 @@ class CustomDropDown {
               : Container(
                   margin: EdgeInsets.only(left: 10),
                   child: Text(
-                    "${cakeCategory != null ? cakeCategory.name : ""}",
+                    "${cakeCategory != null ? cakeCategory.name : cakeCategoryName}",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                   )),
         ]));
@@ -143,7 +145,11 @@ class CustomDropDown {
   selectCakePrice(
       {@required CakeCategory currentCakeCategory,
       List<CakeSizePrice> cakeList,
-      CakeSizePrice selectedCakeSize}) {
+      CakeSizePrice selectedCakeSize,
+      String cakeSize,
+      String cakePrice}) {
+    cakeSize = cakeSize ?? '';
+    cakePrice = cakePrice ?? '';
     Widget dropDown;
     try {
       dropDown = DropdownButton<String>(
@@ -163,7 +169,6 @@ class CustomDropDown {
               break;
             }
           }
-          // print("result" + result);
           setStateCallback("?parm1=cakePrice", cakePrice: result);
         },
         items: cakeList.map((CakeSizePrice cake) {
@@ -200,33 +205,66 @@ class CustomDropDown {
         }).toList(),
       );
     }
-    if (currentCakeCategory != null) {
-      List<Widget> children2 = [
+    List<Widget> children2 = [];
+    if (!isClickable) {
+      children2 = [
         _customTitle(title: "케이크 호수", important: true),
-        if (cakeSizeList != null)
-          if (isClickable)
+        Container(
+            margin: EdgeInsets.only(left: 10),
+            child: Text(
+              "${selectedCakeSize != null ? selectedCakeSize.cakeSize.toString() + selectedCakeSize.cakePrice.toString() : cakeSize + cakePrice}",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            ))
+      ];
+    } else {
+      if (currentCakeCategory != null) {
+        children2 = [
+          _customTitle(title: "케이크 호수", important: true),
+          if (cakeSizeList != null)
             dropDown
           else
             Container(
-                margin: EdgeInsets.only(left: 10),
-                child: Text(
-                  "${selectedCakeSize != null ? selectedCakeSize.cakeSize.toString() + selectedCakeSize.cakePrice.toString() : ""}",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                ))
-        else
-          Container(
-            child: CupertinoActivityIndicator(),
-          ),
-      ];
-      return Container(
-        margin: EdgeInsets.only(left: 10, top: 15),
-        child: Column(children: children2),
-      );
-    } else {
-      return Container(
-          margin: EdgeInsets.only(top: 20),
-          child: _customTitle(
-              title: '케이크를 선택해주세요', important: true, fontSize: 13));
+              child: CupertinoActivityIndicator(),
+            ),
+        ];
+      } else {
+        return Container(
+            margin: EdgeInsets.only(top: 20),
+            child: _customTitle(
+                title: '케이크를 선택해주세요', important: true, fontSize: 13));
+      }
     }
+    return Container(
+      margin: EdgeInsets.only(left: 10, top: 15),
+      child: Column(children: children2),
+    );
+    // if (currentCakeCategory != null) {
+    //   List<Widget> children2 = [
+    //     _customTitle(title: "케이크 호수", important: true),
+    //     if (cakeSizeList != null)
+    //       if (isClickable)
+    //         dropDown
+    //       else
+    //         Container(
+    //             margin: EdgeInsets.only(left: 10),
+    //             child: Text(
+    //               "${selectedCakeSize != null ? selectedCakeSize.cakeSize.toString() + selectedCakeSize.cakePrice.toString() : ""}",
+    //               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+    //             ))
+    //     else
+    //       Container(
+    //         child: CupertinoActivityIndicator(),
+    //       ),
+    //   ];
+    //   return Container(
+    //     margin: EdgeInsets.only(left: 10, top: 15),
+    //     child: Column(children: children2),
+    //   );
+    // } else {
+    //   return Container(
+    //       margin: EdgeInsets.only(top: 20),
+    //       child: _customTitle(
+    //           title: '케이크를 선택해주세요', important: true, fontSize: 13));
+    // }
   }
 }

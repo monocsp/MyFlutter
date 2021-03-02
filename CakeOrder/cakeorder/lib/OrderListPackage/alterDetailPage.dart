@@ -62,59 +62,79 @@ class _AlterPageState extends AddOrderParent<OrderAlterPage> {
     super.dispose();
   }
 
-  initData() async {
+  getCakeCategory() async {
     return await CakeCategory().getCake(_cakeData.cakeCategory);
   }
 
-  setInitiData(BuildContext context) {
+  setCakeCategory(var cake) {
+    cake["CakePrice"].keys.toList().asMap().forEach((index, size) {
+      int cakePrice;
+      if (cake["CakePrice"].values.toList()[index].runtimeType == String)
+        cakePrice = int.parse(cake["CakePrice"].values.toList()[index]);
+      else
+        cakePrice = cake["CakePrice"].values.toList()[index];
+      cakeSizeList.add(new CakeSizePrice(size, cakePrice));
+    });
+    selectedCakeName = CakeCategory(
+        name: cake.id,
+        cakeSize: cake["CakePrice"].keys.toList(),
+        cakePrice: cake["CakePrice"].values.toList());
+  }
+
+  initialization() {
+    selectedCakeSize = CakeSizePrice(_cakeData.cakeSize, _cakeData.cakePrice);
+    cakeCount = _cakeData.cakeCount;
+    payStatus = _cakeData.payStatus;
+    pickUpStatus = _cakeData.pickUpStatus;
+    partTimer = _cakeData.partTimer;
+    payInCash = _cakeData.payInCash;
+    payInStore = _cakeData.payInStore;
+    orderName = _cakeData.customerName;
+    orderPhone = _cakeData.customerPhone;
+    partTimer = _cakeData.partTimer;
+    remarkText = _cakeData.remark ?? '';
+    textEditingControllerRemark = TextEditingController()
+      ..text = remarkText ?? '';
+    textEditingControllerCustomerName = TextEditingController()
+      ..text = orderName ?? '';
+    textEditingControllerCustomerPhone = TextEditingController()
+      ..text = orderPhone ?? '';
+    textEditingControllerPickUpDate = TextEditingController()
+      ..text = _cakeData.pickUpDate.toString().split(' ')[0];
+    textEditingControllerPickUpTime = TextEditingController()
+      ..text = DateFormat('kk:mm').format(_cakeData.pickUpDate);
+    textEditingControllerOrderDate = TextEditingController()
+      ..text = _cakeData.orderDate.toString().split(' ')[0];
+    textEditingControllerOrderTime = TextEditingController()
+      ..text = DateFormat('kk:mm').format(_cakeData.orderDate);
+    currentDocumentId = _cakeData.documentId;
+  }
+
+  setInitiData(BuildContext context) async {
     _cakeData = widget.cakeData;
     // Future.delayed(Duration(milliseconds: 1000));
     _forCrossValidationCakeList =
         Provider.of<List<CakeData>>(context, listen: false);
     _setCakeData();
-    initData().then((cake) {
+    if (await checkCakeCategory()) {
+      getCakeCategory().then((cake) {
+        setState(() {
+          setCakeCategory(cake);
+          initialization();
+        });
+      });
+    } else {
       setState(() {
-        selectedCakeName = CakeCategory(
-            name: cake.id,
-            cakeSize: cake["CakePrice"].keys.toList(),
-            cakePrice: cake["CakePrice"].values.toList());
-        selectedCakeSize =
-            CakeSizePrice(_cakeData.cakeSize, _cakeData.cakePrice);
-        cakeCount = _cakeData.cakeCount;
-        payStatus = _cakeData.payStatus;
-        pickUpStatus = _cakeData.pickUpStatus;
-        partTimer = _cakeData.partTimer;
-        payInCash = _cakeData.payInCash;
-        payInStore = _cakeData.payInStore;
-        orderName = _cakeData.customerName;
-        orderPhone = _cakeData.customerPhone;
-        partTimer = _cakeData.partTimer;
-        remarkText = _cakeData.remark ?? '';
-        textEditingControllerRemark = TextEditingController()
-          ..text = remarkText ?? '';
-        textEditingControllerCustomerName = TextEditingController()
-          ..text = orderName ?? '';
-        textEditingControllerCustomerPhone = TextEditingController()
-          ..text = orderPhone ?? '';
-        textEditingControllerPickUpDate = TextEditingController()
-          ..text = _cakeData.pickUpDate.toString().split(' ')[0];
-        textEditingControllerPickUpTime = TextEditingController()
-          ..text = DateFormat('kk:mm').format(_cakeData.pickUpDate);
-        textEditingControllerOrderDate = TextEditingController()
-          ..text = _cakeData.orderDate.toString().split(' ')[0];
-        textEditingControllerOrderTime = TextEditingController()
-          ..text = DateFormat('kk:mm').format(_cakeData.orderDate);
-        currentDocumentId = _cakeData.documentId;
+        initialization();
       });
-      cake["CakePrice"].keys.toList().asMap().forEach((index, size) {
-        int cakePrice;
-        if (cake["CakePrice"].values.toList()[index].runtimeType == String)
-          cakePrice = int.parse(cake["CakePrice"].values.toList()[index]);
-        else
-          cakePrice = cake["CakePrice"].values.toList()[index];
-        cakeSizeList.add(new CakeSizePrice(size, cakePrice));
-      });
-    });
+    }
+  }
+
+  checkCakeCategory() async {
+    bool result =
+        await CakeCategory().checkCakeCateogry(_cakeData.cakeCategory);
+
+    return result;
   }
 
   _setCakeData() {
@@ -179,7 +199,9 @@ class _AlterPageState extends AddOrderParent<OrderAlterPage> {
         payStatus: payStatus,
         pickUpStatus: pickUpStatus,
         cakeCount: cakeCount,
-        documentId: currentDocumentId);
+        documentId: currentDocumentId,
+        payInCash: payInCash,
+        payInStore: payInStore);
     await data.updateFireStore(loadDialogCallback);
   }
 
@@ -187,23 +209,12 @@ class _AlterPageState extends AddOrderParent<OrderAlterPage> {
     if (isCompleted == null) {
       Navigator.of(context).pop();
       TipDialogHelper.success("수정 완료!");
-      await Future.delayed(Duration(seconds: 3));
+      await Future.delayed(Duration(seconds: 2));
       Navigator.of(context).popUntil(ModalRoute.withName('/'));
     } else {
       Navigator.of(context).pop();
     }
   }
-
-  // @override
-  // fifthLineBuild() {
-  //   return Row(children: [
-  //     customDropDown.selectPartTimerDropDown(partTimer),
-  //     payAndPickUpStatusCheckBox(
-  //       isPayStatus: true,
-  //     ),
-  //     payAndPickUpStatusCheckBox(isPayStatus: false)
-  //   ]);
-  // }
 }
 
 class DetailPage extends StatefulWidget {
@@ -214,6 +225,10 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends AddOrderParent<DetailPage> {
+  String cakeCategoryName;
+  String cakeSize;
+  String cakePrice;
+
   List<CakeData> _forCrossValidationCakeList = [];
   CakeData _cakeData;
   @override
@@ -243,14 +258,15 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
     }
   }
 
-  setInitiData(BuildContext context) {
+  setInitiData(BuildContext context) async {
     _cakeData = widget.cakeData;
     // Future.delayed(Duration(milliseconds: 1000));
     _forCrossValidationCakeList =
         Provider.of<List<CakeData>>(context, listen: false);
 
     _setCakeData();
-    initData().then((cake) {
+    // if (await checkCakeCategory()) {
+    getCakeCategory().then((cake) {
       setState(() {
         var dateTimePickUpDate = _cakeData.pickUpDate;
         var dateTimeOrderDate = _cakeData.orderDate;
@@ -260,15 +276,16 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
         if (dateTimeOrderDate.runtimeType == Timestamp) {
           dateTimePickUpDate = _cakeData.orderDate.toDate();
         }
-        try {
-          selectedCakeName = CakeCategory(
-              name: cake.id,
-              cakeSize: cake["CakePrice"].keys.toList(),
-              cakePrice: cake["CakePrice"].values.toList());
-        } on Exception {}
+        cakeCategoryName = _cakeData.cakeCategory;
+        cakeSize = _cakeData.cakeSize;
+        cakePrice = _cakeData.cakePrice.toString();
+        // selectedCakeName = CakeCategory(
+        //     name: cake.id,
+        //     cakeSize: cake["CakePrice"].keys.toList(),
+        //     cakePrice: cake["CakePrice"].values.toList());
 
-        selectedCakeSize =
-            CakeSizePrice(_cakeData.cakeSize, _cakeData.cakePrice);
+        // selectedCakeSize =
+        //     CakeSizePrice(_cakeData.cakeSize, _cakeData.cakePrice);
         cakeCount = _cakeData.cakeCount;
         payStatus = _cakeData.payStatus;
         pickUpStatus = _cakeData.pickUpStatus;
@@ -294,16 +311,15 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
         textEditingControllerOrderTime = TextEditingController()
           ..text = DateFormat('kk:mm').format(dateTimeOrderDate);
         currentDocumentId = _cakeData.documentId;
-        cake["CakePrice"].keys.toList().asMap().forEach((index, size) {
-          int cakePrice;
-          if (cake["CakePrice"].values.toList()[index].runtimeType == String)
-            cakePrice = int.parse(cake["CakePrice"].values.toList()[index]);
-          else
-            cakePrice = cake["CakePrice"].values.toList()[index];
-          cakeSizeList.add(new CakeSizePrice(size, cakePrice));
-        });
       });
     });
+    // }     else {
+    //   setState(() {
+    //     cakeCategoryName = _cakeData.cakeCategory;
+    //     cakeSize = _cakeData.cakeSize;
+    //     cakePrice = _cakeData.cakePrice.toString();
+    //   });
+    // }
   }
 
   @override
@@ -311,7 +327,7 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
     isDetailPage = true;
   }
 
-  initData() async {
+  getCakeCategory() async {
     return await CakeCategory().getCake(_cakeData.cakeCategory);
   }
 
@@ -386,13 +402,6 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
         Navigator.pop(context, _cakeData);
       }
     });
-    // .whenComplete(() {
-    //   Navigator.popUntil(
-    //       context,
-    //       ModalRoute.withName(
-    //         "/",
-    //       ));
-    // });
   }
 
   Future updateStatus(String statusCase) async {
@@ -453,21 +462,24 @@ class _DetailPageState extends AddOrderParent<DetailPage> {
       children: [
         Flexible(
           flex: 1,
-          child: customDropDown.selectCakeCategory(
-            selectedCakeName,
-          ),
+          child: customDropDown.selectCakeCategory(selectedCakeName,
+              cakeCategoryName: cakeCategoryName),
         ),
         Flexible(
           flex: 1,
           child: customDropDown.selectCakePrice(
               currentCakeCategory: selectedCakeName,
               cakeList: cakeSizeList,
-              selectedCakeSize: selectedCakeSize),
+              selectedCakeSize: selectedCakeSize,
+              cakePrice: cakePrice,
+              cakeSize: cakeSize),
         ),
         Flexible(
             flex: 1,
             child: cakeCountWidget.countWidget(
-                isvisible: selectedCakeName != null)),
+                isvisible:
+                    // selectedCakeName != null
+                    isDetailPage)),
         payAndPickUpStatusCheckBox(
             isPayStatus: false, payStatusUpdateFireStore: updateStatus)
       ],
